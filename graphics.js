@@ -12,15 +12,14 @@
     $('#watermark').classList.toggle('show', recording || state.lowerThird.visible || state.graphic.visible);
     $('#onAir').classList.toggle('show', recording);
 
-    $('#lowerName').textContent = state.lowerThird.name || state.guest.name || 'Guest';
-    $('#lowerTitle').textContent = state.lowerThird.title || state.guest.title || 'Guest';
-    $('#lowerSocial').textContent = state.lowerThird.social || state.guest.social || '';
+    $('#lowerName').textContent = state.lowerThird.name || '3Dudes1Life';
+    $('#lowerTitle').textContent = state.lowerThird.title || 'Hosts of A Little Throuple Tea';
+    $('#lowerSocial').textContent = state.lowerThird.social || '@throupletea';
     $('#lowerThird').classList.toggle('show', Boolean(state.lowerThird.visible));
 
     const graphic = state.graphic || {};
     const visible = Boolean(graphic.visible) && (!graphic.expiresAt || graphic.expiresAt > Date.now());
     const isPrompt = graphic.type === 'prompt';
-
     $('#promptGraphic').classList.toggle('show', visible && isPrompt);
     $('#reactionGraphic').classList.toggle('show', visible && !isPrompt);
 

@@ -11,95 +11,106 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Studio</strong><span>Episode Setup</span></span></a>
-      <nav class="nav-links" aria-label="Studio pages"><a href="index.html">Launcher</a><a class="active" href="setup.html">Episode Setup</a><a href="guest.html">Guest Lounge</a><a href="studio.html">Guest Studio</a><a href="host.html">Host Control</a><a href="graphics.html?debug=1" target="_blank" rel="noopener">OBS Preview</a></nav>
+      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Studio</strong><span>Hosts-Only Episode Setup</span></span></a>
+      <nav class="nav-links" aria-label="Studio pages"><a href="index.html">Dashboard</a><a class="active" href="setup.html">Episode Setup</a><a href="host.html">Host Control</a><a href="teleprompter.html" target="_blank" rel="noopener">Teleprompter</a><a href="graphics.html?debug=1" target="_blank" rel="noopener">OBS Preview</a></nav>
     </header>
 
     <section class="page-head">
-      <div><div class="eyebrow">Build the recording room</div><h1>Set the episode.<span>Everything else follows.</span></h1><p>These details feed the Guest Lounge, Guest Studio, Host Control Room and OBS graphics automatically.</p></div>
+      <div><div class="eyebrow">Hosts Only · Weekly Workflow</div><h1>Plan the episode.<span>Walk into recording ready.</span></h1><p>Everything saved here feeds Host Control, the shared teleprompter and OBS graphics. OBS and the podcast recorder continue handling the actual media.</p></div>
       <div class="art glass"><img src="assets/podcast-artwork.jpg" alt="Official podcast artwork"></div>
     </section>
+
+    <div class="notice info"><span>✅</span><div><b>No guest setup required.</b> This page is designed for William, Daniel and Caleb’s normal weekly recording.</div></div>
 
     <form id="setupForm" class="grid sidebar">
       <div class="stack">
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Episode</div><h2>Recording details</h2></div><span class="status-pill"><i class="status-dot"></i>Auto-saves on submit</span></div>
+          <div class="card-head"><div><div class="card-kicker">Episode</div><h2>Recording details</h2></div><span class="status-pill"><i class="status-dot"></i>Hosts Only</span></div>
           <div class="form-grid three">
-            <div class="field"><label for="season">Season</label><input id="season" name="season" inputmode="numeric"></div>
-            <div class="field"><label for="episodeNumber">Episode number</label><input id="episodeNumber" name="episodeNumber" inputmode="numeric"></div>
-            <div class="field"><label for="recordingDate">Recording date</label><input id="recordingDate" name="recordingDate" type="date"></div>
-            <div class="field full"><label for="episodeTitle">Episode title</label><input id="episodeTitle" name="episodeTitle" required></div>
-            <div class="field full"><label for="mainTopic">Main topic / episode framing</label><textarea id="mainTopic" name="mainTopic"></textarea></div>
-            <div class="field"><label for="recordingTime">Recording time</label><input id="recordingTime" name="recordingTime" type="time"></div>
-            <div class="field"><label for="recordingLink">External recording-room link</label><input id="recordingLink" name="recordingLink" type="url" placeholder="https://..."></div>
-            <div class="field full"><label for="exclusionKeywords">Bowl of Chaos exclusions</label><input id="exclusionKeywords" name="exclusionKeywords" placeholder="marriage, legal, wedding..."><div class="help">Prompts containing these terms or the main topic are skipped.</div></div>
+            <div class="field"><label for="season">Season</label><input id="season" inputmode="numeric"></div>
+            <div class="field"><label for="episodeNumber">Episode number</label><input id="episodeNumber" inputmode="numeric"></div>
+            <div class="field"><label for="recordingDate">Recording date</label><input id="recordingDate" type="date"></div>
+            <div class="field full"><label for="episodeTitle">Working episode title</label><input id="episodeTitle" required></div>
+            <div class="field full"><label for="mainTopic">Main topic / episode framing</label><textarea id="mainTopic"></textarea></div>
+            <div class="field"><label for="recordingTime">Recording time</label><input id="recordingTime" type="time"></div>
+            <div class="field full"><label for="exclusionKeywords">Bowl of Chaos exclusions</label><input id="exclusionKeywords" placeholder="marriage, legal, wedding..."><div class="help">Prompts containing these subjects are skipped so the game does not repeat the main episode.</div></div>
           </div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Guest Profile</div><h2>Personalize their lounge</h2></div></div>
+          <div class="card-head"><div><div class="card-kicker">Tonight</div><h2>Must-mention reminders</h2></div></div>
+          <div class="field"><label for="mustMentions">One reminder per line</label><textarea class="code" id="mustMentions" placeholder="Listener email and shoutout\nMention LA Blade\nThrouple Hotline CTA"></textarea><div class="help">These become checkable reminders in Host Control and the teleprompter.</div></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Throuple Hotline</div><h2>Listener question or email</h2></div><label class="switch-label"><input id="hotlineEnabled" type="checkbox"><span>Include</span></label></div>
           <div class="form-grid">
-            <div class="field"><label for="guestName">Guest name</label><input id="guestName" name="guestName" required></div>
-            <div class="field"><label for="pronouns">Pronouns</label><input id="pronouns" name="pronouns" placeholder="she/her, he/him, they/them"></div>
-            <div class="field"><label for="guestTitle">Title / description</label><input id="guestTitle" name="guestTitle" placeholder="Creator, author, listener..."></div>
-            <div class="field"><label for="social">Social handle</label><input id="social" name="social" placeholder="@handle"></div>
-            <div class="field"><label for="email">Email</label><input id="email" name="email" type="email"></div>
-            <div class="field"><label for="promo">What are they promoting?</label><input id="promo" name="promo"></div>
-            <div class="field full"><label for="guestNotes">Host-only guest notes</label><textarea id="guestNotes" name="guestNotes"></textarea></div>
+            <div class="field"><label for="hotlineListener">Listener name / location</label><input id="hotlineListener" placeholder="Name, city or anonymous"></div>
+            <div class="field"><label for="hotlineQuestion">Question or email summary</label><textarea id="hotlineQuestion"></textarea></div>
+            <div class="field full"><label for="hotlineNotes">Host notes</label><textarea id="hotlineNotes" placeholder="Shoutout, context, what not to read verbatim..."></textarea></div>
           </div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Conversation</div><h2>Questions and safety nets</h2></div></div>
+          <div class="card-head"><div><div class="card-kicker">Conversation</div><h2>Main questions and safety nets</h2></div></div>
           <div class="form-grid">
-            <div class="field"><label for="questions">Main questions</label><textarea class="code" id="questions" name="questions" placeholder="One question per line"></textarea><div class="help">One question per line. The Host Control Room can push any question to the guest screen.</div></div>
-            <div class="field"><label for="backupQuestions">Emergency backup questions</label><textarea class="code" id="backupQuestions" name="backupQuestions" placeholder="One backup question per line"></textarea><div class="help">Use these when the conversation stalls or takes a weird turn.</div></div>
+            <div class="field"><label for="questions">Main questions</label><textarea class="code" id="questions" placeholder="One question per line"></textarea></div>
+            <div class="field"><label for="backupQuestions">Emergency backup questions</label><textarea class="code" id="backupQuestions" placeholder="One backup question per line"></textarea></div>
           </div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Run of Show</div><h2>Segments and timing</h2></div></div>
-          <div class="field"><label for="segments">Format: Segment name | minutes | production note</label><textarea class="code" id="segments" name="segments"></textarea><div class="help">One segment per line. Example: Main Topic | 30 | Primary episode conversation.</div></div>
+          <div class="card-head"><div><div class="card-kicker">Run of Show</div><h2>Segments and target timing</h2></div></div>
+          <div class="field"><label for="segments">Format: Segment name | minutes | production note</label><textarea class="code tall" id="segments"></textarea><div class="help">Host Control will compare live segment time against these targets.</div></div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Scripts</div><h2>Always available in Host Control</h2></div></div>
+          <div class="card-head"><div><div class="card-kicker">Recording Safety</div><h2>Preflight and postflight checklists</h2></div></div>
           <div class="form-grid">
-            <div class="field"><label for="intro">Official intro</label><textarea class="code" id="intro" name="intro"></textarea></div>
-            <div class="field"><label for="outro">Official outro</label><textarea class="code" id="outro" name="outro"></textarea></div>
+            <div class="field"><label for="preflight">Before recording · one item per line</label><textarea class="code" id="preflight"></textarea></div>
+            <div class="field"><label for="postflight">After recording · one item per line</label><textarea class="code" id="postflight"></textarea></div>
+          </div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Scripts</div><h2>Official intro and outro</h2></div></div>
+          <div class="form-grid">
+            <div class="field"><label for="intro">Official intro</label><textarea class="code tall" id="intro"></textarea></div>
+            <div class="field"><label for="outro">Official outro</label><textarea class="code tall" id="outro"></textarea></div>
           </div>
         </section>
       </div>
 
       <aside class="stack sticky-stack">
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Save + Launch</div><h2>Build the room</h2></div></div>
-          <button class="btn primary" style="width:100%" type="submit">Save episode setup</button>
-          <div class="button-row">
-            <a class="btn teal" href="guest.html">Open Guest Lounge</a>
-            <a class="btn" href="host.html">Open Host Control</a>
-            <a class="btn" href="studio.html">Open Guest Studio</a>
-          </div>
-          <div class="divider"></div>
-          <div class="field"><label>Personalized guest link</label><div class="code-output" id="guestUrl">—</div></div>
-          <div class="button-row compact"><button class="btn small" id="copyGuestUrl" type="button">Copy link</button><button class="btn small" id="openGuestUrl" type="button">Open link</button></div>
+          <div class="card-head"><div><div class="card-kicker">Save + Launch</div><h2>Prepare Thursday</h2></div></div>
+          <button class="btn primary" style="width:100%" type="submit">Save hosts-only episode</button>
+          <div class="button-row"><a class="btn teal" href="host.html">Open Host Control</a><a class="btn" href="teleprompter.html" target="_blank" rel="noopener">Open Teleprompter</a></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Readiness</div><h2>Recording plan</h2></div><strong class="readiness-score" id="readinessScore">0%</strong></div>
+          <div class="meter"><i id="readinessBar"></i></div>
+          <div class="episode-summary" style="margin-top:16px"><img src="assets/podcast-artwork.jpg" alt="Podcast artwork"><div><strong id="summaryTitle">—</strong><span id="summaryDate">—</span><span id="summarySegments">—</span></div></div>
         </section>
 
         <section class="card glass">
           <div class="card-head"><div><div class="card-kicker">Portable Setup</div><h2>Export or import</h2></div></div>
-          <p class="muted mini">Save a complete episode configuration as JSON, send it to another browser or keep it with the episode folder.</p>
+          <p class="muted mini">Keep a copy of the episode plan with the recording folder or move it to another browser.</p>
           <div class="button-row"><button class="btn success" id="exportJson" type="button">Export episode JSON</button><button class="btn" id="importJson" type="button">Import JSON</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Session Status</div><h2>What is currently live</h2></div></div>
-          <div class="episode-summary"><img src="assets/podcast-artwork.jpg" alt="Podcast artwork"><div><strong id="summaryTitle">—</strong><span id="summaryGuest">—</span><span id="summarySegments">—</span></div></div>
-          <div class="button-row"><button class="btn danger" id="resetAll" type="button">Reset entire prototype</button></div>
+          <div class="card-head"><div><div class="card-kicker">Fresh Session</div><h2>Clear last week</h2></div></div>
+          <p class="muted mini">Keep the episode plan but reset the timer, completed checkboxes, Bowl prompts, directions and markers.</p>
+          <button class="btn sun" id="freshSession" type="button">Start fresh recording session</button>
+          <div class="divider"></div>
+          <button class="btn danger" id="resetAll" type="button">Reset entire studio</button>
         </section>
       </aside>
     </form>
 
-    <footer class="footer"><b>3Dudes1Life Creative</b> · Episode settings are stored only in this browser during prototype testing.</footer>
+    <footer class="footer"><b>3Dudes1Life Creative</b> · Hosts-only settings are stored in this browser during prototype testing.</footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="shared-state.js"></script>

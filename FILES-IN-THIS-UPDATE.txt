@@ -1,0 +1,22 @@
+THROUPLE TEA HOSTS-ONLY V2
+
+REPLACE:
+index.html
+launcher.js
+setup.html
+setup.js
+host.html
+host.js
+shared-state.js
+prompts.js
+graphics.html
+graphics.js
+styles.css
+README.md
+UPLOAD-INSTRUCTIONS.md
+
+ADD:
+teleprompter.html
+teleprompter.js
+
+No unchanged website files or artwork are included.

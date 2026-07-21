@@ -11,124 +11,144 @@
 <body class="compact">
   <main class="shell">
     <header class="topbar">
-      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Host Control</strong><span id="headerEpisode">Episode cockpit</span></span></a>
-      <nav class="nav-links" aria-label="Studio pages"><a href="index.html">Launcher</a><a href="setup.html">Setup</a><a href="guest.html">Guest Lounge</a><a href="studio.html" target="_blank" rel="noopener">Guest Screen</a><a class="active" href="host.html">Host Control</a><a href="graphics.html?debug=1" target="_blank" rel="noopener">OBS Preview</a></nav>
+      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Host Control</strong><span id="headerEpisode">Hosts-only cockpit</span></span></a>
+      <nav class="nav-links" aria-label="Studio pages"><a href="index.html">Dashboard</a><a href="setup.html">Setup</a><a class="active" href="host.html">Host Control</a><a href="teleprompter.html" target="_blank" rel="noopener">Teleprompter</a><a href="graphics.html?debug=1" target="_blank" rel="noopener">OBS Preview</a></nav>
     </header>
 
     <section class="page-head" style="padding-bottom:18px">
-      <div><div class="eyebrow">William · Daniel · Caleb</div><h1 style="font-size:clamp(2.2rem,4.5vw,4.8rem)">Run the episode.<span>Mark the gold.</span></h1><p>Control every synchronized screen from one cockpit while saving the exact moments you will need during editing.</p></div>
+      <div><div class="eyebrow">William · Daniel · Caleb</div><h1 style="font-size:clamp(2.2rem,4.5vw,4.8rem)">Run the episode.<span>Mark the gold.</span></h1><p>This page follows OBS and the PodTrak—it never replaces them. Start the studio timer when both recorders are rolling.</p></div>
       <div class="art glass"><img src="assets/podcast-artwork.jpg" alt="Official podcast artwork"></div>
     </section>
 
     <section class="summary-bar">
       <div class="summary-item"><small>Episode</small><strong id="summaryEpisode">—</strong></div>
       <div class="summary-item"><small>Current Segment</small><strong id="summarySegment">—</strong></div>
-      <div class="summary-item"><small>Guest</small><strong id="summaryGuest">—</strong></div>
-      <div class="summary-item"><small>Recording Time</small><strong class="big" id="summaryTimer">00:00:00</strong></div>
-      <div class="summary-item"><small>Clip Markers</small><strong class="big" id="summaryClips">0</strong></div>
+      <div class="summary-item"><small>Current Speaker</small><strong id="summarySpeaker">William</strong></div>
+      <div class="summary-item"><small>Studio Time</small><strong class="big" id="summaryTimer">00:00:00</strong></div>
+      <div class="summary-item"><small>Markers</small><strong class="big" id="summaryClips">0</strong></div>
+      <div class="summary-item"><small>Preflight</small><strong class="big" id="summaryReady">0%</strong></div>
     </section>
 
-    <div class="notice" id="guestRequestAlert" hidden>
-      <span>✋</span>
-      <div style="flex:1"><b id="guestRequestText">Guest needs something</b><div class="tiny" id="guestRequestTime"></div></div>
-      <button class="btn small" id="acknowledgeRequest" type="button">Acknowledge</button>
-    </div>
+    <div class="notice danger-note" id="notReadyAlert" hidden><span>⚠️</span><div><b>Recording stack not fully checked.</b> OBS, the audio recorder or another preflight item is still open.</div></div>
 
     <div class="grid host-layout">
       <div class="stack">
-        <section class="card glass">
+        <section class="card glass recording-console">
           <div class="card-head wrap">
-            <div><div class="card-kicker">Recording Controls</div><h2>Session timer</h2></div>
+            <div><div class="card-kicker">Recording Controls</div><h2>Follow OBS + PodTrak</h2></div>
             <span class="status-pill" id="recordingPill"><i class="status-dot"></i>Standby</span>
           </div>
-          <div class="summary-item"><small>Elapsed recording time</small><strong class="big" style="font-size:2.5rem" id="recordingTimer">00:00:00</strong></div>
+          <div class="recording-clock-row">
+            <div class="summary-item"><small>Studio elapsed time</small><strong class="big giant-time" id="recordingTimer">00:00:00</strong></div>
+            <div class="segment-clock"><small id="segmentTargetLabel">Segment target</small><strong id="segmentTimer">00:00</strong><div class="meter"><i id="segmentProgress"></i></div></div>
+          </div>
           <div class="button-row">
-            <button class="btn success" id="startRecording" type="button">● Start</button>
+            <button class="btn success" id="startRecording" type="button">● Start Studio Timer</button>
             <button class="btn sun" id="pauseRecording" type="button">Ⅱ Pause</button>
-            <button class="btn danger" id="endRecording" type="button">■ End</button>
-            <button class="btn" id="resetTimer" type="button">↺ Reset timer</button>
+            <button class="btn danger" id="endRecording" type="button">■ End Episode</button>
+            <button class="btn" id="resetTimer" type="button">↺ Reset Timer</button>
           </div>
-          <div class="divider"></div>
-          <div class="card-head"><div><div class="card-kicker">Active Speaker</div><h3>Highlight the shared host view or guest</h3><p class="muted tiny" style="margin:5px 0 0">All three hosts share one camera tile; selecting a host identifies who is speaking inside that view.</p></div></div>
-          <div class="button-row compact" id="speakerButtons">
-            <button class="btn small" data-speaker="William" type="button">William</button>
-            <button class="btn small" data-speaker="Daniel" type="button">Daniel</button>
-            <button class="btn small" data-speaker="Caleb" type="button">Caleb</button>
-            <button class="btn small" data-speaker="Guest" type="button">Guest</button>
-          </div>
+          <p class="muted tiny">The studio timer creates approximate edit timestamps. Start it immediately after OBS and the podcast recorder begin.</p>
         </section>
 
         <section class="card glass">
-          <div class="card-head wrap">
-            <div><div class="card-kicker">Run of Show</div><h2>Move the whole room together</h2></div>
-            <div class="button-row compact"><button class="btn small" id="previousSegment" type="button">← Previous</button><button class="btn small teal" id="nextSegment" type="button">Next →</button></div>
-          </div>
+          <div class="card-head"><div><div class="card-kicker">Preflight</div><h2>Confirm the real recorders</h2></div><button class="btn small teal" id="completePreflight" type="button">Mark all ready</button></div>
+          <div class="checklist two-column-checks" id="preflightList"></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Run of Show</div><h2>Segments, targets and actual time</h2></div><div class="button-row compact"><button class="btn small" id="previousSegment" type="button">← Previous</button><button class="btn small teal" id="nextSegment" type="button">Next →</button></div></div>
           <div class="segment-list" id="segmentList"></div>
         </section>
 
         <section class="card glass">
-          <div class="card-head wrap"><div><div class="card-kicker">Conversation Driver</div><h2>Push questions to the guest</h2></div><button class="btn small danger" id="clearQuestion" type="button">Clear question</button></div>
-          <div class="focus-panel" style="margin-bottom:16px"><small>Currently on guest screen</small><strong id="currentQuestion">No question pushed yet.</strong></div>
-          <h3 style="margin-bottom:10px">Main questions</h3>
+          <div class="card-head"><div><div class="card-kicker">Conversation Board</div><h2>Current question</h2></div><button class="btn small" id="clearQuestion" type="button">Clear display</button></div>
+          <div class="prompt-box question-live"><small>Live on teleprompter</small><strong id="liveQuestion">No question selected.</strong></div>
+          <div class="divider"></div>
+          <h3>Main questions</h3>
           <div class="question-list" id="questionList"></div>
           <div class="divider"></div>
-          <h3 style="margin-bottom:10px">Emergency backup questions</h3>
+          <h3>Backup questions</h3>
           <div class="question-list" id="backupQuestionList"></div>
-          <div class="divider"></div>
-          <div class="form-grid">
-            <div class="field full"><label for="customQuestion">Custom question</label><textarea id="customQuestion" placeholder="Type something the guest should see right now..."></textarea></div>
-          </div>
-          <div class="button-row"><button class="btn teal" id="pushCustomQuestion" type="button">Push custom question</button></div>
+          <div class="field" style="margin-top:14px"><label for="customQuestion">Custom question or talking point</label><textarea id="customQuestion" placeholder="Type something that should appear on the teleprompter..."></textarea></div>
+          <div class="button-row"><button class="btn teal" id="pushCustomQuestion" type="button">Push to teleprompter</button></div>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Clip Markers</div><h2>Save editing timestamps live</h2></div><button class="btn primary" id="openClipModal" type="button">+ Detailed marker</button></div>
+          <div class="card-head"><div><div class="card-kicker">Tonight</div><h2>Must mention + Throuple Hotline</h2></div></div>
+          <div class="grid two">
+            <div><h3>Must-mention checklist</h3><div class="checklist" id="mentionList"></div></div>
+            <div><h3>Hotline</h3><div class="cue-banner hotline-card" id="hotlineCard"></div><div class="button-row compact"><button class="btn small teal" id="showHotlineGraphic" type="button">Show Hotline graphic</button><button class="btn small" id="pushHotline" type="button">Push to teleprompter</button></div></div>
+          </div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Clip + Edit Markers</div><h2>Save timestamps while you talk</h2></div><button class="btn primary" id="openClipModal" type="button">+ Detailed marker</button></div>
           <div class="form-grid three">
-            <div class="field"><label for="quickSpeaker">Speaker</label><select id="quickSpeaker"><option>William</option><option>Daniel</option><option>Caleb</option><option>Guest</option></select></div>
+            <div class="field"><label for="quickSpeaker">Speaker</label><select id="quickSpeaker"><option>William</option><option>Daniel</option><option>Caleb</option><option>All Hosts</option></select></div>
             <div class="field"><label for="quickRating">Rating</label><select id="quickRating"><option>Good</option><option selected>Great</option><option>Must-use</option></select></div>
             <div class="field"><label for="quickNote">Tiny note</label><input id="quickNote" placeholder="Marriage rant, perfect reaction..."></div>
           </div>
-          <div class="button-row compact" id="quickClipButtons">
+          <div class="button-row compact marker-grid" id="quickClipButtons">
             <button class="btn small" data-type="Funny" type="button">😂 Funny</button>
             <button class="btn small" data-type="Chaotic" type="button">🔥 Chaotic</button>
             <button class="btn small" data-type="Emotional" type="button">❤️ Emotional</button>
             <button class="btn small" data-type="Quote" type="button">💬 Quote</button>
             <button class="btn small primary" data-type="Teaser" type="button">🎬 Teaser</button>
             <button class="btn small teal" data-type="Must-use" type="button">⭐ Must-use</button>
+            <button class="btn small sun" data-type="Cut / Tighten" type="button">✂️ Cut / Tighten</button>
+            <button class="btn small danger" data-type="Sensitive / Do Not Publish" type="button">🚫 Sensitive</button>
+          </div>
+          <div class="save-that-row">
+            <span>Save that:</span>
+            <button class="btn small" data-save-type="Future Topic" type="button">Future topic</button>
+            <button class="btn small" data-save-type="Episode Title" type="button">Episode title</button>
+            <button class="btn small" data-save-type="Callback" type="button">Callback</button>
+            <button class="btn small" data-save-type="Merch Phrase" type="button">Merch phrase</button>
+            <button class="btn small" data-save-type="On-Air Promise" type="button">Promise / follow-up</button>
           </div>
           <div class="divider"></div>
           <div class="list" id="clipList"></div>
-          <div class="button-row"><button class="btn success" id="exportClips" type="button">Export clip CSV</button><button class="btn" id="exportSession" type="button">Export session notes</button><button class="btn" id="exportState" type="button">Export full JSON</button></div>
+          <div class="button-row"><button class="btn success" id="exportClips" type="button">Export marker CSV</button><button class="btn" id="exportSession" type="button">Export session notes</button><button class="btn" id="exportState" type="button">Export full JSON</button></div>
         </section>
 
         <section class="card glass">
           <div class="card-head"><div><div class="card-kicker">Host Notes</div><h2>Scratchpad saved with the session</h2></div><span class="muted tiny" id="notesSaved">Saved locally</span></div>
-          <textarea class="code" id="hostNotes" placeholder="Callbacks, edits, sponsor notes, things to cut, follow-up ideas..."></textarea>
+          <textarea class="code tall" id="hostNotes" placeholder="Callbacks, edits, things to cut, promises made, follow-up ideas..."></textarea>
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Scripts</div><h2>Clean intro and outro</h2></div></div>
-          <div class="grid two">
-            <div><h3 style="margin-bottom:9px">Official intro</h3><div class="cue-banner" id="introScript"></div></div>
-            <div><h3 style="margin-bottom:9px">Official outro</h3><div class="cue-banner" id="outroScript"></div></div>
-          </div>
+          <div class="card-head"><div><div class="card-kicker">After Recording</div><h2>Do not lose the files</h2></div></div>
+          <div class="checklist" id="postflightList"></div>
+          <div class="field" style="margin-top:14px"><label for="debrief">30-second debrief</label><textarea id="debrief" placeholder="Best moment, what must be cut, what becomes the teaser..."></textarea></div>
+          <div class="button-row"><button class="btn primary" id="finishSession" type="button">Finish + Export Session Notes</button></div>
         </section>
       </div>
 
       <aside class="stack sticky-stack">
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Private Guest Cue</div><h2>Message the guest screen</h2></div></div>
-          <div class="cue-banner"><b>Live cue:</b> <span id="liveCue">—</span></div>
-          <div class="field" style="margin-top:14px"><label for="cueText">New private cue</label><textarea id="cueText" placeholder="Move closer to your mic..."></textarea></div>
-          <div class="button-row"><button class="btn teal" id="sendCue" type="button">Send cue</button><button class="btn" id="clearCue" type="button">Clear</button></div>
+          <div class="card-head"><div><div class="card-kicker">Who Is Talking?</div><h2>Speaker tracking</h2></div></div>
+          <div class="speaker-buttons" id="speakerButtons">
+            <button class="btn speaker-btn" data-speaker="William" type="button">William</button>
+            <button class="btn speaker-btn" data-speaker="Daniel" type="button">Daniel</button>
+            <button class="btn speaker-btn" data-speaker="Caleb" type="button">Caleb</button>
+          </div>
+          <p class="muted tiny">This tags markers and tells the teleprompter who currently has the floor. It does not analyze audio.</p>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Room Direction</div><h2>Shared teleprompter cue</h2></div></div>
+          <div class="cue-banner"><b>Live direction:</b> <span id="liveDirection">—</span></div>
+          <div class="field" style="margin-top:14px"><label for="directionText">New direction</label><textarea id="directionText" placeholder="Move on, clean take, let Caleb answer..."></textarea></div>
+          <div class="button-row"><button class="btn teal" id="sendDirection" type="button">Show direction</button><button class="btn" id="clearDirection" type="button">Clear</button></div>
           <div class="divider"></div>
-          <div class="preset-grid">
-            <button class="btn" data-cue="Move a little closer to your microphone." type="button">Closer to mic</button>
-            <button class="btn" data-cue="You’re doing great—keep going." type="button">Keep going</button>
-            <button class="btn" data-cue="We’re moving to the game next." type="button">Game next</button>
-            <button class="btn" data-cue="Give us a clean version of that line." type="button">Clean take</button>
-            <button class="btn" data-cue="Pause for one second while we fix something." type="button">Hold please</button>
-            <button class="btn" data-cue="We’re wrapping up—get your plug ready." type="button">Prepare plug</button>
+          <div class="preset-grid" id="directionPresets">
+            <button class="btn" data-direction="Move on after this answer." type="button">Move on</button>
+            <button class="btn" data-direction="Let Daniel answer this one." type="button">Daniel next</button>
+            <button class="btn" data-direction="Let Caleb answer this one." type="button">Caleb next</button>
+            <button class="btn" data-direction="Give us a clean version of that line." type="button">Clean take</button>
+            <button class="btn" data-direction="Pause—technical check." type="button">Tech pause</button>
+            <button class="btn" data-direction="Wrap this answer and move to the next segment." type="button">Wrap it up</button>
           </div>
         </section>
 
@@ -141,8 +161,9 @@
         </section>
 
         <section class="card glass">
-          <div class="card-head"><div><div class="card-kicker">Lower Third</div><h2>Guest identity graphic</h2></div></div>
-          <div class="field"><label for="lowerName">Name</label><input id="lowerName"></div>
+          <div class="card-head"><div><div class="card-kicker">Lower Third</div><h2>Host identity graphic</h2></div></div>
+          <div class="field"><label for="lowerPreset">Preset</label><select id="lowerPreset"><option value="show">3Dudes1Life</option><option value="William">William</option><option value="Daniel">Daniel</option><option value="Caleb">Caleb</option><option value="custom">Custom</option></select></div>
+          <div class="field" style="margin-top:9px"><label for="lowerName">Name</label><input id="lowerName"></div>
           <div class="field" style="margin-top:9px"><label for="lowerTitle">Title</label><input id="lowerTitle"></div>
           <div class="field" style="margin-top:9px"><label for="lowerSocial">Social</label><input id="lowerSocial"></div>
           <div class="button-row"><button class="btn teal" id="showLowerThird" type="button">Show lower third</button><button class="btn" id="hideLowerThird" type="button">Hide</button></div>
@@ -159,7 +180,7 @@
             <button class="btn" data-graphic="tea|WILLIAM STARTED A BUSINESS|It happened again." type="button">💼 New Business</button>
             <button class="btn" data-graphic="teal|THROUPLE HOTLINE|Your mess. Our opinions." type="button">☎️ Hotline</button>
             <button class="btn" data-graphic="gold|BOWL OF CHAOS|No dignity. No repeats." type="button">🔥 Bowl Time</button>
-            <button class="btn" data-graphic="dark|THROUPLE LIFE|It doesn’t suck." type="button">🌴 Show Tagline</button>
+            <button class="btn" data-graphic="dark|THROUPLE LIFE|It doesn’t suck." type="button">🌴 Tagline</button>
           </div>
         </section>
 
@@ -167,7 +188,12 @@
           <div class="card-head"><div><div class="card-kicker">OBS Browser Source</div><h2>Transparent output</h2></div></div>
           <div class="code-output" id="obsUrl">—</div>
           <div class="button-row compact"><button class="btn small" id="copyObsUrl" type="button">Copy OBS URL</button><a class="btn small" href="graphics.html?debug=1" target="_blank" rel="noopener">Open preview</a></div>
-          <p class="muted tiny">For OBS, use the URL without <code>?debug=1</code>. Recommended browser-source size: 1920×1080.</p>
+          <p class="muted tiny">Recommended browser-source size: 1920×1080. Use the URL without <code>?debug=1</code> in OBS.</p>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Keyboard Shortcuts</div><h2>Move without mousing</h2></div></div>
+          <div class="shortcut-grid"><span><kbd>Space</kbd> Start / pause</span><span><kbd>1</kbd> William</span><span><kbd>2</kbd> Daniel</span><span><kbd>3</kbd> Caleb</span><span><kbd>M</kbd> Detailed marker</span><span><kbd>F</kbd> Funny marker</span><span><kbd>X</kbd> Cut marker</span><span><kbd>→</kbd> Next segment</span></div>
         </section>
 
         <section class="card glass">
@@ -177,16 +203,16 @@
       </aside>
     </div>
 
-    <footer class="footer"><b>3Dudes1Life Creative</b> · Host Control Room prototype · Markers are timestamps, not media recordings.</footer>
+    <footer class="footer"><b>3Dudes1Life Creative</b> · Hosts-only Control Room · Markers are timestamps, not media recordings.</footer>
   </main>
 
   <div class="modal" id="clipModal" hidden>
     <div class="modal-card glass">
-      <div class="modal-head"><div><div class="card-kicker">Detailed Clip Marker</div><h2>Save the moment</h2></div><button class="btn square" id="closeClipModal" type="button" aria-label="Close">×</button></div>
+      <div class="modal-head"><div><div class="card-kicker">Detailed Marker</div><h2>Save the moment</h2></div><button class="btn square" id="closeClipModal" type="button" aria-label="Close">×</button></div>
       <div class="summary-item" style="margin-bottom:14px"><small>Current timestamp</small><strong class="big" id="modalTime">00:00:00</strong></div>
       <div class="form-grid three">
-        <div class="field"><label for="clipSpeaker">Speaker</label><select id="clipSpeaker"><option>William</option><option>Daniel</option><option>Caleb</option><option>Guest</option></select></div>
-        <div class="field"><label for="clipType">Type</label><select id="clipType"><option>Funny</option><option>Chaotic</option><option>Emotional</option><option>Educational</option><option>Quote</option><option>Teaser</option><option>Must-use</option></select></div>
+        <div class="field"><label for="clipSpeaker">Speaker</label><select id="clipSpeaker"><option>William</option><option>Daniel</option><option>Caleb</option><option>All Hosts</option></select></div>
+        <div class="field"><label for="clipType">Type</label><select id="clipType"><option>Funny</option><option>Chaotic</option><option>Emotional</option><option>Educational</option><option>Quote</option><option>Teaser</option><option>Must-use</option><option>Cut / Tighten</option><option>Sensitive / Do Not Publish</option><option>Future Topic</option><option>Episode Title</option><option>Callback</option><option>Merch Phrase</option><option>On-Air Promise</option></select></div>
         <div class="field"><label for="clipRating">Rating</label><select id="clipRating"><option>Good</option><option selected>Great</option><option>Must-use</option></select></div>
         <div class="field full"><label for="clipNote">Editing note</label><textarea id="clipNote" placeholder="What happened and where the clip should start/end..."></textarea></div>
         <div class="field full"><label for="clipTags">Tags</label><input id="clipTags" placeholder="reel, teaser, funny, episode-title"></div>

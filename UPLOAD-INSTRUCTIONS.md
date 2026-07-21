@@ -1,49 +1,40 @@
-# Upload Instructions
+# Hosts-Only V2 Update Instructions
 
-## Safest first upload
+This update is supplied as **changed and newly added files only**.
 
-Do not replace any live Throuple Tea website files.
+## Replace these existing files
 
-Upload this complete folder as:
-
-`studio-prototype/`
-
-inside the `3dudes1life/ThroupleTea` repository, ideally on a prototype branch first.
-
-The preview URL would normally become:
-
-`https://throupletea.com/studio-prototype/`
-
-or the equivalent GitHub Pages URL.
-
-## Important privacy note
-
-A public GitHub Pages folder is not truly private just because it is absent from navigation. Before using real guest information, protect the route with Cloudflare Access or move it behind the planned production authentication layer.
-
-The included pages use `noindex,nofollow,noarchive`, but that is not access control.
-
-## Files that must stay together
-
-- All `.html` files
+- `index.html`
+- `launcher.js`
+- `setup.html`
+- `setup.js`
+- `host.html`
+- `host.js`
+- `shared-state.js`
+- `prompts.js`
+- `graphics.html`
+- `graphics.js`
 - `styles.css`
-- All `.js` files
-- The complete `assets/` folder
+- `README.md`
+- `UPLOAD-INSTRUCTIONS.md`
 
-Do not upload only `index.html`; the screens depend on the shared files.
+## Add these new files
 
-## Camera and microphone testing
+- `teleprompter.html`
+- `teleprompter.js`
 
-Camera/microphone permission requires HTTPS or localhost. It may not work when the HTML is opened directly as a `file://` URL.
+Upload all files into the same existing `studio-prototype/` folder and preserve the filenames exactly.
 
-## No live-site integration yet
+Do not delete the existing guest files yet. They can stay dormant for a future Guest Episode mode, but the hosts-only dashboard no longer links to them.
 
-Do not add a public website navigation link until:
+## Before Thursday’s recording
 
-- the workflow is approved,
-- access is protected,
-- real guest data is stored securely,
-- and the remote synchronization/backend phase is complete.
+1. Open the updated `index.html`.
+2. Open Episode Setup and save the current episode once.
+3. Use **Launch recording screens** to open Host Control, Teleprompter and the OBS preview.
+4. In OBS, create or update a Browser Source pointing to `graphics.html` without `?debug=1`.
+5. Confirm the preflight checklist correctly reflects the actual OBS and PodTrak workflow.
 
-## Recording layout
+## Privacy
 
-The prototype is configured for exactly two visible feeds: one shared camera view for William, Daniel and Caleb, and one guest camera view.
+This is still a static browser prototype. Do not store private listener details in a publicly accessible version until the route is protected.

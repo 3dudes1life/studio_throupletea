@@ -54,7 +54,29 @@
     { id: 'p45', category: 'Whose Chart?', text: 'Starts every project with “This will be quick”—famous last words.', tags: ['astrology', 'business'] },
     { id: 'p46', category: 'Whose Chart?', text: 'Acts chill, secretly keeps receipts like a Scorpio with Wi-Fi.', tags: ['astrology', 'personality'] },
     { id: 'p47', category: 'Whose Chart?', text: 'Gives great advice they do not personally follow.', tags: ['astrology', 'personality'] },
-    { id: 'p48', category: 'Whose Chart?', text: 'Attracts weird coincidences and blames it on the universe doing bits.', tags: ['astrology', 'universe'] }
+    { id: 'p48', category: 'Whose Chart?', text: 'Attracts weird coincidences and blames it on the universe doing bits.', tags: ['astrology', 'universe'] },
+    { id: 'p49', category: 'Whose Chart?', text: 'Has deep emotional intelligence but forgets to text back.', tags: ['astrology', 'communication'] },
+    { id: 'p50', category: 'Whose Chart?', text: 'Is either everyone’s therapist or everyone’s problem—no middle ground.', tags: ['astrology', 'personality'] },
+    { id: 'p51', category: 'Whose Chart?', text: 'Gets moody when the vibe feels off but calls it intuition.', tags: ['astrology', 'intuition'] },
+    { id: 'p52', category: 'Whose Chart?', text: 'Says they hate attention, yet somehow ends up with the microphone.', tags: ['astrology', 'attention'] },
+    { id: 'p53', category: 'Whose Chart?', text: 'Cannot focus until the environment looks like a Pinterest board.', tags: ['astrology', 'home'] },
+    { id: 'p54', category: 'Whose Chart?', text: 'Has the confidence of a fire sign but the anxiety of a water sign.', tags: ['astrology', 'personality'] },
+    { id: 'p55', category: 'Whose Chart?', text: 'Will start a business because of one compliment.', tags: ['astrology', 'business'] },
+    { id: 'p56', category: 'Whose Chart?', text: 'Feels deeply, but will not admit it until three margaritas in.', tags: ['astrology', 'emotions'] },
+    { id: 'p57', category: 'Whose Chart?', text: 'Is constantly just checking in but really wants to know the gossip.', tags: ['astrology', 'gossip'] },
+    { id: 'p58', category: 'Whose Chart?', text: 'Has an opinion about everything, including your rising sign.', tags: ['astrology', 'opinions'] },
+    { id: 'p59', category: 'Whose Chart?', text: 'Is emotionally reactive, recovers fast, then forgets the fight ever happened.', tags: ['astrology', 'conflict'] },
+    { id: 'p60', category: 'Whose Chart?', text: 'Wants everyone to get along but low-key loves a little drama.', tags: ['astrology', 'drama'] },
+    { id: 'p61', category: 'Whose Chart?', text: 'Says they are spontaneous but actually researched it for two weeks.', tags: ['astrology', 'planning'] },
+    { id: 'p62', category: 'Whose Chart?', text: 'Falls in love through shared playlists and eye contact.', tags: ['astrology', 'love'] },
+    { id: 'p63', category: 'Whose Chart?', text: 'Cannot let someone else drive without judging their route.', tags: ['astrology', 'driving'] },
+    { id: 'p64', category: 'Whose Chart?', text: 'Is both the storm and the calm after it.', tags: ['astrology', 'personality'] },
+    { id: 'p65', category: 'Whose Chart?', text: 'Looks chill in photos, full existential meltdown behind the scenes.', tags: ['astrology', 'anxiety'] },
+    { id: 'p66', category: 'Whose Chart?', text: 'Will reorganize the kitchen to feel emotionally stable again.', tags: ['astrology', 'home'] },
+    { id: 'p67', category: 'Whose Chart?', text: 'Thinks being vulnerable is hot until someone actually does it.', tags: ['astrology', 'vulnerability'] },
+    { id: 'p68', category: 'Whose Chart?', text: 'Laughs in serious conversations to diffuse tension—it never works.', tags: ['astrology', 'humor'] },
+    { id: 'p69', category: 'Whose Chart?', text: 'Gives main-character speeches in their head daily.', tags: ['astrology', 'personality'] },
+    { id: 'p70', category: 'Whose Chart?', text: 'Once cried over something beautiful and blamed Mercury retrograde.', tags: ['astrology', 'emotions'] }
   ];
 
   function tokenize(value) {

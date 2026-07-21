@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#020204">
+  <title>Shared Teleprompter — Throuple Tea Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="teleprompter-page">
+  <main class="teleprompter-shell">
+    <header class="teleprompter-top">
+      <a href="host.html" class="teleprompter-brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>A Little Throuple Tea</b><small id="episodeLabel">Hosts Only</small></span></a>
+      <div class="teleprompter-status"><span id="speakerBadge">William has the floor</span><strong id="timer">00:00:00</strong><button id="fullscreenButton" type="button">Full screen</button></div>
+    </header>
+
+    <section class="teleprompter-main">
+      <div class="teleprompter-segment"><small>Current Segment</small><h1 id="segmentName">Pre-Show Checklist</h1><div class="teleprompter-progress"><i id="segmentProgress"></i></div><p id="segmentTiming">Target 5m · 00:00 elapsed</p></div>
+
+      <div class="teleprompter-direction" id="directionBox" hidden><small>PRODUCTION DIRECTION</small><strong id="directionText"></strong></div>
+
+      <div class="teleprompter-question">
+        <small id="questionLabel">CURRENT QUESTION</small>
+        <strong id="currentQuestion">No question selected yet.</strong>
+      </div>
+
+      <div class="teleprompter-script" id="scriptBox" hidden><small id="scriptLabel">SCRIPT</small><div id="scriptText"></div></div>
+
+      <div class="teleprompter-bottom-grid">
+        <section><small>MUST MENTION</small><div id="mentionList" class="teleprompter-list"></div></section>
+        <section><small>THROUPLE HOTLINE</small><div id="hotline" class="teleprompter-hotline"></div></section>
+      </div>
+    </section>
+
+    <footer class="teleprompter-footer"><span>← / → changes segment</span><span>1 William · 2 Daniel · 3 Caleb</span><span>Controlled from Host Control Room</span></footer>
+  </main>
+  <script src="shared-state.js"></script>
+  <script src="teleprompter.js"></script>
+</body>
+</html>
