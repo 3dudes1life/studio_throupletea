@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#020204">
+  <meta name="theme-color" content="#0b0b0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Throuple Tea Studio — Hosts Only</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="studio-os dashboard-os">
   <main class="shell">
     <header class="topbar">
       <a class="brand" href="index.html">
@@ -27,8 +29,8 @@
     <section class="page-head">
       <div>
         <div class="eyebrow">William · Daniel · Caleb</div>
-        <h1>Every episode.<span>One production cockpit.</span></h1>
-        <p>OBS records the video. Your podcast recorder captures the audio tracks. This studio runs everything around them: preparation, timing, questions, reminders, graphics, clip markers and the post-record handoff.</p>
+        <h1>Your podcast.<span>Run like an operating system.</span></h1>
+        <p>OBS records the video. Your podcast recorder captures the audio. Studio OS watches the workflow around them and surfaces the next thing that needs attention.</p>
       </div>
       <div class="art glass"><img src="assets/podcast-artwork.jpg" alt="Official podcast artwork"></div>
     </section>
@@ -37,6 +39,19 @@
       <span>🎙️</span>
       <div><b>Hosts Only is the default.</b> Guest pages remain dormant for later. Nothing here replaces OBS or records media.</div>
     </div>
+
+
+    <section class="smart-command-center glass" aria-labelledby="smartHeadline">
+      <div class="smart-orb" id="smartPulse" data-state="idle" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="smart-main">
+        <div class="smart-label"><span>Studio Intelligence</span><b id="smartStatus" data-tone="idle">Standby</b></div>
+        <h2 id="smartHeadline">Studio is standing by</h2>
+        <p id="smartDetail">Complete setup, open OBS and the podcast recorder, then begin the studio timer.</p>
+        <div class="button-row compact" id="smartActions"></div>
+      </div>
+      <div class="smart-score" aria-label="Production confidence score"><span id="smartScore">0%</span><small>Production confidence</small></div>
+      <div class="smart-insights" id="smartInsights"></div>
+    </section>
 
     <section class="summary-bar" aria-label="Current episode summary">
       <div class="summary-item"><small>Episode</small><strong id="episodeLabel">—</strong></div>
@@ -106,5 +121,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="shared-state.js"></script>
   <script src="launcher.js"></script>
+  <script src="smart-os.js"></script>
 </body>
 </html>

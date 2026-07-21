@@ -36,7 +36,7 @@
   ];
 
   const DEFAULT_STATE = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     revision: 0,
     updatedAt: null,
     mode: 'hosts-only',
@@ -104,6 +104,8 @@
       currentSegment: 0,
       currentQuestion: '',
       currentSpeaker: 'William',
+      speakerDurations: { William: 0, Daniel: 0, Caleb: 0 },
+      speakerStartedAtMs: 0,
       direction: '',
       hostNote: '',
       currentMustMention: '',
@@ -208,7 +210,7 @@
     state = mergeDefaults(DEFAULT_STATE, nextState);
     state.mode = 'hosts-only';
     state.studio.mode = 'hosts-only';
-    state.schemaVersion = 2;
+    state.schemaVersion = 3;
     state.revision = Number(state.revision || 0) + 1;
     state.updatedAt = new Date().toISOString();
     try {
@@ -308,6 +310,18 @@
     nextState.activity = nextState.activity.slice(0, 80);
   }
 
+  function finalizeCurrentSpeaker(next) {
+    if (!next || !next.studio) return;
+    const speaker = next.studio.currentSpeaker;
+    if (!speaker || !['William', 'Daniel', 'Caleb'].includes(speaker)) return;
+    const elapsed = timerMilliseconds(next);
+    const started = Number(next.studio.speakerStartedAtMs || 0);
+    const delta = Math.max(0, elapsed - started);
+    next.studio.speakerDurations = next.studio.speakerDurations || { William: 0, Daniel: 0, Caleb: 0 };
+    next.studio.speakerDurations[speaker] = Number(next.studio.speakerDurations[speaker] || 0) + delta;
+    next.studio.speakerStartedAtMs = elapsed;
+  }
+
   function startTimer() {
     return update((next) => {
       if (next.timer.status === 'recording') return;
@@ -316,10 +330,13 @@
         next.timer.baseElapsed = 0;
         next.studio.segmentDurations = {};
         next.studio.segmentStartedAtMs = 0;
+        next.studio.speakerDurations = { William: 0, Daniel: 0, Caleb: 0 };
+        next.studio.speakerStartedAtMs = 0;
       }
       next.timer.status = 'recording';
       next.timer.startedAt = Date.now();
       next.timer.endedAt = null;
+      next.studio.speakerStartedAtMs = timerMilliseconds(next);
       addActivity(next, 'Studio timer started alongside OBS and the podcast recorder');
     }, 'timer-start');
   }
@@ -327,6 +344,7 @@
   function pauseTimer() {
     return update((next) => {
       if (next.timer.status !== 'recording') return;
+      finalizeCurrentSpeaker(next);
       next.timer.baseElapsed = timerMilliseconds(next);
       next.timer.startedAt = null;
       next.timer.status = 'paused';
@@ -336,6 +354,7 @@
 
   function endTimer() {
     return update((next) => {
+      finalizeCurrentSpeaker(next);
       next.timer.baseElapsed = timerMilliseconds(next);
       next.timer.startedAt = null;
       next.timer.status = 'ended';
@@ -349,7 +368,9 @@
       next.timer = { status: 'idle', baseElapsed: 0, startedAt: null, endedAt: null };
       next.studio.segmentStartedAtMs = 0;
       next.studio.segmentDurations = {};
-      addActivity(next, 'Studio timer and segment timing reset');
+      next.studio.speakerDurations = { William: 0, Daniel: 0, Caleb: 0 };
+      next.studio.speakerStartedAtMs = 0;
+      addActivity(next, 'Studio timer, segment timing and speaker tracking reset');
     }, 'timer-reset');
   }
 

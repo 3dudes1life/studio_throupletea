@@ -50,6 +50,23 @@
     }, source || 'host-segment-finalize');
   }
 
+  function changeSpeaker(speaker, source) {
+    const allowed = ['William', 'Daniel', 'Caleb'];
+    if (!allowed.includes(speaker)) return;
+    TTStudio.update((next) => {
+      const previous = next.studio.currentSpeaker || 'William';
+      const elapsed = TTStudio.timerMilliseconds(next);
+      next.studio.speakerDurations = next.studio.speakerDurations || { William: 0, Daniel: 0, Caleb: 0 };
+      if (next.timer.status === 'recording' && allowed.includes(previous)) {
+        const started = Number(next.studio.speakerStartedAtMs || 0);
+        next.studio.speakerDurations[previous] = Number(next.studio.speakerDurations[previous] || 0) + Math.max(0, elapsed - started);
+      }
+      next.studio.currentSpeaker = speaker;
+      next.studio.speakerStartedAtMs = elapsed;
+      if (previous !== speaker) TTStudio.addActivity(next, `${speaker} has the floor`);
+    }, source || 'host-speaker');
+  }
+
   function renderChecklist(items, target, dataName) {
     target.innerHTML = items.length ? items.map((item) => `
       <label class="check-row${item.done ? ' done' : ''}">
@@ -317,7 +334,7 @@
   $('#speakerButtons').addEventListener('click', (event) => {
     const button = event.target.closest('[data-speaker]');
     if (!button) return;
-    TTStudio.update((next) => { next.studio.currentSpeaker = button.dataset.speaker; }, 'host-speaker');
+    changeSpeaker(button.dataset.speaker, 'host-speaker');
   });
   $('#segmentList').addEventListener('click', (event) => {
     const button = event.target.closest('[data-segment-index]');
@@ -511,7 +528,7 @@
     if (key === 'x') addClip({ type: 'Cut / Tighten', rating: 'Good', speaker: TTStudio.getState().studio.currentSpeaker });
     if (key === '1' || key === '2' || key === '3') {
       const speaker = { '1': 'William', '2': 'Daniel', '3': 'Caleb' }[key];
-      TTStudio.update((next) => { next.studio.currentSpeaker = speaker; }, 'shortcut-speaker');
+      changeSpeaker(speaker, 'shortcut-speaker');
     }
     if (event.key === 'ArrowRight') changeSegment(TTStudio.getState().studio.currentSegment + 1);
     if (event.key === 'ArrowLeft') changeSegment(TTStudio.getState().studio.currentSegment - 1);

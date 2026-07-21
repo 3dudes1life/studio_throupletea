@@ -1,40 +1,29 @@
-# Hosts-Only V2 Update Instructions
+# Throuple Tea Studio OS — Smart Update
 
-This update is supplied as **changed and newly added files only**.
+Upload these files into your existing `studio-prototype/` folder.
 
-## Replace these existing files
+## Replace
 
 - `index.html`
-- `launcher.js`
-- `setup.html`
-- `setup.js`
 - `host.html`
+- `setup.html`
+- `teleprompter.html`
 - `host.js`
 - `shared-state.js`
+- `styles.css`
+
+## Add
+
+- `smart-os.js`
+
+Do not delete or replace any other files. In particular, keep your existing:
+
+- `setup.js`
+- `teleprompter.js`
 - `prompts.js`
 - `graphics.html`
 - `graphics.js`
-- `styles.css`
-- `README.md`
-- `UPLOAD-INSTRUCTIONS.md`
+- `launcher.js`
+- `assets/` folder
 
-## Add these new files
-
-- `teleprompter.html`
-- `teleprompter.js`
-
-Upload all files into the same existing `studio-prototype/` folder and preserve the filenames exactly.
-
-Do not delete the existing guest files yet. They can stay dormant for a future Guest Episode mode, but the hosts-only dashboard no longer links to them.
-
-## Before Thursday’s recording
-
-1. Open the updated `index.html`.
-2. Open Episode Setup and save the current episode once.
-3. Use **Launch recording screens** to open Host Control, Teleprompter and the OBS preview.
-4. In OBS, create or update a Browser Source pointing to `graphics.html` without `?debug=1`.
-5. Confirm the preflight checklist correctly reflects the actual OBS and PodTrak workflow.
-
-## Privacy
-
-This is still a static browser prototype. Do not store private listener details in a publicly accessible version until the route is protected.
+After uploading, hard-refresh the browser so the new CSS and JavaScript load. On iPhone/iPad Safari, close the tab and reopen it if the older design remains cached.
