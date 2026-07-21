@@ -15,6 +15,8 @@ This package is intentionally much more than a visual mockup. It lets the hosts 
 
 ## What works in this prototype
 
+**Recording layout:** exactly two visible camera feeds—one combined view for William, Daniel and Caleb, plus one guest view. Individual host names remain available for clip markers and speaking indicators.
+
 - Personalized guest links using URL parameters
 - Browser camera preview and microphone level meter
 - Camera and microphone device selectors
@@ -26,7 +28,7 @@ This package is intentionally much more than a visual mockup. It lets the hosts 
 - Current segment and current question pushed to the guest screen
 - Private host-to-guest cues
 - Guest request buttons and host acknowledgement
-- Active-speaker highlighting
+- Active-speaker highlighting across the two visible feeds: the shared 3Dudes1Life host view and the guest view
 - Bowl of Chaos prompt drawing with main-topic keyword exclusions and no repeats
 - Lower thirds and animated OBS reaction graphics
 - Clip timestamps with speaker, type, rating, tags and editing notes
@@ -35,7 +37,7 @@ This package is intentionally much more than a visual mockup. It lets the hosts 
 
 ## What is deliberately simulated
 
-- The host camera tiles are branded placeholders.
+- The single shared 3Dudes1Life host camera view is a branded placeholder; the guest preview can use their real local camera.
 - The timer creates editing timestamps but does not record media.
 - Cross-screen synchronization works between tabs/windows sharing the same browser profile.
 - The release acknowledgement is not a legal signature system.

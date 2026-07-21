@@ -47,10 +47,14 @@
     $('#recordingPill').className = `status-pill${status === 'recording' ? ' on-air' : status === 'paused' ? ' paused' : ''}`;
     $('#recordingPill').innerHTML = `<i class="status-dot"></i>${status === 'recording' ? 'Recording simulation live' : status === 'paused' ? 'Hosts paused recording' : status === 'ended' ? 'Recording ended' : 'Waiting for hosts'}`;
 
-    document.querySelectorAll('.camera-tile').forEach((tile) => {
-      const speaker = tile.dataset.speaker === 'Guest' ? state.guest.name : tile.dataset.speaker;
-      tile.classList.toggle('active-speaker', speaker === state.studio.currentSpeaker || (tile.dataset.speaker === 'Guest' && state.studio.currentSpeaker === 'Guest'));
-    });
+    const currentSpeaker = state.studio.currentSpeaker || 'William';
+    const guestIsSpeaking = currentSpeaker === 'Guest' || currentSpeaker === state.guest.name;
+    const hostIsSpeaking = ['William', 'Daniel', 'Caleb', 'Hosts'].includes(currentSpeaker);
+    $('#hostTile').classList.toggle('active-speaker', hostIsSpeaking);
+    $('#guestTile').classList.toggle('active-speaker', guestIsSpeaking);
+    $('#hostSpeakerLabel').textContent = hostIsSpeaking && currentSpeaker !== 'Hosts'
+      ? `3Dudes1Life · ${currentSpeaker} speaking`
+      : '3Dudes1Life Hosts';
 
     const micMuted = Boolean(state.media.guestMicMuted);
     const cameraOff = Boolean(state.media.guestCameraOff);

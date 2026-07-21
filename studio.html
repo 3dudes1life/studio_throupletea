@@ -29,10 +29,21 @@
     <div class="grid sidebar">
       <div class="stack">
         <section class="card glass">
-          <div class="camera-grid">
-            <div class="camera-tile" data-speaker="William"><div class="camera-placeholder"><div><div class="avatar">W</div><strong>William</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>William</div></div>
-            <div class="camera-tile" data-speaker="Daniel"><div class="camera-placeholder"><div><div class="avatar">D</div><strong>Daniel</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>Daniel</div></div>
-            <div class="camera-tile" data-speaker="Caleb"><div class="camera-placeholder"><div><div class="avatar">C</div><strong>Caleb</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>Caleb</div></div>
+          <div class="camera-grid two-feed">
+            <div class="camera-tile host-view" id="hostTile" data-speaker-group="Hosts">
+              <div class="camera-placeholder">
+                <div>
+                  <div class="host-avatar-row" aria-hidden="true">
+                    <span class="avatar mini">W</span>
+                    <span class="avatar mini">D</span>
+                    <span class="avatar mini">C</span>
+                  </div>
+                  <strong>William · Daniel · Caleb</strong>
+                  <div class="muted tiny">One shared 3Dudes1Life camera view</div>
+                </div>
+              </div>
+              <div class="camera-label"><i></i><span id="hostSpeakerLabel">3Dudes1Life Hosts</span></div>
+            </div>
             <div class="camera-tile" id="guestTile" data-speaker="Guest">
               <video id="guestVideo" playsinline muted></video>
               <div class="camera-placeholder" id="guestPlaceholder"><div><div class="avatar" id="guestInitial">G</div><strong id="guestCameraName">Guest</strong><div class="muted tiny">Press “Connect camera” below</div></div></div>
@@ -81,7 +92,7 @@
         <section class="card glass">
           <div class="card-head"><div><div class="card-kicker">Prototype status</div><h2>Connection</h2></div></div>
           <div class="device-status"><div class="ready">Screen sync live</div><div id="cameraConnection">Camera not connected</div><div id="guestReadyStatus">Guest checked in</div></div>
-          <p class="muted tiny">This screen is synchronized locally. Production will replace the placeholder host feeds with the actual recording platform.</p>
+          <p class="muted tiny">This screen is synchronized locally. Production will replace the combined host placeholder and guest preview with the two actual recording feeds.</p>
         </section>
       </aside>
     </div>

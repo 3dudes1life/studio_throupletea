@@ -43,3 +43,7 @@ Do not add a public website navigation link until:
 - access is protected,
 - real guest data is stored securely,
 - and the remote synchronization/backend phase is complete.
+
+## Recording layout
+
+The prototype is configured for exactly two visible feeds: one shared camera view for William, Daniel and Caleb, and one guest camera view.
