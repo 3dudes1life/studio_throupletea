@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" class="obs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Throuple Tea — OBS Graphics Output</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="obs-page">
+  <main class="obs-stage" aria-live="polite">
+    <img class="obs-watermark" id="watermark" src="assets/podcast-artwork.jpg" alt="">
+    <div class="obs-corner" id="onAir"><i></i><span id="onAirText">ON AIR · 00:00:00</span></div>
+
+    <section class="lower-third" id="lowerThird">
+      <img src="assets/podcast-artwork.jpg" alt="">
+      <div><strong id="lowerName">Guest Name</strong><span><span id="lowerTitle">Guest</span> <em id="lowerSocial">@guest</em></span></div>
+    </section>
+
+    <section class="obs-reaction" id="reactionGraphic">
+      <div class="reaction-inner"><strong id="reactionHeadline">SPILL THE TEA</strong><span id="reactionSubline">You cannot stop there.</span></div>
+    </section>
+
+    <section class="obs-prompt" id="promptGraphic">
+      <small id="promptCategory">Bowl of Chaos</small>
+      <strong id="promptHeadline">The prompt appears here.</strong>
+    </section>
+
+    <div id="debugLabel" style="position:absolute;right:34px;bottom:28px;padding:8px 11px;border:1px solid rgba(0,215,232,.45);border-radius:999px;background:rgba(2,2,4,.75);color:#9fcbd4;font:800 12px/1 system-ui;opacity:0">OBS DEBUG PREVIEW · remove ?debug=1 for transparency</div>
+  </main>
+
+  <script src="shared-state.js"></script>
+  <script src="graphics.js"></script>
+</body>
+</html>

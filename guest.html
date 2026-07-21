@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#020204">
+  <title>Guest Lounge — Throuple Tea Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell narrow">
+    <header class="topbar">
+      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Guest Lounge</strong><span>Grab a drink. Check your mic. Prepare to overshare.</span></span></a>
+      <span class="status-pill" id="readyPill"><i class="status-dot"></i>Check-in not finished</span>
+    </header>
+
+    <section class="page-head center">
+      <div><div class="eyebrow">Welcome to A Little Throuple Tea</div><h1 id="welcomeTitle">Hey, Guest.<span>You’re almost on air.</span></h1><p>We’ll make sure you look and sound great before William, Daniel and Caleb drag you into the chaos.</p></div>
+    </section>
+
+    <section class="episode-summary glass" style="margin-bottom:20px">
+      <img src="assets/podcast-artwork.jpg" alt="Podcast artwork">
+      <div><strong id="episodeTitle">—</strong><span id="episodeMeta">—</span><span id="episodeTopic">—</span></div>
+    </section>
+
+    <div class="grid sidebar">
+      <div class="stack">
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Step 1</div><h2>Check your camera and microphone</h2></div><span class="status-pill" id="devicePill"><i class="status-dot"></i>Not tested</span></div>
+          <div class="device-preview">
+            <video id="previewVideo" playsinline muted></video>
+            <div class="preview-empty" id="previewEmpty"><div><strong>Camera preview appears here</strong><span>Press “Test camera + mic” and allow browser access.</span></div></div>
+          </div>
+          <div class="meter" aria-label="Microphone level"><span id="audioMeter"></span></div>
+          <div class="device-status"><div id="cameraStatus">Camera waiting</div><div id="micStatus">Microphone waiting</div><div id="browserStatus">Browser ready</div></div>
+          <div class="form-grid" style="margin-top:14px">
+            <div class="field"><label for="cameraSelect">Camera</label><select id="cameraSelect"><option>Default camera</option></select></div>
+            <div class="field"><label for="micSelect">Microphone</label><select id="micSelect"><option>Default microphone</option></select></div>
+          </div>
+          <div class="button-row"><button class="btn teal" id="testDevices" type="button">Test camera + mic</button><button class="btn" id="stopDevices" type="button">Stop preview</button></div>
+          <div class="notice" id="mediaNotice" hidden><span>⚠️</span><div id="mediaNoticeText"></div></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Step 2</div><h2>Confirm how we introduce you</h2></div></div>
+          <div class="form-grid">
+            <div class="field"><label for="guestName">Name</label><input id="guestName"></div>
+            <div class="field"><label for="pronouns">Pronouns</label><input id="pronouns"></div>
+            <div class="field"><label for="guestTitle">Title / description</label><input id="guestTitle"></div>
+            <div class="field"><label for="social">Social handle</label><input id="social"></div>
+            <div class="field full"><label for="promo">Anything you want us to mention?</label><textarea id="promo"></textarea></div>
+          </div>
+          <div class="button-row"><button class="btn" id="saveGuest" type="button">Save my details</button></div>
+        </section>
+      </div>
+
+      <aside class="stack sticky-stack">
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Before we record</div><h2>Fast prep checklist</h2></div></div>
+          <div class="prep-list">
+            <label class="prep-item"><input class="prep-check" type="checkbox"><span><b>Wear headphones</b><span class="muted tiny">This prevents echo and makes editing much easier.</span></span></label>
+            <label class="prep-item"><input class="prep-check" type="checkbox"><span><b>Silence notifications</b><span class="muted tiny">Phone, computer, Slack and anything else ready to expose you.</span></span></label>
+            <label class="prep-item"><input class="prep-check" type="checkbox"><span><b>Close extra tabs</b><span class="muted tiny">Especially anything that might steal your microphone.</span></span></label>
+            <label class="prep-item"><input class="prep-check" type="checkbox"><span><b>Check lighting and framing</b><span class="muted tiny">Face a light source and leave a little room above your head.</span></span></label>
+            <label class="prep-item"><input class="prep-check" type="checkbox"><span><b>Grab water</b><span class="muted tiny">The tea can be metaphorical. Hydration cannot.</span></span></label>
+          </div>
+          <div class="divider"></div>
+          <label class="check-row"><input id="releaseAccepted" type="checkbox"><span>I understand this is a prototype release acknowledgement. I’m comfortable with the conversation being recorded and clips being used for podcast promotion. No legal signature is stored in this prototype.</span></label>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Recording</div><h2 id="countdownTitle">Studio opens when you’re ready</h2></div></div>
+          <div class="summary-item" style="margin-bottom:14px"><small>Countdown</small><strong class="big" id="countdown">Ready now</strong></div>
+          <button class="btn primary" style="width:100%" id="enterStudio" type="button" disabled>Enter the Guest Studio</button>
+          <p class="muted tiny" style="margin-bottom:0">For the prototype, the studio opens in this browser. The production version will use a private one-time guest link.</p>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="footer"><b>Throuple life… it doesn’t suck.</b> · Guest Lounge prototype by 3Dudes1Life Creative.</footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="shared-state.js"></script>
+  <script src="media-tools.js"></script>
+  <script src="guest.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#020204">
+  <title>Guest Studio — A Little Throuple Tea</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="compact">
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="index.html"><img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea artwork"><span class="brand-copy"><strong>Throuple Tea Guest Studio</strong><span id="headerEpisode">Recording room</span></span></a>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="status-pill" id="recordingPill"><i class="status-dot"></i>Waiting for hosts</span><a class="btn small" id="externalRoom" href="#" target="_blank" rel="noopener" hidden>Open recording platform</a></div>
+    </header>
+
+    <section class="page-head" style="padding-bottom:18px">
+      <div><div class="eyebrow">Guest view · what the guest sees</div><h1 style="font-size:clamp(2.1rem,4vw,4.4rem)">You’re in the room.<span>Let the chaos begin.</span></h1><p>Questions, private cues and segment changes are controlled live from the Host Control Room.</p></div>
+      <div class="art glass"><img src="assets/podcast-artwork.jpg" alt="Podcast artwork"></div>
+    </section>
+
+    <div class="studio-banner card glass">
+      <div class="onair-box idle" id="onAirBox">STANDBY</div>
+      <div class="current-content"><small id="segmentKicker">Current segment</small><strong id="segmentName">Pre-Show Check-In</strong></div>
+      <div class="timer" id="recordingTimer">00:00:00</div>
+    </div>
+
+    <div class="grid sidebar">
+      <div class="stack">
+        <section class="card glass">
+          <div class="camera-grid">
+            <div class="camera-tile" data-speaker="William"><div class="camera-placeholder"><div><div class="avatar">W</div><strong>William</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>William</div></div>
+            <div class="camera-tile" data-speaker="Daniel"><div class="camera-placeholder"><div><div class="avatar">D</div><strong>Daniel</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>Daniel</div></div>
+            <div class="camera-tile" data-speaker="Caleb"><div class="camera-placeholder"><div><div class="avatar">C</div><strong>Caleb</strong><div class="muted tiny">Host feed placeholder</div></div></div><div class="camera-label"><i></i>Caleb</div></div>
+            <div class="camera-tile" id="guestTile" data-speaker="Guest">
+              <video id="guestVideo" playsinline muted></video>
+              <div class="camera-placeholder" id="guestPlaceholder"><div><div class="avatar" id="guestInitial">G</div><strong id="guestCameraName">Guest</strong><div class="muted tiny">Press “Connect camera” below</div></div></div>
+              <div class="camera-label"><i id="guestMicDot"></i><span id="guestLabel">Guest</span></div>
+            </div>
+          </div>
+          <div class="studio-controls">
+            <button class="round-control" id="connectMedia" type="button">📷 Connect camera</button>
+            <button class="round-control" id="toggleMic" type="button" disabled>🎙️ Mic on</button>
+            <button class="round-control" id="toggleCamera" type="button" disabled>📹 Camera on</button>
+            <button class="round-control" id="leaveStudio" type="button">🚪 Leave studio</button>
+          </div>
+          <div class="meter"><span id="audioMeter"></span></div>
+        </section>
+
+        <section class="focus-panel">
+          <small>Current question</small>
+          <strong id="currentQuestion">The hosts have not pushed a question yet.</strong>
+        </section>
+
+        <section class="cue-banner"><b>Private host cue:</b> <span id="privateCue">Welcome! We’ll begin in a moment.</span></section>
+      </div>
+
+      <aside class="stack sticky-stack">
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Need something?</div><h2>Signal the hosts</h2></div></div>
+          <div class="grid two">
+            <button class="btn" data-request="I need a second" type="button">✋ I need a second</button>
+            <button class="btn" data-request="Can you repeat that?" type="button">🔁 Repeat that</button>
+            <button class="btn" data-request="I need water" type="button">💧 Need water</button>
+            <button class="btn danger" data-request="Technical issue" type="button">⚠️ Tech issue</button>
+          </div>
+          <div class="notice info" id="requestNotice" hidden><span>✅</span><div>Your message was sent to the Host Control Room.</div></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Up next</div><h2>Run of show</h2></div></div>
+          <div class="segment-list" id="segmentList"></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Bowl of Chaos</div><h2>Current game prompt</h2></div></div>
+          <div class="prompt-box"><small id="promptCategory">Waiting for the hosts</small><strong id="currentPrompt">No prompt has been drawn yet.</strong></div>
+        </section>
+
+        <section class="card glass">
+          <div class="card-head"><div><div class="card-kicker">Prototype status</div><h2>Connection</h2></div></div>
+          <div class="device-status"><div class="ready">Screen sync live</div><div id="cameraConnection">Camera not connected</div><div id="guestReadyStatus">Guest checked in</div></div>
+          <p class="muted tiny">This screen is synchronized locally. Production will replace the placeholder host feeds with the actual recording platform.</p>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="footer"><b>Throuple life… it doesn’t suck.</b> · Nothing on this prototype page records or uploads media.</footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="shared-state.js"></script>
+  <script src="media-tools.js"></script>
+  <script src="studio.js"></script>
+</body>
+</html>
