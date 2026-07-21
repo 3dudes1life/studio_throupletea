@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07070b">
+  <title>Podcast Brain Studio 3.1</title>
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea">
+        <div><strong>Podcast Brain Studio</strong><span>Hosts only · v3.1</span></div>
+      </div>
+      <div class="episode-chip"><small>Current episode</small><b id="episodeChip">Episode 29</b></div>
+    </header>
+
+    <main>
+      <nav class="stage-nav" aria-label="Studio stages">
+        <button data-view="prepare"><span>1</span><b>Prepare</b><small>Plan the room</small></button>
+        <button data-view="record"><span>2</span><b>Record</b><small>Run the show</small></button>
+        <button data-view="wrap"><span>3</span><b>Wrap</b><small>Send it forward</small></button>
+      </nav>
+
+      <section id="prepare" class="view"></section>
+      <section id="record" class="view"></section>
+      <section id="wrap" class="view"></section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+  </div>
+  <script src="studio.js"></script>
+</body>
+</html>

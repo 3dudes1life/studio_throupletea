@@ -1,28 +1,44 @@
-# Podcast Brain 3.0
+# Podcast Brain Studio 3.1
 
-A hosts-first production operating system for **A Little Throuple Tea**.
+This corrects the architecture from v3.0.
 
-## What this build does
-- Prepare: episode fields, run of show, must-mentions, questions, and preflight
-- Record: timer, segment/question controls, fast markers, and editing timeline
-- Wrap: captures title, reel, thumbnail, running joke, future episode, and listener promises
-- Edit: turns markers into a Premiere companion checklist
-- Publish: tracks every release destination and marketing task
-- Vault: searchable-style persistent libraries for jokes, ideas, Hotline items, and quotes
-- Producer Brain: quiet workflow reminders
-- Responsive desktop, iPad, and mobile UI
-- Saves automatically in browser localStorage
-- Exports the complete episode as JSON
+## Studio responsibilities
+1. Prepare
+2. Record
+3. Wrap
+4. Send one completed episode packet to the main dashboard
 
-## Install on GitHub Pages
-Upload these files to the root of `3dudes1life/studio_throupletea`:
+The Studio no longer owns editing, publishing, promotion, archives, or the long-term content vault.
 
+## Included
+
+### `studio/`
+Upload these files to `studio_throupletea`:
 - `index.html`
-- `podcast-brain.css`
-- `podcast-brain.js`
+- `studio.css`
+- `studio.js`
 - `assets/podcast-artwork.jpg`
 
-This replaces the current landing page while leaving the old pages in the repository untouched.
+### `dashboard-bridge/`
+- `dashboard-bridge.js`: receiver/import layer for the main dashboard
+- `inbox-demo.html`: a working proof-of-concept dashboard inbox
 
-## Important
-The GitHub integration returned a 403 write error, so this package was built locally for manual upload.
+## Handoff behavior
+The Send button creates a structured `podcast-brain-episode-packet` containing:
+- episode plan
+- run of show
+- recording duration
+- questions
+- must-mentions
+- timestamped markers
+- wrap notes
+- generated editing/content tasks
+- clip candidates
+- cuts and sensitive markers
+- future topics
+- running jokes
+
+It writes to a dashboard inbox in localStorage, broadcasts to another open same-origin tab, and allows a JSON download as a fallback.
+
+## Production note
+Because the Studio and Dashboard currently live in separate GitHub repositories/domains, browser localStorage cannot automatically cross domains. The provided JSON import works now. A true one-click cross-domain handoff will need a shared data layer such as Cloudflare Workers/KV, Supabase, or Firebase. The packet schema is already designed for that future connection.
