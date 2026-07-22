@@ -1,37 +1,32 @@
-# Podcast Brain — Recording Update 3 FIXED
+# Podcast Brain 3.1 — Recording Flow Polish
 
-This rebuild starts from the repository ZIP you uploaded, not from the failed Update 3 package.
+Upload these three changed files to the ROOT of `studio_throupletea`:
 
-## Upload
-
-Upload these FOUR files to the ROOT of `studio_throupletea`, replacing the existing files:
-
-- `.nojekyll`
 - `index.html`
 - `podcast-brain.css`
 - `podcast-brain.js`
 
-The `.nojekyll` file is important. It tells GitHub Pages to serve the project as a plain static site instead of trying to process it through Jekyll.
+Keep the existing `.nojekyll` file from 3.0.3.
 
-## Included
+## Mobile view button
 
-- Marker count summary
-- Automatic backups every two minutes
-- Manual backup and restore
-- Safer Finish Recording summary
-- TXT editing-notes export
-- JSON export from Wrap
-- Mobile wake lock where supported
-- Mobile vibration and tap feedback
-- Larger mobile touch targets
-- Test Recording Mode
-- Wrap totals for duration, markers, and clip leads
+The desktop sidebar now has a permanent:
 
-## Testing
+**📱 Mobile Record View**
 
-After uploading, hard refresh the site:
+button. It opens Record and immediately switches to the simplified timer + marker interface.
 
-- Mac Safari: Command + Option + R
-- iPhone Safari: close the tab and reopen the site
+The existing phone-sized **Open Mobile View** option remains too.
 
-Then run Test Recording Mode before using it for a real episode.
+## Also included
+
+- Recording mission-control header
+- Current episode, segment, question, timer, and status at a glance
+- Sticky must-mention producer strip
+- Larger current-segment focus card
+- Polished marker timeline
+- Marker heatmap
+- Episode rating during Wrap
+- All 3.0.3 safety, backup, export, test-mode, and wake-lock features remain
+
+After uploading, hard refresh Safari with Command + Option + R.
