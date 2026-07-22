@@ -1,5 +1,6 @@
 const KEY='podcastBrain3';
 const BACKUP_KEY='podcastBrain3_backup';
+const SNAPSHOT_KEY='podcastBrain3_snapshots';
 const defaults={episode:{number:'29',title:'Can a Throuple Actually Get Married?',description:'',topic:'',hotline:'',game:'Chaos Bowl',intro:'',outro:''},stage:'prepare',running:false,elapsed:0,startedAt:null,currentSegment:0,currentQuestion:0,segments:['Cold Open','Intro','Life Update','Main Topic','Throuple Hotline','Chaos Bowl','Outro'],questions:['Can a throuple actually get married?','Why does the system celebrate messy TV relationships but reject ours?','What would legal recognition actually change?'],mustMentions:[{text:'Mention LA Blade',done:false},{text:'Listener email shout-out',done:false},{text:'Book 2 update',done:false},{text:'Weekly giveaway',done:false}],preflight:[{text:'OBS open and cameras framed',done:false},{text:'PodTrak recording media ready',done:false},{text:'All three microphones checked',done:false},{text:'Phones silenced',done:false},{text:'Water and Chaos Bowl ready',done:false}],markers:[],wrap:{favorite:'',reels:'',thumbnail:'',titles:'',runningJoke:'',futureEpisode:'',promises:''},publish:{Spotify:false,YouTube:false,'Show Notes':false,Website:false,Instagram:false,'YouTube Shorts':false,'Push Notification':false},vault:{jokes:['Hole Pics','Gay Rulebook','Triangle of Support'],ideas:['Growing Old Together','Parents Meeting Partners'],hotline:[],quotes:[]},editDone:[],lastSavedAt:null};
 let state=load();
 let timerId=null;
@@ -7,6 +8,9 @@ let vaultType='jokes';
 let lastMarkerUndo=null;
 let recoveredRunningSession=Boolean(state.running&&state.startedAt);
 let mobileRecordingMode=sessionStorage.getItem('podcastBrainMobileMode')==='1';
+let wakeLock=null;
+let snapshotTimer=null;
+let testMode=false;
 const nav=[['home','⌂','Home'],['prepare','✎','Prepare'],['record','●','Record'],['wrap','✓','Wrap'],['edit','✂','Edit'],['publish','↑','Publish'],['vault','◇','Vault']];
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
@@ -31,6 +35,55 @@ function save(){
 }
 function el(id){return document.getElementById(id)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+function readSnapshots(){
+  try{return JSON.parse(localStorage.getItem(SNAPSHOT_KEY)||'[]')}catch{return []}
+}
+function saveSnapshot(reason){
+  const list=readSnapshots();
+  list.unshift({id:Date.now(),savedAt:new Date().toISOString(),reason:reason||'automatic',state:clone(state)});
+  localStorage.setItem(SNAPSHOT_KEY,JSON.stringify(list.slice(0,3)));
+}
+function restoreSnapshot(id){
+  const snapshot=readSnapshots().find(item=>item.id===id);
+  if(!snapshot)return;
+  const when=new Date(snapshot.savedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  if(!confirm(`Restore the backup from ${when}?`))return;
+  state=merge(clone(defaults),clone(snapshot.state));
+  state.running=false;
+  state.startedAt=null;
+  save();
+  setView('record');
+  toast('Backup restored');
+}
+function startSnapshotTimer(){
+  clearInterval(snapshotTimer);
+  snapshotTimer=setInterval(()=>saveSnapshot('automatic'),120000);
+}
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator))return;
+  try{
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',()=>{wakeLock=null;updateWakeStatus()});
+  }catch{}
+  updateWakeStatus();
+}
+async function releaseWakeLock(){
+  try{if(wakeLock)await wakeLock.release()}catch{}
+  wakeLock=null;
+  updateWakeStatus();
+}
+function updateWakeStatus(){
+  const node=el('wakeStatus');
+  if(!node)return;
+  node.classList.toggle('active',Boolean(wakeLock));
+  node.textContent=wakeLock?'Screen awake':'Screen may sleep';
+}
+function markerSummary(){
+  const types=['Funny','Highlight','Reel','Cut','Sensitive','Running Joke'];
+  return types.map(type=>`<span>${esc(type)} <b>${state.markers.filter(marker=>marker.type===type).length}</b></span>`).join('');
+}
+
 function toast(msg){const t=el('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function fmt(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return [Math.floor(sec/3600),Math.floor(sec/60)%60,sec%60].map(n=>String(n).padStart(2,'0')).join(':')}
 function prepPct(){const checks=[state.episode.title,state.episode.topic,state.episode.intro,state.episode.outro,state.episode.hotline,state.episode.game,...state.preflight.map(x=>x.done),...state.mustMentions.map(x=>x.done)];return Math.round(checks.filter(Boolean).length/checks.length*100)}
@@ -38,7 +91,7 @@ function stageIndex(){return ['prepare','record','wrap','edit','publish'].indexO
 function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.floor((Date.now()-state.startedAt)/1000)):Math.max(0,state.elapsed)}
 function updateDocumentTitle(){
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.0.2 — Mobile Recording Option';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.0.3 — Safety + Speed FIXED';
 }
 function updateSaveState(){
   const node=el('saveState');
@@ -116,6 +169,7 @@ function exitMobileRecordingMode(rerender=true){
   mobileRecordingMode=false;
   sessionStorage.removeItem('podcastBrainMobileMode');
   document.body.classList.remove('mobile-recording-mode');
+  releaseWakeLock();
   if(rerender)record();
 }
 
@@ -124,7 +178,7 @@ function record(){
   const q=state.questions[state.currentQuestion]||'No question selected';
   const nextSeg=state.segments[state.currentSegment+1]||'Wrap';
   const recovery=recoveredRunningSession?`<div class="recovery-banner">↻ Recovered your active recording session. Timer and markers were preserved.</div>`:'';
-  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Mobile recording controls</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Mobile View</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="mobile-remote-topbar"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><button class="mobile-remote-exit" id="exitMobileMode">Full View</button></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><div class="question">${esc(q)}</div><div class="question-meta"><span>Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span><span>Next segment: ${esc(nextSeg)}</span></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause Recording':'Start Recording'}</button><button class="btn" id="mobilePrevQ">← Question</button><button class="btn teal" id="mobileNextQ">Next Question</button><button class="btn" id="mobileNextSeg">Next Segment</button></div><div class="marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
+  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Mobile recording controls</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Mobile View</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn" id="testModeBtn">${testMode?'End Test':'Test Recording Mode'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="test-banner" ${testMode?'':'hidden'}><span><strong>Test Recording Mode</strong><br><small>Practice safely, then restore your episode.</small></span><button class="btn" id="endTestMode">End Test</button></div><div class="mobile-remote-topbar"><div><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><div class="wake-status ${wakeLock?'active':''}" id="wakeStatus">${wakeLock?'Screen awake':'Screen may sleep'}</div></div><button class="mobile-remote-exit" id="exitMobileMode">Full View</button></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><div class="question">${esc(q)}</div><div class="question-meta"><span>Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span><span>Next segment: ${esc(nextSeg)}</span></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause Recording':'Start Recording'}</button><button class="btn" id="mobilePrevQ">← Question</button><button class="btn teal" id="mobileNextQ">Next Question</button><button class="btn" id="mobileNextSeg">Next Segment</button></div><div class="marker-summary">${markerSummary()}</div><div class="marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card safety-card"><h3>Safety backups</h3><p class="muted">Podcast Brain keeps the latest three snapshots.</p><div class="safety-list">${readSnapshots().length?readSnapshots().map(snapshot=>`<div class="safety-row"><div><b>${new Date(snapshot.savedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</b><small>${esc(snapshot.reason)}</small></div><button class="btn" data-snapshot="${snapshot.id}">Restore</button></div>`).join(''):'<div class="muted">No snapshots saved yet.</div>'}</div><button class="btn" id="saveSnapshot" style="margin-top:10px">Save backup now</button></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
   bindRecord();
   updateSaveState();
   recoveredRunningSession=false;
@@ -137,6 +191,10 @@ function timeline(){
 }
 function bindRecord(){
   const openMobile=el('openMobileMode');if(openMobile)openMobile.onclick=enterMobileRecordingMode;
+  const saveSnapshotButton=el('saveSnapshot');if(saveSnapshotButton)saveSnapshotButton.onclick=()=>{saveSnapshot('manual');toast('Backup saved');record()};
+  document.querySelectorAll('[data-snapshot]').forEach(button=>button.onclick=()=>restoreSnapshot(Number(button.dataset.snapshot)));
+  const testButton=el('testModeBtn');if(testButton)testButton.onclick=()=>testMode?endTestRecordingMode():startTestRecordingMode();
+  const endTestButton=el('endTestMode');if(endTestButton)endTestButton.onclick=endTestRecordingMode;
   const exitMobile=el('exitMobileMode');if(exitMobile)exitMobile.onclick=()=>exitMobileRecordingMode(true);
   const mobileTimer=el('mobileTimerBtn');if(mobileTimer)mobileTimer.onclick=toggleTimer;
   const mobilePrevQ=el('mobilePrevQ');if(mobilePrevQ)mobilePrevQ.onclick=()=>{state.currentQuestion=(state.currentQuestion-1+Math.max(1,state.questions.length))%Math.max(1,state.questions.length);save();record()};
@@ -171,9 +229,14 @@ function adjustTimer(amount){
   save();record();toast(`Timer ${amount>0?'+':''}${amount} seconds`);
 }
 function finishRecording(){
-  if(!confirm('Stop the timer and move to Wrap? Your duration and markers will be preserved.'))return;
+  const clipLeads=state.markers.filter(marker=>['Funny','Highlight','Reel','Best Moment'].includes(marker.type)).length;
+  const summary=`Finish recording?\n\nDuration: ${fmt(currentElapsed())}\nMarkers: ${state.markers.length}\nClip leads: ${clipLeads}`;
+  if(!confirm(summary))return;
   if(state.running){state.elapsed=currentElapsed();state.running=false;state.startedAt=null}
-  state.stage='wrap';save();setView('wrap');
+  saveSnapshot('finish recording');
+  state.stage='wrap';
+  save();
+  setView('wrap');
 }
 function syncTimer(){
   clearInterval(timerId);
@@ -188,8 +251,16 @@ function addMarker(type,note=''){
   lastMarkerUndo=clone(marker);
   state.stage='record';
   save();
+  if(navigator.vibrate)navigator.vibrate(35);
   toast(`${type} saved`);
   record();
+  requestAnimationFrame(()=>{
+    const button=[...document.querySelectorAll('[data-marker]')].find(item=>item.dataset.marker===type);
+    if(button){
+      button.classList.add('tap-confirm');
+      setTimeout(()=>button.classList.remove('tap-confirm'),320);
+    }
+  });
 }
 function saveQuickNote(){
   const input=el('quickNote');
@@ -229,10 +300,89 @@ function keyboardHandler(e){
   if(e.key==='ArrowRight'){e.preventDefault();state.currentQuestion=(state.currentQuestion+1)%Math.max(1,state.questions.length);save();record()}
 }
 
+
+function buildEditingNotes(){
+  const lines=[
+    `A LITTLE THROUPLE TEA — EPISODE ${state.episode.number}`,
+    state.episode.title||'Untitled Episode',
+    '',
+    `Duration: ${fmt(currentElapsed())}`,
+    `Markers: ${state.markers.length}`,
+    '',
+    'MARKERS',
+    '-------'
+  ];
+  if(state.markers.length){
+    state.markers.forEach(marker=>{
+      lines.push(`${fmt(marker.time)} — ${marker.type}${marker.segment?` — ${marker.segment}`:''}${marker.note?` — ${marker.note}`:''}`);
+    });
+  }else{
+    lines.push('No markers captured.');
+  }
+  lines.push(
+    '',
+    'WRAP NOTES',
+    '----------',
+    `Favorite moment: ${state.wrap.favorite||''}`,
+    `Reel ideas: ${state.wrap.reels||''}`,
+    `Thumbnail idea: ${state.wrap.thumbnail||''}`,
+    `Title ideas: ${state.wrap.titles||''}`,
+    `Running joke: ${state.wrap.runningJoke||''}`,
+    `Future episode: ${state.wrap.futureEpisode||''}`,
+    `Listener promises: ${state.wrap.promises||''}`,
+    ''
+  );
+  return lines.join('\n');
+}
+function downloadEditingNotes(){
+  const blob=new Blob([buildEditingNotes()],{type:'text/plain;charset=utf-8'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=`ALT-Episode-${state.episode.number||'episode'}-editing-notes.txt`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+function startTestRecordingMode(){
+  saveSnapshot('before test mode');
+  testMode=true;
+  state.running=false;
+  state.elapsed=0;
+  state.startedAt=null;
+  state.currentSegment=0;
+  state.currentQuestion=0;
+  state.markers=[];
+  save();
+  setView('record');
+  toast('Test mode started');
+}
+function endTestRecordingMode(){
+  if(!confirm('End test mode and restore the backup from before testing?'))return;
+  const snapshot=readSnapshots().find(item=>item.reason==='before test mode');
+  testMode=false;
+  if(snapshot){
+    state=merge(clone(defaults),clone(snapshot.state));
+    state.running=false;
+    state.startedAt=null;
+    save();
+  }
+  setView('record');
+  toast('Test mode ended');
+}
+
 function wrap(){
-  el('wrap').innerHTML=`<div class="section-head"><div><div class="eyebrow">Wrap</div><h2>Before you leave the room…</h2><p class="muted">Final duration: ${fmt(currentElapsed())} · ${state.markers.length} markers captured</p></div><button class="btn primary" id="wrapDone">Save & move to Edit</button></div><article class="card"><div class="wrap-grid">${wrapField('⭐ Favorite moment','favorite')}${wrapField('🎬 Reel ideas','reels')}${wrapField('🖼 Thumbnail idea','thumbnail')}${wrapField('📌 Episode title ideas','titles')}${wrapField('😂 Running joke','runningJoke')}${wrapField('💡 Future episode','futureEpisode')}${wrapField('🔔 Things promised to listeners','promises')}</div></article>`;
-  document.querySelectorAll('[data-wrap]').forEach(x=>x.oninput=()=>{state.wrap[x.dataset.wrap]=x.value;save()});
-  el('wrapDone').onclick=()=>{if(state.wrap.runningJoke&&!state.vault.jokes.includes(state.wrap.runningJoke))state.vault.jokes.push(state.wrap.runningJoke);if(state.wrap.futureEpisode&&!state.vault.ideas.includes(state.wrap.futureEpisode))state.vault.ideas.push(state.wrap.futureEpisode);state.stage='edit';save();setView('edit')};
+  const clipLeads=state.markers.filter(marker=>['Funny','Highlight','Reel','Best Moment'].includes(marker.type)).length;
+  el('wrap').innerHTML=`<div class="section-head"><div><div class="eyebrow">Wrap</div><h2>Before you leave the room…</h2><p class="muted">The session is preserved. Capture the details while they are fresh.</p></div><button class="btn primary" id="wrapDone">Save & move to Edit</button></div><article class="card"><div class="wrap-stats"><div class="wrap-stat"><small>Final duration</small><b>${fmt(currentElapsed())}</b></div><div class="wrap-stat"><small>Markers</small><b>${state.markers.length}</b></div><div class="wrap-stat"><small>Clip leads</small><b>${clipLeads}</b></div></div><div class="wrap-grid">${wrapField('⭐ Favorite moment','favorite')}${wrapField('🎬 Reel ideas','reels')}${wrapField('🖼 Thumbnail idea','thumbnail')}${wrapField('📌 Episode title ideas','titles')}${wrapField('😂 Running joke','runningJoke')}${wrapField('💡 Future episode','futureEpisode')}${wrapField('🔔 Things promised to listeners','promises')}</div><div class="wrap-downloads"><button class="btn teal" id="downloadNotes">Download Editing Notes</button><button class="btn" id="downloadJson">Download Episode JSON</button></div></article>`;
+  document.querySelectorAll('[data-wrap]').forEach(input=>input.oninput=()=>{state.wrap[input.dataset.wrap]=input.value;save()});
+  el('downloadNotes').onclick=downloadEditingNotes;
+  el('downloadJson').onclick=exportEpisode;
+  el('wrapDone').onclick=()=>{
+    if(state.wrap.runningJoke&&!state.vault.jokes.includes(state.wrap.runningJoke))state.vault.jokes.push(state.wrap.runningJoke);
+    if(state.wrap.futureEpisode&&!state.vault.ideas.includes(state.wrap.futureEpisode))state.vault.ideas.push(state.wrap.futureEpisode);
+    saveSnapshot('wrap complete');
+    state.stage='edit';
+    save();
+    setView('edit');
+  };
 }
 function wrapField(label,key){return `<div class="field"><label>${label}</label><textarea class="textarea" data-wrap="${key}">${esc(state.wrap[key])}</textarea></div>`}
 function edit(){el('edit').innerHTML=`<div class="section-head"><div><div class="eyebrow">Edit</div><h2>Your Premiere companion</h2></div><button class="btn primary" id="editDone">Editing complete</button></div><div class="grid two"><article class="card"><h3>Marker checklist</h3><div class="list">${state.markers.length?state.markers.map((m,i)=>`<label class="check"><input type="checkbox" data-edit="${i}" ${state.editDone.includes(i)?'checked':''}><span><b>${fmt(m.time)} · ${esc(m.type)}</b><br><span class="muted">${esc(m.segment)}${m.note?' — '+esc(m.note):''}</span></span></label>`).join(''):`<div class="empty">No markers captured yet.</div>`}</div></article><div class="grid"><article class="card"><h3>Episode memory</h3><p><b>Favorite:</b> ${esc(state.wrap.favorite)||'—'}</p><p><b>Reels:</b> ${esc(state.wrap.reels)||'—'}</p><p><b>Thumbnail:</b> ${esc(state.wrap.thumbnail)||'—'}</p><p><b>Titles:</b> ${esc(state.wrap.titles)||'—'}</p></article><article class="card producer"><div class="eyebrow">Producer Brain</div><div class="producer-message">${state.editDone.length} of ${state.markers.length} markers reviewed.</div><p class="muted">Use this as your map while Premiere handles the actual edit.</p></article></div></div>`;document.querySelectorAll('[data-edit]').forEach(x=>x.onchange=()=>{let i=+x.dataset.edit;if(x.checked&&!state.editDone.includes(i))state.editDone.push(i);if(!x.checked)state.editDone=state.editDone.filter(v=>v!==i);save();edit()});el('editDone').onclick=()=>{state.stage='publish';save();setView('publish')}}
@@ -247,3 +397,8 @@ el('exportBtn').onclick=exportEpisode;
 el('resetBtn').onclick=resetAll;
 render(mobileRecordingMode?'record':'home');
 document.querySelectorAll(`[data-view="${mobileRecordingMode?'record':'home'}"]`).forEach(x=>x.classList.add('active'));
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&mobileRecordingMode&&!wakeLock)requestWakeLock();
+});
+startSnapshotTimer();

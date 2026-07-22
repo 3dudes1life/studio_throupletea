@@ -292,3 +292,95 @@ body.mobile-recording-mode .mobile-record-button{
 @media(max-width:760px){
   .mobile-mode-launch{display:flex}
 }
+
+
+/* =========================================================
+   PODCAST BRAIN 3.0.3 FIXED — SAFETY + SPEED
+   ========================================================= */
+.marker-summary{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  max-width:820px;
+  margin:12px auto 16px;
+}
+.marker-summary span{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,.045);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+}
+.marker-summary b{color:#fff}
+.safety-card{border-left:3px solid var(--yellow)}
+.safety-list{display:grid;gap:8px;margin-top:12px}
+.safety-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.03);
+}
+.safety-row small{display:block;color:var(--muted);margin-top:2px}
+.safety-row .btn{padding:8px 10px}
+.wrap-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:0 0 18px;
+}
+.wrap-stat{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:rgba(255,255,255,.035);
+}
+.wrap-stat small,.wrap-stat b{display:block}
+.wrap-stat small{color:var(--muted)}
+.wrap-stat b{font-size:22px;margin-top:3px}
+.wrap-downloads{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.test-banner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  margin-bottom:14px;
+  border:1px solid rgba(255,209,102,.35);
+  border-radius:15px;
+  background:rgba(255,209,102,.09);
+  color:#ffe6a8;
+}
+.test-banner[hidden]{display:none}
+.wake-status{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:800;
+}
+.wake-status.active{color:var(--teal)}
+.marker.tap-confirm{animation:tapConfirm .3s ease}
+@keyframes tapConfirm{
+  0%{transform:scale(1)}
+  45%{transform:scale(.96);background:rgba(53,220,197,.22)}
+  100%{transform:scale(1)}
+}
+body.mobile-recording-mode .marker-summary{
+  flex-wrap:nowrap;
+  justify-content:flex-start;
+  overflow-x:auto;
+  margin:8px 0 10px;
+}
+body.mobile-recording-mode .marker-summary span{flex:0 0 auto}
+body.mobile-recording-mode .marker{min-height:88px}
+@media(max-width:680px){
+  .wrap-stats{grid-template-columns:1fr}
+}
