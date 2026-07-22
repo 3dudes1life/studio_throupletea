@@ -1,32 +1,31 @@
-# Podcast Brain 3.1 — Recording Flow Polish
+# Podcast Brain 3.1.1 — Mobile UX Fix
 
-Upload these three changed files to the ROOT of `studio_throupletea`:
+Upload these three files to the ROOT of `studio_throupletea`, replacing the current versions:
 
 - `index.html`
 - `podcast-brain.css`
 - `podcast-brain.js`
 
-Keep the existing `.nojekyll` file from 3.0.3.
+Keep the existing `.nojekyll` file.
 
-## Mobile view button
+## Fixed
 
-The desktop sidebar now has a permanent:
+The Mobile Record View no longer collapses into a tiny strip on the left side of a desktop browser.
 
-**📱 Mobile Record View**
+It now:
 
-button. It opens Record and immediately switches to the simplified timer + marker interface.
+- correctly removes the hidden sidebar column
+- centers the remote interface on desktop
+- uses the full screen on an actual phone
+- keeps the timer on one line
+- gives the current question enough room
+- uses 4 marker columns on large screens
+- uses 3 marker columns on medium screens
+- uses 2 large marker columns on phones
+- improves button spacing and touch targets
+- keeps Full View and recording status visible at the top
 
-The existing phone-sized **Open Mobile View** option remains too.
+Hard refresh after uploading:
 
-## Also included
-
-- Recording mission-control header
-- Current episode, segment, question, timer, and status at a glance
-- Sticky must-mention producer strip
-- Larger current-segment focus card
-- Polished marker timeline
-- Marker heatmap
-- Episode rating during Wrap
-- All 3.0.3 safety, backup, export, test-mode, and wake-lock features remain
-
-After uploading, hard refresh Safari with Command + Option + R.
+- Mac Safari: Command + Option + R
+- iPhone Safari: close and reopen the tab

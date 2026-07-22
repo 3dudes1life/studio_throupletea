@@ -91,7 +91,7 @@ function stageIndex(){return ['prepare','record','wrap','edit','publish'].indexO
 function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.floor((Date.now()-state.startedAt)/1000)):Math.max(0,state.elapsed)}
 function updateDocumentTitle(){
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.1 — Recording Flow Polish';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.1.1 — Mobile UX Fix';
 }
 function updateSaveState(){
   const node=el('saveState');
