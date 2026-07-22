@@ -1,19 +1,29 @@
-# Throuple Tea Studio OS — Responsive UX Update
+# Podcast Brain — Recording Update 1
 
-Upload these files to the ROOT of `3dudes1life/studio_throupletea`.
+Upload these three files to the ROOT of `studio_throupletea`, replacing the existing files:
 
-## Add
-- `responsive-os.css`
-
-## Replace
 - `index.html`
-- `host.html`
-- `setup.html`
-- `teleprompter.html`
-- `graphics.html`
-- `guest.html`
-- `studio.html`
+- `podcast-brain.css`
+- `podcast-brain.js`
 
-No JavaScript, saved episode data, OBS behavior, or smart logic is changed.
+Do not upload them into the nested `/studio/` folder.
 
-After upload, hard refresh Safari with **Option + Command + R**.
+## This update adds
+
+- One-tap markers with no typing popup
+- Undo for the latest marker
+- Add/edit marker notes later from the timeline
+- Large live RECORDING / STANDBY state
+- Recording timer in the browser tab title
+- Finish Recording confirmation
+- Previous and next question controls
+- Segment and question counts
+- Must-mentions directly inside Record
+- Timer offset buttons (-5 / +5 seconds)
+- Quick timestamped note field
+- Keyboard shortcuts
+- Recording recovery banner after refresh
+- Local backup copy and visible save time
+- Final duration and marker count shown in Wrap
+
+A dedicated mobile remote view is intentionally not included yet; it will be built after the desktop recording series is finalized.
