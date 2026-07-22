@@ -6,6 +6,7 @@ let timerId=null;
 let vaultType='jokes';
 let lastMarkerUndo=null;
 let recoveredRunningSession=Boolean(state.running&&state.startedAt);
+let mobileRecordingMode=sessionStorage.getItem('podcastBrainMobileMode')==='1';
 const nav=[['home','⌂','Home'],['prepare','✎','Prepare'],['record','●','Record'],['wrap','✓','Wrap'],['edit','✂','Edit'],['publish','↑','Publish'],['vault','◇','Vault']];
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
@@ -37,7 +38,7 @@ function stageIndex(){return ['prepare','record','wrap','edit','publish'].indexO
 function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.floor((Date.now()-state.startedAt)/1000)):Math.max(0,state.elapsed)}
 function updateDocumentTitle(){
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.0.1 — Recording Update';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.0.2 — Mobile Recording Option';
 }
 function updateSaveState(){
   const node=el('saveState');
@@ -46,6 +47,7 @@ function updateSaveState(){
   node.innerHTML=`Saved locally · <strong>${new Date(state.lastSavedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</strong>`;
 }
 function setView(id){
+  if(id!=='record'&&mobileRecordingMode)exitMobileRecordingMode(false);
   document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===id));
   el('pageTitle').textContent=nav.find(n=>n[0]===id)?.[2]||'Podcast Brain';
@@ -59,6 +61,7 @@ function buildNav(){
   document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 }
 function render(view=document.querySelector('.section.active')?.id||'home'){
+  document.body.classList.toggle('mobile-recording-mode',mobileRecordingMode&&view==='record');
   if(view==='home')home();
   if(view==='prepare')prepare();
   if(view==='record')record();
@@ -101,12 +104,27 @@ function bindPrepare(){
 }
 function move(i,d){let j=i+d;if(j<0||j>=state.segments.length)return;[state.segments[i],state.segments[j]]=[state.segments[j],state.segments[i]];save();prepare()}
 
+
+function enterMobileRecordingMode(){
+  mobileRecordingMode=true;
+  sessionStorage.setItem('podcastBrainMobileMode','1');
+  document.body.classList.add('mobile-recording-mode');
+  record();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function exitMobileRecordingMode(rerender=true){
+  mobileRecordingMode=false;
+  sessionStorage.removeItem('podcastBrainMobileMode');
+  document.body.classList.remove('mobile-recording-mode');
+  if(rerender)record();
+}
+
 function record(){
   const seg=state.segments[state.currentSegment]||'—';
   const q=state.questions[state.currentQuestion]||'No question selected';
   const nextSeg=state.segments[state.currentSegment+1]||'Wrap';
   const recovery=recoveredRunningSession?`<div class="recovery-banner">↻ Recovered your active recording session. Timer and markers were preserved.</div>`:'';
-  el('record').innerHTML=`${recovery}<div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><div class="question">${esc(q)}</div><div class="question-meta"><span>Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span><span>Next segment: ${esc(nextSeg)}</span></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
+  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Mobile recording controls</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Mobile View</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="mobile-remote-topbar"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><button class="mobile-remote-exit" id="exitMobileMode">Full View</button></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><div class="question">${esc(q)}</div><div class="question-meta"><span>Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span><span>Next segment: ${esc(nextSeg)}</span></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause Recording':'Start Recording'}</button><button class="btn" id="mobilePrevQ">← Question</button><button class="btn teal" id="mobileNextQ">Next Question</button><button class="btn" id="mobileNextSeg">Next Segment</button></div><div class="marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
   bindRecord();
   updateSaveState();
   recoveredRunningSession=false;
@@ -118,6 +136,12 @@ function timeline(){
   }).join(''):`<div class="empty">Your clip, cut and callback markers will appear here.</div>`;
 }
 function bindRecord(){
+  const openMobile=el('openMobileMode');if(openMobile)openMobile.onclick=enterMobileRecordingMode;
+  const exitMobile=el('exitMobileMode');if(exitMobile)exitMobile.onclick=()=>exitMobileRecordingMode(true);
+  const mobileTimer=el('mobileTimerBtn');if(mobileTimer)mobileTimer.onclick=toggleTimer;
+  const mobilePrevQ=el('mobilePrevQ');if(mobilePrevQ)mobilePrevQ.onclick=()=>{state.currentQuestion=(state.currentQuestion-1+Math.max(1,state.questions.length))%Math.max(1,state.questions.length);save();record()};
+  const mobileNextQ=el('mobileNextQ');if(mobileNextQ)mobileNextQ.onclick=()=>{state.currentQuestion=(state.currentQuestion+1)%Math.max(1,state.questions.length);save();record()};
+  const mobileNextSeg=el('mobileNextSeg');if(mobileNextSeg)mobileNextSeg.onclick=()=>{state.currentSegment=Math.min(state.segments.length-1,state.currentSegment+1);save();record()};
   el('timerBtn').onclick=toggleTimer;
   el('finishRecording').onclick=finishRecording;
   el('nextSeg').onclick=()=>{state.currentSegment=Math.min(state.segments.length-1,state.currentSegment+1);save();record()};
@@ -221,5 +245,5 @@ document.addEventListener('keydown',keyboardHandler);
 buildNav();
 el('exportBtn').onclick=exportEpisode;
 el('resetBtn').onclick=resetAll;
-render('home');
-document.querySelectorAll('[data-view="home"]').forEach(x=>x.classList.add('active'));
+render(mobileRecordingMode?'record':'home');
+document.querySelectorAll(`[data-view="${mobileRecordingMode?'record':'home'}"]`).forEach(x=>x.classList.add('active'));

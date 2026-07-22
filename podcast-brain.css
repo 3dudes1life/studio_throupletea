@@ -167,3 +167,128 @@ body.recording-browser-state::before{
   .quick-note{flex-direction:column}
   .record-status-row{align-items:flex-start}
 }
+
+
+/* =========================================================
+   PODCAST BRAIN 3.0.2 — MOBILE RECORDING OPTION
+   ========================================================= */
+.mobile-mode-launch{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+  padding:14px 15px;
+  border:1px solid rgba(53,220,197,.28);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(53,220,197,.09),rgba(255,76,156,.06));
+}
+.mobile-mode-launch strong,
+.mobile-mode-launch small{display:block}
+.mobile-mode-launch small{color:var(--muted);margin-top:2px}
+.mobile-mode-toggle{
+  white-space:nowrap;
+}
+.mobile-remote-topbar{
+  display:none;
+}
+.mobile-remote-exit{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:850;
+}
+body.mobile-recording-mode{
+  overflow-x:hidden;
+}
+body.mobile-recording-mode .sidebar,
+body.mobile-recording-mode .topbar,
+body.mobile-recording-mode .mobile-nav,
+body.mobile-recording-mode .section-head,
+body.mobile-recording-mode .record-status-row,
+body.mobile-recording-mode .record-side-stack,
+body.mobile-recording-mode .question-meta,
+body.mobile-recording-mode .record-toolbar,
+body.mobile-recording-mode .quick-note,
+body.mobile-recording-mode .marker-feedback,
+body.mobile-recording-mode .mobile-mode-launch{
+  display:none!important;
+}
+body.mobile-recording-mode .main{
+  padding:10px 10px 24px;
+  max-width:none;
+}
+body.mobile-recording-mode #record{
+  display:block!important;
+}
+body.mobile-recording-mode .record-shell{
+  display:block;
+}
+body.mobile-recording-mode .record-main{
+  padding:16px 12px 18px;
+  border-radius:20px;
+  min-height:calc(100vh - 20px);
+  display:flex;
+  flex-direction:column;
+}
+body.mobile-recording-mode .mobile-remote-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+body.mobile-recording-mode .mobile-remote-topbar .live-recording{
+  margin:0;
+}
+body.mobile-recording-mode .timer{
+  font-size:clamp(56px,17vw,90px);
+  margin-top:4px;
+}
+body.mobile-recording-mode .segment{
+  margin-top:8px;
+}
+body.mobile-recording-mode .question{
+  font-size:20px;
+  line-height:1.2;
+  margin:7px auto 14px;
+  max-width:100%;
+}
+body.mobile-recording-mode .marker-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:auto;
+}
+body.mobile-recording-mode .marker{
+  min-height:78px;
+  border-radius:16px;
+  font-size:14px;
+}
+body.mobile-recording-mode .marker div{
+  font-size:22px!important;
+  margin-bottom:4px!important;
+}
+body.mobile-recording-mode .mobile-remote-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin:0 0 12px;
+}
+body.mobile-recording-mode .mobile-remote-controls .btn{
+  min-height:46px;
+  padding:10px 8px;
+  font-size:13px;
+}
+body.mobile-recording-mode .mobile-record-button{
+  grid-column:1/-1;
+  min-height:54px!important;
+  font-size:16px!important;
+}
+.mobile-remote-controls{
+  display:none;
+}
+@media(max-width:760px){
+  .mobile-mode-launch{display:flex}
+}

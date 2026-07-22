@@ -1,4 +1,4 @@
-# Podcast Brain — Recording Update 1
+# Podcast Brain — Recording Update 2
 
 Upload these three files to the ROOT of `studio_throupletea`, replacing the existing files:
 
@@ -8,22 +8,28 @@ Upload these three files to the ROOT of `studio_throupletea`, replacing the exis
 
 Do not upload them into the nested `/studio/` folder.
 
-## This update adds
+## New in Update 2
+
+- Desktop keeps the full Record screen and normal Start/Pause recording button.
+- Phones now show an **Open Mobile View** option at the top of Record.
+- Mobile View strips the screen down to:
+  - recording timer
+  - Start/Pause Recording
+  - previous/next question
+  - next segment
+  - all marker buttons
+- **Full View** exits the simplified mobile controls.
+- Mobile View stays selected during that browser session.
+
+## Still included from Update 1
 
 - One-tap markers with no typing popup
 - Undo for the latest marker
-- Add/edit marker notes later from the timeline
-- Large live RECORDING / STANDBY state
-- Recording timer in the browser tab title
-- Finish Recording confirmation
-- Previous and next question controls
-- Segment and question counts
-- Must-mentions directly inside Record
-- Timer offset buttons (-5 / +5 seconds)
-- Quick timestamped note field
+- Add/edit marker notes from the timeline
+- Recording / standby status
+- Refresh recovery
+- Timer offset controls
+- Quick notes
+- Must-mentions in Record
 - Keyboard shortcuts
-- Recording recovery banner after refresh
-- Local backup copy and visible save time
-- Final duration and marker count shown in Wrap
-
-A dedicated mobile remote view is intentionally not included yet; it will be built after the desktop recording series is finalized.
+- Local backup and saved time
