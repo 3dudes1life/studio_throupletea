@@ -1,4 +1,4 @@
-# Podcast Brain 3.2 — Session Control
+# Podcast Brain 3.3 — Recording Remote
 
 Upload these three files to the ROOT of `studio_throupletea`:
 
@@ -8,14 +8,35 @@ Upload these three files to the ROOT of `studio_throupletea`:
 
 Keep the existing `.nojekyll` file.
 
-## New
-- Active session lock when recording begins
-- Pause count and paused-duration tracking
-- Marker confirmation tray with Undo and Add Note
-- Finish-session review before Wrap
-- Recording health panel
-- Built-in real episode test checklist
-- Session start and finish backups
-- Protected navigation during active recording
+## Recording Remote redesign
 
-Hard refresh Safari with Command + Option + R after uploading.
+The simplified recording view now contains only:
+
+- recording status
+- timer
+- Start / Pause / Resume
+- Undo Last Marker
+- Funny
+- Highlight
+- Reel
+- Best Moment
+- Cut
+- Sensitive
+- Edit Note
+- Running Joke
+- Hotline Callback
+- Future Episode
+- Producer View button
+
+Removed from the Recording Remote:
+
+- segment card
+- current question
+- previous question
+- next question
+- next segment
+- marker counters
+
+The full desktop Producer View still keeps all episode structure, questions, segments, heatmaps, must-mentions, backups, and session controls.
+
+After uploading, hard refresh Safari with Command + Option + R.

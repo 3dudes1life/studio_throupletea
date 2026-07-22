@@ -769,3 +769,125 @@ body.mobile-recording-mode .wake-status{
 body.session-locked [data-view]:not([data-view="record"]):not([data-view="wrap"]){opacity:.42}
 body.mobile-recording-mode .marker-confirm-tray{bottom:calc(14px + env(safe-area-inset-bottom))}
 @media(max-width:760px){.finish-review-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.finish-review-grid{grid-template-columns:1fr}.marker-confirm-tray{align-items:flex-start;flex-direction:column}.marker-confirm-actions{width:100%}.marker-confirm-actions .btn{flex:1}}
+
+
+/* =========================================================
+   PODCAST BRAIN 3.3 — RECORDING REMOTE
+   Mobile mode is now a dedicated timer + marker pad.
+   ========================================================= */
+.remote-marker-grid{
+  display:none;
+}
+
+body.mobile-recording-mode .current-focus,
+body.mobile-recording-mode .marker-summary,
+body.mobile-recording-mode .desktop-marker-grid,
+body.mobile-recording-mode .marker-confirm-tray{
+  display:none!important;
+}
+
+body.mobile-recording-mode .record-main{
+  justify-content:flex-start;
+  min-height:100dvh;
+}
+
+body.mobile-recording-mode .mobile-remote-topbar{
+  margin-bottom:4px;
+}
+
+body.mobile-recording-mode .timer{
+  margin:22px 0 20px;
+  font-size:clamp(72px,17vw,126px);
+}
+
+body.mobile-recording-mode .mobile-remote-controls{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  width:100%;
+  margin:0 0 14px;
+}
+
+body.mobile-recording-mode .mobile-record-button{
+  grid-column:auto;
+  min-height:66px!important;
+  font-size:17px!important;
+  border-radius:18px;
+}
+
+body.mobile-recording-mode .remote-undo-button{
+  min-height:50px;
+  border-radius:15px;
+}
+
+body.mobile-recording-mode .remote-marker-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:11px;
+  width:100%;
+}
+
+body.mobile-recording-mode .remote-marker{
+  min-height:118px;
+  padding:16px 10px;
+  border-radius:20px;
+  font-size:15px;
+}
+
+body.mobile-recording-mode .remote-marker div{
+  font-size:30px!important;
+  margin-bottom:8px!important;
+}
+
+body.mobile-recording-mode .wake-status{
+  margin-top:4px;
+}
+
+body.mobile-recording-mode .mobile-remote-exit{
+  min-height:42px;
+  padding:9px 12px;
+}
+
+@media(min-width:760px){
+  body.mobile-recording-mode .main{
+    max-width:900px;
+  }
+
+  body.mobile-recording-mode .remote-marker-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  body.mobile-recording-mode .remote-marker{
+    min-height:120px;
+  }
+}
+
+@media(min-width:1100px){
+  body.mobile-recording-mode .remote-marker-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+}
+
+@media(max-width:520px){
+  body.mobile-recording-mode .record-main{
+    padding:calc(12px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  body.mobile-recording-mode .timer{
+    margin:12px 0 16px;
+    font-size:clamp(60px,20vw,82px);
+  }
+
+  body.mobile-recording-mode .remote-marker-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+
+  body.mobile-recording-mode .remote-marker{
+    min-height:96px;
+  }
+
+  body.mobile-recording-mode .remote-marker div{
+    font-size:26px!important;
+  }
+}
