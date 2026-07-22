@@ -757,3 +757,15 @@ body.mobile-recording-mode .wake-status{
     min-height:auto;
   }
 }
+
+/* PODCAST BRAIN 3.2 — SESSION CONTROL */
+.session-lock-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;margin-bottom:12px;border:1px solid rgba(255,209,102,.28);border-radius:15px;background:rgba(255,209,102,.08)}
+.session-lock-banner small{color:var(--muted);display:block;margin-top:2px}
+.marker-confirm-tray{position:fixed;left:50%;bottom:24px;z-index:100;width:min(520px,calc(100vw - 28px));transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid rgba(53,220,197,.34);border-radius:16px;background:rgba(17,20,29,.96);backdrop-filter:blur(18px);box-shadow:0 18px 50px rgba(0,0,0,.42)}
+.marker-confirm-tray[hidden]{display:none}.marker-confirm-copy{display:grid;gap:2px}.marker-confirm-copy small{color:var(--muted)}.marker-confirm-actions{display:flex;gap:8px;flex:0 0 auto}
+.record-health,.record-test-checklist{display:grid;gap:8px}.health-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}.health-row:last-child{border-bottom:0}.health-label{color:var(--muted);font-size:12px;font-weight:800}.health-value{font-size:12px;font-weight:900}.health-value.good{color:var(--teal)}.health-value.warn{color:var(--yellow)}
+.record-test-check{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}.record-test-check input{accent-color:var(--teal)}
+.finish-review{display:grid;gap:16px}.finish-review-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.finish-review-stat{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035)}.finish-review-stat small,.finish-review-stat b{display:block}.finish-review-stat small{color:var(--muted)}.finish-review-stat b{font-size:20px;margin-top:3px}.finish-review-list{display:grid;gap:8px}.finish-review-item{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.03)}.finish-review-item .warn{color:var(--yellow)}
+body.session-locked [data-view]:not([data-view="record"]):not([data-view="wrap"]){opacity:.42}
+body.mobile-recording-mode .marker-confirm-tray{bottom:calc(14px + env(safe-area-inset-bottom))}
+@media(max-width:760px){.finish-review-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.finish-review-grid{grid-template-columns:1fr}.marker-confirm-tray{align-items:flex-start;flex-direction:column}.marker-confirm-actions{width:100%}.marker-confirm-actions .btn{flex:1}}
