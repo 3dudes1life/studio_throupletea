@@ -891,3 +891,116 @@ body.mobile-recording-mode .mobile-remote-exit{
     font-size:26px!important;
   }
 }
+
+
+/* =========================================================
+   PODCAST BRAIN 3.4 — LIVE RECORDING READY
+   ========================================================= */
+.session-tools{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.obs-sync-card{
+  border-left:3px solid var(--teal);
+}
+.obs-offset-display{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:rgba(255,255,255,.035);
+}
+.obs-offset-display small,
+.obs-offset-display strong{display:block}
+.obs-offset-display small{color:var(--muted)}
+.obs-offset-display strong{
+  margin-top:3px;
+  font-size:26px;
+  font-variant-numeric:tabular-nums;
+}
+.obs-offset-controls{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+.obs-offset-controls .btn{
+  min-width:0;
+  padding:10px 7px;
+}
+.sync-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+}
+.sync-status.ready{color:var(--teal)}
+.new-session-options{
+  display:grid;
+  gap:10px;
+  margin:16px 0;
+}
+.new-session-option{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+}
+.new-session-option input{
+  margin-top:3px;
+  accent-color:var(--teal);
+}
+.archive-note{
+  padding:11px 12px;
+  border:1px solid rgba(53,220,197,.24);
+  border-radius:13px;
+  background:rgba(53,220,197,.07);
+  color:var(--muted);
+  font-size:12px;
+}
+.duplicate-warning{
+  color:var(--yellow);
+  font-size:12px;
+  font-weight:850;
+}
+.export-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:18px;
+}
+.export-grid .btn{
+  min-height:48px;
+}
+.live-ready-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  border:1px solid rgba(53,220,197,.28);
+  border-radius:999px;
+  background:rgba(53,220,197,.08);
+  color:var(--teal);
+  font-size:12px;
+  font-weight:900;
+}
+body.mobile-recording-mode .session-tools,
+body.mobile-recording-mode .obs-sync-card{
+  display:none!important;
+}
+@media(max-width:680px){
+  .obs-offset-controls,
+  .export-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}

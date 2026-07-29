@@ -1,8 +1,10 @@
 const KEY='podcastBrain3';
 const BACKUP_KEY='podcastBrain3_backup';
 const SNAPSHOT_KEY='podcastBrain3_snapshots';
+const ARCHIVE_KEY='podcastBrain3_archives';
+const DUPLICATE_WINDOW_MS=700;
 const defaults={episode:{number:'29',title:'Can a Throuple Actually Get Married?',description:'',topic:'',hotline:'',game:'Chaos Bowl',intro:'',outro:''},stage:'prepare',
-  session:{locked:false,startedAt:null,finishedAt:null,pauseStartedAt:null,totalPaused:0,pauseCount:0,lastBackupAt:null,lastMarker:null},running:false,elapsed:0,startedAt:null,currentSegment:0,currentQuestion:0,segments:['Cold Open','Intro','Life Update','Main Topic','Throuple Hotline','Chaos Bowl','Outro'],questions:['Can a throuple actually get married?','Why does the system celebrate messy TV relationships but reject ours?','What would legal recognition actually change?'],mustMentions:[{text:'Mention LA Blade',done:false},{text:'Listener email shout-out',done:false},{text:'Book 2 update',done:false},{text:'Weekly giveaway',done:false}],preflight:[{text:'OBS open and cameras framed',done:false},{text:'PodTrak recording media ready',done:false},{text:'All three microphones checked',done:false},{text:'Phones silenced',done:false},{text:'Water and Chaos Bowl ready',done:false}],markers:[],wrap:{favorite:'',reels:'',thumbnail:'',titles:'',runningJoke:'',futureEpisode:'',promises:'',rating:''},publish:{Spotify:false,YouTube:false,'Show Notes':false,Website:false,Instagram:false,'YouTube Shorts':false,'Push Notification':false},vault:{jokes:['Hole Pics','Gay Rulebook','Triangle of Support'],ideas:['Growing Old Together','Parents Meeting Partners'],hotline:[],quotes:[]},editDone:[],lastSavedAt:null};
+  session:{locked:false,startedAt:null,finishedAt:null,pauseStartedAt:null,totalPaused:0,pauseCount:0,lastBackupAt:null,lastMarker:null,obsOffset:0,obsSyncedAt:null},running:false,elapsed:0,startedAt:null,currentSegment:0,currentQuestion:0,segments:['Cold Open','Intro','Life Update','Main Topic','Throuple Hotline','Chaos Bowl','Outro'],questions:['Can a throuple actually get married?','Why does the system celebrate messy TV relationships but reject ours?','What would legal recognition actually change?'],mustMentions:[{text:'Mention LA Blade',done:false},{text:'Listener email shout-out',done:false},{text:'Book 2 update',done:false},{text:'Weekly giveaway',done:false}],preflight:[{text:'OBS open and cameras framed',done:false},{text:'PodTrak recording media ready',done:false},{text:'All three microphones checked',done:false},{text:'Phones silenced',done:false},{text:'Water and Chaos Bowl ready',done:false}],markers:[],wrap:{favorite:'',reels:'',thumbnail:'',titles:'',runningJoke:'',futureEpisode:'',promises:'',rating:''},publish:{Spotify:false,YouTube:false,'Show Notes':false,Website:false,Instagram:false,'YouTube Shorts':false,'Push Notification':false},vault:{jokes:['Hole Pics','Gay Rulebook','Triangle of Support'],ideas:['Growing Old Together','Parents Meeting Partners'],hotline:[],quotes:[]},editDone:[],lastSavedAt:null};
 let state=load();
 let timerId=null;
 let vaultType='jokes';
@@ -13,6 +15,7 @@ let wakeLock=null;
 let snapshotTimer=null;
 let testMode=false;
 let markerTrayTimer=null;
+let lastMarkerTap={type:null,at:0};
 const nav=[['home','⌂','Home'],['prepare','✎','Prepare'],['record','●','Record'],['wrap','✓','Wrap'],['edit','✂','Edit'],['publish','↑','Publish'],['vault','◇','Vault']];
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
@@ -87,16 +90,162 @@ function markerSummary(){
 }
 
 
-function ensureSession(){state.session=merge({locked:false,startedAt:null,finishedAt:null,pauseStartedAt:null,totalPaused:0,pauseCount:0,lastBackupAt:null,lastMarker:null},state.session||{})}
+function ensureSession(){state.session=merge({locked:false,startedAt:null,finishedAt:null,pauseStartedAt:null,totalPaused:0,pauseCount:0,lastBackupAt:null,lastMarker:null,obsOffset:0,obsSyncedAt:null},state.session||{})}
 function activeSession(){ensureSession();return Boolean(state.session.locked)}
 function pausedDuration(){ensureSession();let total=Number(state.session.totalPaused||0);if(state.session.pauseStartedAt)total+=Math.max(0,Math.floor((Date.now()-state.session.pauseStartedAt)/1000));return total}
 function storageAvailable(){try{localStorage.setItem('__pb_test__','1');localStorage.removeItem('__pb_test__');return true}catch{return false}}
 function latestSnapshotTime(){const snap=readSnapshots()[0];return snap?new Date(snap.savedAt):null}
-function healthRows(){const latest=latestSnapshotTime();const backup=latest?latest.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'Not yet';return [['Autosave','Active','good'],['Latest backup',backup,latest?'good':'warn'],['Screen awake',wakeLock?'Active':'Available on mobile',wakeLock?'good':'warn'],['Browser storage',storageAvailable()?'Available':'Unavailable',storageAvailable()?'good':'warn'],['Session recovery',activeSession()?'Ready':'Standby',activeSession()?'good':'warn']].map(r=>`<div class="health-row"><span class="health-label">${r[0]}</span><span class="health-value ${r[2]}">${r[1]}</span></div>`).join('')}
+function healthRows(){const latest=latestSnapshotTime();const backup=latest?latest.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'Not yet';return [['Autosave','Active','good'],['Latest backup',backup,latest?'good':'warn'],['Screen awake',wakeLock?'Active':'Available on mobile',wakeLock?'good':'warn'],['Browser storage',storageAvailable()?'Available':'Unavailable',storageAvailable()?'good':'warn'],['Session recovery',activeSession()?'Ready':'Standby',activeSession()?'good':'warn'],['OBS sync',formatOffset(),state.session.obsSyncedAt?'good':'warn']].map(r=>`<div class="health-row"><span class="health-label">${r[0]}</span><span class="health-value ${r[2]}">${r[1]}</span></div>`).join('')}
 function showMarkerTray(marker){ensureSession();state.session.lastMarker=clone(marker);const tray=el('markerConfirmTray');if(!tray)return;tray.hidden=false;const copy=el('markerConfirmCopy');if(copy)copy.innerHTML=`<b>${markerIcon(marker.type)} ${esc(marker.type)} saved — ${fmt(marker.time)}</b><small>${marker.note?esc(marker.note):'No note added yet'}</small>`;clearTimeout(markerTrayTimer);markerTrayTimer=setTimeout(()=>{if(tray)tray.hidden=true},5000)}
 function hideMarkerTray(){const tray=el('markerConfirmTray');if(tray)tray.hidden=true}
 function endSessionAndWrap(){ensureSession();if(state.running){state.elapsed=currentElapsed();state.running=false;state.startedAt=null}if(state.session.pauseStartedAt){state.session.totalPaused+=Math.max(0,Math.floor((Date.now()-state.session.pauseStartedAt)/1000));state.session.pauseStartedAt=null}state.session.finishedAt=Date.now();state.session.locked=false;document.body.classList.remove('session-locked');state.stage='wrap';saveSnapshot('session finished');save();setView('wrap')}
-function finishReviewHtml(){ensureSession();const unchecked=(state.mustMentions||[]).filter(i=>!i.done).length;const unanswered=Math.max(0,(state.questions||[]).length-(state.currentQuestion+1));const complete=Math.min(state.currentSegment+1,(state.segments||[]).length);const latest=latestSnapshotTime();return `<div class="finish-review"><div class="finish-review-grid"><div class="finish-review-stat"><small>Recorded</small><b>${fmt(currentElapsed())}</b></div><div class="finish-review-stat"><small>Paused</small><b>${fmt(pausedDuration())}</b></div><div class="finish-review-stat"><small>Markers</small><b>${state.markers.length}</b></div><div class="finish-review-stat"><small>Pauses</small><b>${state.session.pauseCount||0}</b></div><div class="finish-review-stat"><small>Segments reached</small><b>${complete}/${state.segments.length}</b></div><div class="finish-review-stat"><small>Latest backup</small><b>${latest?latest.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'None'}</b></div></div><div class="finish-review-list"><div class="finish-review-item"><span>Unchecked must-mentions</span><b class="${unchecked?'warn':''}">${unchecked}</b></div><div class="finish-review-item"><span>Questions not yet reached</span><b class="${unanswered?'warn':''}">${unanswered}</b></div><div class="finish-review-item"><span>Recovery status</span><b>${storageAvailable()?'Ready':'Unavailable'}</b></div></div></div>`}
+function finishReviewHtml(){ensureSession();const unchecked=(state.mustMentions||[]).filter(i=>!i.done).length;const unanswered=Math.max(0,(state.questions||[]).length-(state.currentQuestion+1));const complete=Math.min(state.currentSegment+1,(state.segments||[]).length);const latest=latestSnapshotTime();return `<div class="finish-review"><div class="finish-review-grid"><div class="finish-review-stat"><small>Recorded</small><b>${fmt(currentElapsed())}</b></div><div class="finish-review-stat"><small>Paused</small><b>${fmt(pausedDuration())}</b></div><div class="finish-review-stat"><small>Markers</small><b>${state.markers.length}</b></div><div class="finish-review-stat"><small>Pauses</small><b>${state.session.pauseCount||0}</b></div><div class="finish-review-stat"><small>Segments reached</small><b>${complete}/${state.segments.length}</b></div><div class="finish-review-stat"><small>Latest backup</small><b>${latest?latest.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'None'}</b></div></div><div class="finish-review-list"><div class="finish-review-item"><span>Unchecked must-mentions</span><b class="${unchecked?'warn':''}">${unchecked}</b></div><div class="finish-review-item"><span>Questions not yet reached</span><b class="${unanswered?'warn':''}">${unanswered}</b></div><div class="finish-review-item"><span>Recovery status</span><b>${storageAvailable()?'Ready':'Unavailable'}</b></div><div class="finish-review-item"><span>OBS export offset</span><b>${formatOffset()}</b></div></div></div>`}
+
+
+function readArchives(){
+  try{return JSON.parse(localStorage.getItem(ARCHIVE_KEY)||'[]')}catch{return []}
+}
+function archiveCurrentSession(reason='manual archive'){
+  ensureSession();
+  const archive={
+    id:Date.now(),
+    archivedAt:new Date().toISOString(),
+    reason,
+    episode:clone(state.episode),
+    duration:currentElapsed(),
+    markers:clone(state.markers),
+    wrap:clone(state.wrap),
+    session:clone(state.session)
+  };
+  const archives=readArchives();
+  archives.unshift(archive);
+  localStorage.setItem(ARCHIVE_KEY,JSON.stringify(archives.slice(0,10)));
+  return archive;
+}
+function resetRecordingSession(options={}){
+  const keepPreparation=options.keepPreparation!==false;
+  const preserveEpisode=clone(state.episode);
+  const preserveSegments=clone(state.segments);
+  const preserveQuestions=clone(state.questions);
+  const preserveMentions=clone(state.mustMentions).map(item=>({...item,done:false}));
+  const preservePreflight=clone(state.preflight).map(item=>({...item,done:false}));
+  state.running=false;
+  state.elapsed=0;
+  state.startedAt=null;
+  state.currentSegment=0;
+  state.currentQuestion=0;
+  state.markers=[];
+  state.editDone=[];
+  state.wrap=clone(defaults.wrap);
+  state.testChecklist=[];
+  state.session=clone(defaults.session);
+  state.stage='prepare';
+  lastMarkerUndo=null;
+  lastMarkerTap={type:null,at:0};
+  if(keepPreparation){
+    state.episode=preserveEpisode;
+    state.segments=preserveSegments;
+    state.questions=preserveQuestions;
+    state.mustMentions=preserveMentions;
+    state.preflight=preservePreflight;
+  }
+  save();
+}
+function openNewSessionModal(){
+  if(state.running){
+    toast('Pause the recording before starting a new session');
+    return;
+  }
+  const modal=document.createElement('div');
+  modal.className='modal';
+  modal.innerHTML=`<div class="modal-panel"><div class="section-head"><div><div class="eyebrow">New recording session</div><h2>Reset safely for the next episode</h2><p class="muted">Podcast Brain will create an archive before clearing the live session.</p></div></div><div class="new-session-options"><label class="new-session-option"><input type="checkbox" id="archiveBeforeReset" checked><span><b>Archive this session first</b><br><small class="muted">Preserves duration, markers, Wrap notes and OBS sync data.</small></span></label><label class="new-session-option"><input type="checkbox" id="keepPreparedEpisode" checked><span><b>Keep the prepared episode</b><br><small class="muted">Keeps the title, segments, questions and must-mentions while clearing the timer and markers.</small></span></label></div><div class="archive-note">Nothing is cleared until you confirm below.</div><div class="button-row" style="margin-top:18px"><button class="btn" id="cancelNewSession">Cancel</button><button class="btn danger" id="confirmNewSession">Create New Session</button></div></div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#cancelNewSession').onclick=()=>modal.remove();
+  modal.querySelector('#confirmNewSession').onclick=()=>{
+    const archiveFirst=modal.querySelector('#archiveBeforeReset').checked;
+    const keepPreparation=modal.querySelector('#keepPreparedEpisode').checked;
+    if(archiveFirst)archiveCurrentSession('new session');
+    saveSnapshot('before new session');
+    resetRecordingSession({keepPreparation});
+    modal.remove();
+    setView('prepare');
+    toast('New recording session ready');
+  };
+}
+function adjustedMarkerTime(marker){
+  ensureSession();
+  return Math.max(0,Number(marker.time||0)+Number(state.session.obsOffset||0));
+}
+function formatOffset(){
+  ensureSession();
+  const value=Math.round(Number(state.session.obsOffset)||0);
+  return `${value>=0?'+':'−'}${fmt(Math.abs(value))}`;
+}
+function adjustObsOffset(seconds){
+  ensureSession();
+  state.session.obsOffset=Math.round(Number(state.session.obsOffset||0)+seconds);
+  state.session.obsSyncedAt=Date.now();
+  save();
+  record();
+  toast(`OBS offset ${formatOffset()}`);
+}
+function syncObsNow(){
+  ensureSession();
+  state.session.obsOffset=-Math.round(currentElapsed());
+  state.session.obsSyncedAt=Date.now();
+  saveSnapshot('OBS sync set');
+  save();
+  record();
+  toast(`OBS sync set ${formatOffset()}`);
+}
+function buildMarkerCsv(){
+  const rows=[['Adjusted Time','Studio Time','Type','Segment','Question','Note']];
+  state.markers.forEach(marker=>rows.push([
+    fmt(adjustedMarkerTime(marker)),
+    fmt(marker.time),
+    marker.type||'',
+    marker.segment||'',
+    marker.question||'',
+    marker.note||''
+  ]));
+  return rows.map(row=>row.map(value=>`"${String(value).replace(/"/g,'""')}"`).join(',')).join('\n');
+}
+function downloadText(filename,text,type='text/plain;charset=utf-8'){
+  const blob=new Blob([text],{type});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+function downloadMarkerCsv(){
+  downloadText(`ALT-Episode-${state.episode.number||'episode'}-markers.csv`,buildMarkerCsv(),'text/csv;charset=utf-8');
+}
+function buildMarkerReport(){
+  ensureSession();
+  const counts={};
+  state.markers.forEach(marker=>counts[marker.type]=(counts[marker.type]||0)+1);
+  const lines=[
+    `A LITTLE THROUPLE TEA — EPISODE ${state.episode.number}`,
+    state.episode.title||'Untitled Episode',
+    '',
+    `Studio duration: ${fmt(currentElapsed())}`,
+    `OBS offset: ${formatOffset()}`,
+    `Total markers: ${state.markers.length}`,
+    '',
+    'MARKER TOTALS',
+    '-------------',
+    ...Object.entries(counts).map(([type,count])=>`${type}: ${count}`),
+    '',
+    'ADJUSTED MARKERS',
+    '----------------'
+  ];
+  state.markers.forEach(marker=>lines.push(`${fmt(adjustedMarkerTime(marker))} — ${marker.type}${marker.note?` — ${marker.note}`:''}`));
+  return lines.join('\n');
+}
+function downloadMarkerReport(){
+  downloadText(`ALT-Episode-${state.episode.number||'episode'}-marker-report.txt`,buildMarkerReport());
+}
 
 function toast(msg){const t=el('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function fmt(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return [Math.floor(sec/3600),Math.floor(sec/60)%60,sec%60].map(n=>String(n).padStart(2,'0')).join(':')}
@@ -105,7 +254,7 @@ function stageIndex(){return ['prepare','record','wrap','edit','publish'].indexO
 function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.floor((Date.now()-state.startedAt)/1000)):Math.max(0,state.elapsed)}
 function updateDocumentTitle(){
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.3 — Recording Remote';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.4 — Live Recording Ready';
 }
 function updateSaveState(){
   const node=el('saveState');
@@ -230,7 +379,7 @@ function record(){
   const q=state.questions[state.currentQuestion]||'No question selected';
   const nextSeg=state.segments[state.currentSegment+1]||'Wrap';
   const recovery=recoveredRunningSession?`<div class="recovery-banner">↻ Recovered your active recording session. Timer and markers were preserved.</div>`:'';
-  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Recording Remote</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Recording Remote</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn" id="testModeBtn">${testMode?'End Test':'Test Recording Mode'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-command"><div class="record-command-side"><span class="record-command-label">Episode</span><span class="record-command-value">${esc(state.episode.number||'—')} · ${esc(state.episode.title||'Untitled')}</span><span class="record-progress">Segment ${state.currentSegment+1} of ${state.segments.length}</span></div><div><div class="record-command-timer" id="commandTimer">${fmt(currentElapsed())}</div><div class="record-command-status"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span></div></div><div class="record-command-side right"><span class="record-command-label">Current</span><span class="record-command-value">${esc(seg)}</span><span class="record-progress">Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span></div></div><div class="producer-strip"><span class="producer-strip-title">Producer</span>${producerStrip()}</div><div class="session-lock-banner"><div><strong>${activeSession()?'Session locked':'Session ready'}</strong><small>${activeSession()?'Episode changes are protected until you finish the session.':'Starting the timer will lock this episode as the active session.'}</small></div><span class="save-state">${activeSession()?'Protected':'Unlocked'}</span></div><div class="marker-confirm-tray" id="markerConfirmTray" hidden><div class="marker-confirm-copy" id="markerConfirmCopy"></div><div class="marker-confirm-actions"><button class="btn" id="trayUndo">Undo</button><button class="btn teal" id="trayAddNote">Add note</button></div></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="test-banner" ${testMode?'':'hidden'}><span><strong>Test Recording Mode</strong><br><small>Practice safely, then restore your episode.</small></span><button class="btn" id="endTestMode">End Test</button></div><div class="mobile-remote-topbar"><div><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><div class="wake-status ${wakeLock?'active':''}" id="wakeStatus">${wakeLock?'Screen awake':'Screen may sleep'}</div></div><button class="mobile-remote-exit" id="exitMobileMode">Producer View</button></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="current-focus"><div class="focus-segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><h3>${esc(q)}</h3><div class="focus-next">Next segment: ${esc(nextSeg)}</div></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause Recording':'Start Recording'}</button><button class="btn remote-undo-button" id="remoteUndo">Undo Last Marker</button></div><div class="marker-summary">${markerSummary()}</div><div class="remote-marker-grid">${remoteMarkerButtons()}</div><div class="marker-grid desktop-marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card"><h3>Recording health</h3><div class="record-health">${healthRows()}</div></section><section class="record-mini-card"><h3>Marker heatmap</h3><p class="muted">See the balance of usable moments.</p><div class="marker-heatmap">${heatmap()}</div></section><section class="record-mini-card"><h3>Real episode test</h3><div class="record-test-checklist">${['Prepare episode','Start timer','Tap every marker once','Pause and resume','Refresh browser','Recover session','Open mobile view','Finish recording','Export editing notes','Confirm Wrap data'].map((item,index)=>`<label class="record-test-check"><input type="checkbox" data-test-check="${index}" ${((state.testChecklist||[])[index])?'checked':''}> <span>${item}</span></label>`).join('')}</div></section><section class="record-mini-card safety-card"><h3>Safety backups</h3><p class="muted">Podcast Brain keeps the latest three snapshots.</p><div class="safety-list">${readSnapshots().length?readSnapshots().map(snapshot=>`<div class="safety-row"><div><b>${new Date(snapshot.savedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</b><small>${esc(snapshot.reason)}</small></div><button class="btn" data-snapshot="${snapshot.id}">Restore</button></div>`).join(''):'<div class="muted">No snapshots saved yet.</div>'}</div><button class="btn" id="saveSnapshot" style="margin-top:10px">Save backup now</button></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
+  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Recording Remote</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Recording Remote</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn" id="newSessionBtn">New Session</button><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn" id="testModeBtn">${testMode?'End Test':'Test Recording Mode'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-command"><div class="record-command-side"><span class="record-command-label">Episode</span><span class="record-command-value">${esc(state.episode.number||'—')} · ${esc(state.episode.title||'Untitled')}</span><span class="record-progress">Segment ${state.currentSegment+1} of ${state.segments.length}</span></div><div><div class="record-command-timer" id="commandTimer">${fmt(currentElapsed())}</div><div class="record-command-status"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span></div></div><div class="record-command-side right"><span class="record-command-label">Current</span><span class="record-command-value">${esc(seg)}</span><span class="record-progress">Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span></div></div><div class="producer-strip"><span class="producer-strip-title">Producer</span>${producerStrip()}</div><div class="session-lock-banner"><div><strong>${activeSession()?'Session locked':'Session ready'}</strong><small>${activeSession()?'Episode changes are protected until you finish the session.':'Starting the timer will lock this episode as the active session.'}</small></div><span class="save-state">${activeSession()?'Protected':'Unlocked'}</span></div><div class="marker-confirm-tray" id="markerConfirmTray" hidden><div class="marker-confirm-copy" id="markerConfirmCopy"></div><div class="marker-confirm-actions"><button class="btn" id="trayUndo">Undo</button><button class="btn teal" id="trayAddNote">Add note</button></div></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="test-banner" ${testMode?'':'hidden'}><span><strong>Test Recording Mode</strong><br><small>Practice safely, then restore your episode.</small></span><button class="btn" id="endTestMode">End Test</button></div><div class="mobile-remote-topbar"><div><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><div class="wake-status ${wakeLock?'active':''}" id="wakeStatus">${wakeLock?'Screen awake':'Screen may sleep'}</div></div><button class="mobile-remote-exit" id="exitMobileMode">Producer View</button></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="current-focus"><div class="focus-segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><h3>${esc(q)}</h3><div class="focus-next">Next segment: ${esc(nextSeg)}</div></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause Recording':'Start Recording'}</button><button class="btn remote-undo-button" id="remoteUndo">Undo Last Marker</button></div><div class="marker-summary">${markerSummary()}</div><div class="remote-marker-grid">${remoteMarkerButtons()}</div><div class="marker-grid desktop-marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card obs-sync-card"><h3>OBS sync</h3><p class="muted">Correct exported timestamps without needing WebSocket control.</p><div class="obs-offset-display"><div><small>Export offset</small><strong>${formatOffset()}</strong></div><span class="sync-status ${state.session.obsSyncedAt?'ready':''}">${state.session.obsSyncedAt?'✓ Synced':'Not synced'}</span></div><div class="obs-offset-controls"><button class="btn" data-obs-offset="-5">−5s</button><button class="btn" data-obs-offset="-1">−1s</button><button class="btn" data-obs-offset="1">+1s</button><button class="btn" data-obs-offset="5">+5s</button></div><button class="btn teal" id="syncObsNow" style="width:100%;margin-top:8px">Sync OBS Now</button></section><section class="record-mini-card"><h3>Recording health</h3><div class="record-health">${healthRows()}</div></section><section class="record-mini-card"><h3>Marker heatmap</h3><p class="muted">See the balance of usable moments.</p><div class="marker-heatmap">${heatmap()}</div></section><section class="record-mini-card"><h3>Real episode test</h3><div class="record-test-checklist">${['Prepare episode','Start timer','Tap every marker once','Pause and resume','Refresh browser','Recover session','Open mobile view','Finish recording','Export editing notes','Confirm Wrap data'].map((item,index)=>`<label class="record-test-check"><input type="checkbox" data-test-check="${index}" ${((state.testChecklist||[])[index])?'checked':''}> <span>${item}</span></label>`).join('')}</div></section><section class="record-mini-card safety-card"><h3>Safety backups</h3><p class="muted">Podcast Brain keeps the latest three snapshots.</p><div class="safety-list">${readSnapshots().length?readSnapshots().map(snapshot=>`<div class="safety-row"><div><b>${new Date(snapshot.savedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</b><small>${esc(snapshot.reason)}</small></div><button class="btn" data-snapshot="${snapshot.id}">Restore</button></div>`).join(''):'<div class="muted">No snapshots saved yet.</div>'}</div><button class="btn" id="saveSnapshot" style="margin-top:10px">Save backup now</button></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
   bindRecord();
   updateSaveState();
   recoveredRunningSession=false;
@@ -242,6 +391,9 @@ function timeline(){
   }).join(''):`<div class="empty">Your clip, cut and callback markers will appear here.</div>`;
 }
 function bindRecord(){
+  const newSessionBtn=el('newSessionBtn');if(newSessionBtn)newSessionBtn.onclick=openNewSessionModal;
+  const syncObsButton=el('syncObsNow');if(syncObsButton)syncObsButton.onclick=syncObsNow;
+  document.querySelectorAll('[data-obs-offset]').forEach(button=>button.onclick=()=>adjustObsOffset(Number(button.dataset.obsOffset)));
   const trayUndo=el('trayUndo');if(trayUndo)trayUndo.onclick=()=>{undoLastMarker();hideMarkerTray()};
   const trayAddNote=el('trayAddNote');if(trayAddNote)trayAddNote.onclick=()=>{const marker=state.markers[state.markers.length-1];if(!marker)return;const note=prompt('Add marker note:',marker.note||'');if(note===null)return;marker.note=note.trim();marker.edited=true;save();hideMarkerTray();record()};
   document.querySelectorAll('[data-test-check]').forEach(box=>box.onchange=()=>{state.testChecklist=state.testChecklist||[];state.testChecklist[Number(box.dataset.testCheck)]=box.checked;save()});
@@ -275,7 +427,7 @@ function bindRecord(){
   });
   const undo=el('undoMarker');if(undo)undo.onclick=undoLastMarker;
 }
-function toggleTimer(){ensureSession();if(state.running){state.elapsed=currentElapsed();state.running=false;state.startedAt=null;state.session.pauseStartedAt=Date.now();state.session.pauseCount=(state.session.pauseCount||0)+1}else{if(!state.session.locked){state.session.locked=true;state.session.startedAt=state.session.startedAt||Date.now();state.session.finishedAt=null;saveSnapshot('session start')}if(state.session.pauseStartedAt){state.session.totalPaused+=(Date.now()-state.session.pauseStartedAt)/1000;state.session.pauseStartedAt=null}state.running=true;state.startedAt=Date.now();state.stage='record'}save();record()}
+function toggleTimer(){ensureSession();if(state.running){state.elapsed=currentElapsed();state.running=false;state.startedAt=null;state.session.pauseStartedAt=Date.now();state.session.pauseCount=(state.session.pauseCount||0)+1;saveSnapshot('recording paused')}else{if(!state.session.locked){state.session.locked=true;state.session.startedAt=state.session.startedAt||Date.now();state.session.finishedAt=null;saveSnapshot('session start')}if(state.session.pauseStartedAt){state.session.totalPaused+=(Date.now()-state.session.pauseStartedAt)/1000;state.session.pauseStartedAt=null}state.running=true;state.startedAt=Date.now();state.stage='record';saveSnapshot('recording resumed')}save();record()}
 function adjustTimer(amount){
   if(state.running){
     state.elapsed=Math.max(0,currentElapsed()+amount);
@@ -292,6 +444,13 @@ function syncTimer(){
   },1000);
 }
 function addMarker(type,note=''){
+  const now=Date.now();
+  if(lastMarkerTap.type===type&&now-lastMarkerTap.at<DUPLICATE_WINDOW_MS){
+    toast(`${type} already saved`);
+    if(navigator.vibrate)navigator.vibrate([20,40,20]);
+    return;
+  }
+  lastMarkerTap={type,at:now};
   const marker={time:currentElapsed(),type,note,segment:state.segments[state.currentSegment],question:state.questions[state.currentQuestion]||'',edited:false};
   state.markers.push(marker);
   lastMarkerUndo=clone(marker);
@@ -354,6 +513,7 @@ function buildEditingNotes(){
     state.episode.title||'Untitled Episode',
     '',
     `Duration: ${fmt(currentElapsed())}`,
+    `OBS offset: ${formatOffset()}`,
     `Markers: ${state.markers.length}`,
     '',
     'MARKERS',
@@ -361,7 +521,7 @@ function buildEditingNotes(){
   ];
   if(state.markers.length){
     state.markers.forEach(marker=>{
-      lines.push(`${fmt(marker.time)} — ${marker.type}${marker.segment?` — ${marker.segment}`:''}${marker.note?` — ${marker.note}`:''}`);
+      lines.push(`${fmt(adjustedMarkerTime(marker))} — ${marker.type}${marker.segment?` — ${marker.segment}`:''}${marker.note?` — ${marker.note}`:''} [Studio ${fmt(marker.time)}]`);
     });
   }else{
     lines.push('No markers captured.');
@@ -419,11 +579,13 @@ function endTestRecordingMode(){
 
 function wrap(){
   const clipLeads=state.markers.filter(marker=>['Funny','Highlight','Reel','Best Moment'].includes(marker.type)).length;
-  el('wrap').innerHTML=`<div class="section-head"><div><div class="eyebrow">Wrap</div><h2>Before you leave the room…</h2><p class="muted">The session is preserved. Capture the details while they are fresh.</p></div><button class="btn primary" id="wrapDone">Save & move to Edit</button></div><article class="card"><div class="wrap-stats"><div class="wrap-stat"><small>Final duration</small><b>${fmt(currentElapsed())}</b></div><div class="wrap-stat"><small>Markers</small><b>${state.markers.length}</b></div><div class="wrap-stat"><small>Clip leads</small><b>${clipLeads}</b></div></div><div><div class="eyebrow">Rate this episode</div><div class="episode-rating">${['Amazing','Good','Okay','Needs Work'].map(value=>`<button class="rating-chip ${state.wrap.rating===value?'active':''}" data-rating="${value}">${value}</button>`).join('')}</div></div><div class="wrap-grid">${wrapField('⭐ Favorite moment','favorite')}${wrapField('🎬 Reel ideas','reels')}${wrapField('🖼 Thumbnail idea','thumbnail')}${wrapField('📌 Episode title ideas','titles')}${wrapField('😂 Running joke','runningJoke')}${wrapField('💡 Future episode','futureEpisode')}${wrapField('🔔 Things promised to listeners','promises')}</div><div class="wrap-downloads"><button class="btn teal" id="downloadNotes">Download Editing Notes</button><button class="btn" id="downloadJson">Download Episode JSON</button></div></article>`;
+  el('wrap').innerHTML=`<div class="section-head"><div><div class="eyebrow">Wrap</div><h2>Before you leave the room…</h2><p class="muted">The session is preserved. Capture the details while they are fresh.</p></div><button class="btn primary" id="wrapDone">Save & move to Edit</button></div><article class="card"><div class="wrap-stats"><div class="wrap-stat"><small>Final duration</small><b>${fmt(currentElapsed())}</b></div><div class="wrap-stat"><small>Markers</small><b>${state.markers.length}</b></div><div class="wrap-stat"><small>Clip leads</small><b>${clipLeads}</b></div></div><div><div class="eyebrow">Rate this episode</div><div class="episode-rating">${['Amazing','Good','Okay','Needs Work'].map(value=>`<button class="rating-chip ${state.wrap.rating===value?'active':''}" data-rating="${value}">${value}</button>`).join('')}</div></div><div class="wrap-grid">${wrapField('⭐ Favorite moment','favorite')}${wrapField('🎬 Reel ideas','reels')}${wrapField('🖼 Thumbnail idea','thumbnail')}${wrapField('📌 Episode title ideas','titles')}${wrapField('😂 Running joke','runningJoke')}${wrapField('💡 Future episode','futureEpisode')}${wrapField('🔔 Things promised to listeners','promises')}</div><div class="export-grid"><button class="btn teal" id="downloadNotes">Editing Notes</button><button class="btn" id="downloadJson">Episode JSON</button><button class="btn" id="downloadCsv">Marker CSV</button><button class="btn" id="downloadMarkerReport">Marker Report</button></div></article>`;
   document.querySelectorAll('[data-wrap]').forEach(input=>input.oninput=()=>{state.wrap[input.dataset.wrap]=input.value;save()});
   document.querySelectorAll('[data-rating]').forEach(button=>button.onclick=()=>{state.wrap.rating=button.dataset.rating;save();wrap()});
   el('downloadNotes').onclick=downloadEditingNotes;
   el('downloadJson').onclick=exportEpisode;
+  el('downloadCsv').onclick=downloadMarkerCsv;
+  el('downloadMarkerReport').onclick=downloadMarkerReport;
   el('wrapDone').onclick=()=>{
     if(state.wrap.runningJoke&&!state.vault.jokes.includes(state.wrap.runningJoke))state.vault.jokes.push(state.wrap.runningJoke);
     if(state.wrap.futureEpisode&&!state.vault.ideas.includes(state.wrap.futureEpisode))state.vault.ideas.push(state.wrap.futureEpisode);
@@ -437,7 +599,7 @@ function wrapField(label,key){return `<div class="field"><label>${label}</label>
 function edit(){el('edit').innerHTML=`<div class="section-head"><div><div class="eyebrow">Edit</div><h2>Your Premiere companion</h2></div><button class="btn primary" id="editDone">Editing complete</button></div><div class="grid two"><article class="card"><h3>Marker checklist</h3><div class="list">${state.markers.length?state.markers.map((m,i)=>`<label class="check"><input type="checkbox" data-edit="${i}" ${state.editDone.includes(i)?'checked':''}><span><b>${fmt(m.time)} · ${esc(m.type)}</b><br><span class="muted">${esc(m.segment)}${m.note?' — '+esc(m.note):''}</span></span></label>`).join(''):`<div class="empty">No markers captured yet.</div>`}</div></article><div class="grid"><article class="card"><h3>Episode memory</h3><p><b>Favorite:</b> ${esc(state.wrap.favorite)||'—'}</p><p><b>Reels:</b> ${esc(state.wrap.reels)||'—'}</p><p><b>Thumbnail:</b> ${esc(state.wrap.thumbnail)||'—'}</p><p><b>Titles:</b> ${esc(state.wrap.titles)||'—'}</p></article><article class="card producer"><div class="eyebrow">Producer Brain</div><div class="producer-message">${state.editDone.length} of ${state.markers.length} markers reviewed.</div><p class="muted">Use this as your map while Premiere handles the actual edit.</p></article></div></div>`;document.querySelectorAll('[data-edit]').forEach(x=>x.onchange=()=>{let i=+x.dataset.edit;if(x.checked&&!state.editDone.includes(i))state.editDone.push(i);if(!x.checked)state.editDone=state.editDone.filter(v=>v!==i);save();edit()});el('editDone').onclick=()=>{state.stage='publish';save();setView('publish')}}
 function publish(){let done=Object.values(state.publish).filter(Boolean).length,total=Object.keys(state.publish).length;el('publish').innerHTML=`<div class="section-head"><div><div class="eyebrow">Publish</div><h2>Finish the launch</h2></div><button class="btn primary" id="archiveBtn">Complete episode</button></div><article class="card"><div class="metric"><div><small>Release completion</small><strong>${Math.round(done/total*100)}%</strong></div><span class="muted">${done} of ${total}</span></div><div class="progress" style="margin:14px 0 24px"><i style="width:${done/total*100}%"></i></div><div class="publish-grid">${Object.entries(state.publish).map(([k,v])=>`<label class="publish-item"><b>${esc(k)}</b><input type="checkbox" data-publish="${esc(k)}" ${v?'checked':''}></label>`).join('')}</div></article>`;document.querySelectorAll('[data-publish]').forEach(x=>x.onchange=()=>{state.publish[x.dataset.publish]=x.checked;save();publish()});el('archiveBtn').onclick=()=>{state.stage='publish';save();toast('Episode marked complete')}}
 function vault(){let arr=state.vault[vaultType]||[];el('vault').innerHTML=`<div class="section-head"><div><div class="eyebrow">Vault</div><h2>The show remembers everything</h2></div></div><div class="vault-tabs">${[['jokes','Running Jokes'],['ideas','Episode Ideas'],['hotline','Hotline'],['quotes','Quotes']].map(([k,l])=>`<button class="btn ${vaultType===k?'active':''}" data-vault="${k}">${l}</button>`).join('')}</div><article class="card"><div style="display:flex;gap:8px;margin-bottom:16px"><input class="input" id="vaultInput" placeholder="Add to ${vaultType}"><button class="btn primary" id="vaultAdd">Add</button></div><div class="list">${arr.length?arr.map((v,i)=>`<div class="list-item"><span class="grow">${esc(v)}</span><button data-vault-del="${i}">×</button></div>`).join(''):`<div class="empty">Nothing saved here yet.</div>`}</div></article>`;document.querySelectorAll('[data-vault]').forEach(b=>b.onclick=()=>{vaultType=b.dataset.vault;vault()});el('vaultAdd').onclick=()=>{let v=el('vaultInput').value.trim();if(v){state.vault[vaultType].push(v);save();vault()}};document.querySelectorAll('[data-vault-del]').forEach(b=>b.onclick=()=>{state.vault[vaultType].splice(+b.dataset.vaultDel,1);save();vault()})}
-function exportEpisode(){let data=JSON.stringify({...state,exportedAt:new Date().toISOString()},null,2);let blob=new Blob([data],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`podcast-brain-ep-${state.episode.number||'episode'}.json`;a.click();URL.revokeObjectURL(a.href)}
+function exportEpisode(){ensureSession();const exported={...clone(state),markers:state.markers.map(marker=>({...marker,adjustedTime:adjustedMarkerTime(marker),adjustedTimecode:fmt(adjustedMarkerTime(marker))})),obsOffset:state.session.obsOffset||0,exportedAt:new Date().toISOString()};let data=JSON.stringify(exported,null,2);let blob=new Blob([data],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`podcast-brain-ep-${state.episode.number||'episode'}.json`;a.click();URL.revokeObjectURL(a.href)}
 function resetAll(){if(confirm('Reset Podcast Brain and erase this episode from this browser?')){state=clone(defaults);save();setView('home')}}
 
 document.addEventListener('keydown',keyboardHandler);
@@ -454,3 +616,10 @@ startSnapshotTimer();
 
 ensureSession();
 document.body.classList.toggle('session-locked',activeSession());
+
+window.addEventListener('beforeunload',event=>{
+  if(activeSession()||state.running){
+    event.preventDefault();
+    event.returnValue='';
+  }
+});
