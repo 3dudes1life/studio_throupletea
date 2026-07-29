@@ -1,41 +1,54 @@
-# Podcast Brain 3.4 — Live Recording Ready
+# Podcast Brain 4.0 — Studio
 
-Upload these three changed files to the ROOT of `studio_throupletea`:
+Upload these three files to the ROOT of `studio_throupletea`:
 
 - `index.html`
 - `podcast-brain.css`
 - `podcast-brain.js`
 
-Keep the existing `.nojekyll` file.
+Keep the existing:
 
-## New in 3.4
+- `.nojekyll`
+- `assets/` folder
 
-### Safe New Session
-- Archives the current session before reset
-- Clears timer, markers, pause history and Wrap notes
-- Can keep the prepared episode, segments, questions and must-mentions
-- Creates a safety snapshot before reset
+After GitHub Pages finishes deploying, hard refresh Safari:
 
-### OBS Timestamp Sync
-- Manual −5, −1, +1 and +5 second controls
-- Sync OBS Now button
-- Visible export offset
-- Editing Notes, CSV, JSON and Marker Report use adjusted timestamps
-- Original Studio timestamps remain included for reference
+`Command + Option + R`
 
-### Live Recording Safety
-- Backup when recording starts, pauses, resumes and finishes
-- Duplicate marker protection for rapid accidental double taps
-- Leave-page warning during an active session
-- Recording-health panel includes OBS sync status
-- Finish review includes OBS offset
+## What changed
 
-### Expanded Exports
-- Editing Notes TXT
-- Episode JSON with adjusted timecodes
-- Marker CSV
-- Marker Report TXT
+### Apple-inspired Studio UX
+- calmer glass interface
+- stronger visual hierarchy
+- larger episode focus
+- fewer competing actions
+- responsive desktop and mobile layouts
+- dedicated Studio command center
 
-The Recording Remote remains timer + record control + Undo + marker pad only.
+### Stable recording workflow
+- Prepare → Record → Wrap remains the core
+- Recording Remote stays timer + controls + marker pad
+- safe New Session archive/reset
+- backups and recovery
+- duplicate marker protection
+- OBS timestamp offset tools
+- leave-page protection during active sessions
 
-After uploading, hard refresh Safari with Command + Option + R.
+### Production Packet
+The top-right button now generates one JSON handoff containing:
+
+- episode plan
+- run of show
+- questions
+- must-mentions
+- duration and pause data
+- OBS-adjusted markers
+- Wrap notes
+- editing status
+- publishing checklist
+
+This becomes the contract between Studio 4.0 and the future Dashboard.
+
+## Important
+
+Studio 4.0 does not control OBS yet. It is prepared for the next connection test after this version loads successfully.

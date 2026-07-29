@@ -1004,3 +1004,386 @@ body.mobile-recording-mode .obs-sync-card{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* =========================================================
+   PODCAST BRAIN 4.0 — STUDIO
+   Focused, calm, Apple-inspired production UX.
+   ========================================================= */
+:root{
+  --bg:#08090c;
+  --panel:rgba(25,26,32,.72);
+  --panel-strong:rgba(31,32,39,.92);
+  --line:rgba(255,255,255,.095);
+  --line-strong:rgba(255,255,255,.16);
+  --text:#f7f7f9;
+  --muted:#9b9da7;
+  --teal:#58e6d1;
+  --pink:#ff5d9e;
+  --yellow:#ffd166;
+  --danger:#ff625f;
+  --shadow:0 22px 70px rgba(0,0,0,.38);
+  --radius:22px;
+  --radius-sm:15px;
+}
+*{
+  -webkit-tap-highlight-color:transparent;
+}
+html{
+  background:#06070a;
+}
+body{
+  background:
+    radial-gradient(circle at 12% -10%,rgba(81,105,255,.16),transparent 32%),
+    radial-gradient(circle at 88% 0%,rgba(255,93,158,.11),transparent 30%),
+    linear-gradient(180deg,#090a0e 0%,#07080b 100%);
+  color:var(--text);
+  letter-spacing:-.01em;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(rgba(255,255,255,.012),rgba(255,255,255,0));
+}
+.app{
+  min-height:100vh;
+}
+.sidebar{
+  background:rgba(12,13,17,.78);
+  border-right:1px solid var(--line);
+  backdrop-filter:blur(28px) saturate(150%);
+  -webkit-backdrop-filter:blur(28px) saturate(150%);
+}
+.brand{
+  padding:22px 18px 18px;
+}
+.brand img{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.brand strong{
+  font-size:15px;
+  letter-spacing:-.02em;
+}
+.brand span{
+  font-size:11px;
+  margin-top:3px;
+}
+.nav button{
+  min-height:43px;
+  border-radius:11px;
+  margin:2px 10px;
+  color:#a9abb4;
+}
+.nav button:hover{
+  background:rgba(255,255,255,.055);
+  color:white;
+}
+.nav button.active{
+  background:rgba(255,255,255,.095);
+  color:white;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+}
+.mobile-side-launch{
+  margin:14px 12px;
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(88,230,209,.14),rgba(88,230,209,.05));
+  border:1px solid rgba(88,230,209,.18);
+}
+.version-chip{
+  display:inline-flex;
+  padding:4px 7px;
+  border-radius:7px;
+  margin-bottom:8px;
+  background:rgba(255,255,255,.06);
+  color:#d6d7dc;
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.main{
+  max-width:1540px;
+  padding:0 38px 70px;
+}
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:40;
+  min-height:92px;
+  padding:20px 0 14px;
+  background:linear-gradient(180deg,rgba(8,9,12,.96),rgba(8,9,12,.78) 72%,transparent);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.topbar h1{
+  font-size:30px;
+  letter-spacing:-.045em;
+}
+.top-actions{
+  gap:10px;
+}
+.studio-status{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:750;
+}
+.studio-status i{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 0 4px rgba(88,230,209,.10);
+}
+.card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(33,34,41,.78),rgba(24,25,31,.68));
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(22px) saturate(130%);
+  -webkit-backdrop-filter:blur(22px) saturate(130%);
+}
+.btn{
+  min-height:40px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.065);
+  color:white;
+  font-weight:800;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease;
+}
+.btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.10);
+  border-color:var(--line-strong);
+}
+.btn:active{
+  transform:scale(.985);
+}
+.btn.primary,.btn.teal{
+  color:#06110f;
+  background:linear-gradient(180deg,#72f1dd,#4ddbc6);
+  border-color:transparent;
+  box-shadow:0 8px 26px rgba(88,230,209,.20);
+}
+.btn.danger{
+  background:rgba(255,98,95,.11);
+  border-color:rgba(255,98,95,.22);
+  color:#ff8d89;
+}
+.input,.textarea{
+  border-radius:13px;
+  background:rgba(5,6,9,.45);
+  border:1px solid var(--line);
+  color:white;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+.input:focus,.textarea:focus{
+  border-color:rgba(88,230,209,.55);
+  box-shadow:0 0 0 4px rgba(88,230,209,.08);
+}
+.eyebrow{
+  color:#a8abb5;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.09em;
+}
+.section-head h2{
+  font-size:clamp(28px,3vw,46px);
+  letter-spacing:-.055em;
+}
+.hero{
+  gap:18px;
+}
+.hero-main{
+  min-height:430px;
+  padding:34px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+  position:relative;
+}
+.hero-main:after{
+  content:"";
+  position:absolute;
+  width:420px;
+  height:420px;
+  border-radius:50%;
+  right:-180px;
+  top:-210px;
+  background:radial-gradient(circle,rgba(88,230,209,.14),transparent 68%);
+  pointer-events:none;
+}
+.episode-title{
+  max-width:850px;
+  font-size:clamp(39px,5.1vw,78px);
+  line-height:.96;
+  letter-spacing:-.075em;
+  margin:24px 0 18px;
+}
+.status-pill{
+  border-color:rgba(88,230,209,.18);
+  background:rgba(88,230,209,.075);
+}
+.stage-row{
+  gap:6px;
+}
+.stage{
+  border-radius:10px;
+  background:rgba(255,255,255,.04);
+}
+.stage.active{
+  color:white;
+  background:rgba(255,255,255,.11);
+}
+.progress{
+  height:7px;
+  background:rgba(255,255,255,.055);
+}
+.progress i{
+  background:linear-gradient(90deg,var(--teal),#8cf4e4);
+}
+.metric strong{
+  letter-spacing:-.055em;
+}
+.producer{
+  background:
+    radial-gradient(circle at 90% 0,rgba(255,93,158,.12),transparent 45%),
+    linear-gradient(180deg,rgba(34,31,41,.88),rgba(24,25,31,.75));
+}
+.producer-message{
+  font-size:clamp(22px,2.2vw,34px);
+  line-height:1.05;
+  letter-spacing:-.045em;
+}
+.studio-command-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.studio-command{
+  min-height:128px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  text-align:left;
+  color:white;
+}
+.studio-command:hover{
+  background:rgba(255,255,255,.07);
+}
+.studio-command span{
+  display:block;
+  font-size:25px;
+  margin-bottom:16px;
+}
+.studio-command b{
+  display:block;
+  font-size:15px;
+}
+.studio-command small{
+  display:block;
+  color:var(--muted);
+  margin-top:5px;
+  line-height:1.35;
+}
+.system-check-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.system-check{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:rgba(255,255,255,.03);
+}
+.system-check small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:7px;
+}
+.system-check b.good{
+  color:var(--teal);
+}
+.system-check b.warn{
+  color:var(--yellow);
+}
+.record-layout{
+  gap:14px;
+}
+.timer{
+  letter-spacing:-.075em;
+  text-shadow:0 18px 65px rgba(0,0,0,.35);
+}
+.marker{
+  border-radius:17px;
+  background:rgba(255,255,255,.045);
+}
+.marker:hover{
+  background:rgba(255,255,255,.09);
+}
+.timeline-item{
+  border-radius:14px;
+}
+.health-row{
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.wrap-stat,.finish-review-stat{
+  border-radius:17px;
+  background:rgba(255,255,255,.035);
+}
+.modal{
+  backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:blur(26px);
+}
+.modal-panel{
+  border-radius:26px;
+  border:1px solid var(--line-strong);
+  background:rgba(24,25,31,.96);
+  box-shadow:0 35px 120px rgba(0,0,0,.65);
+}
+.production-packet{
+  display:grid;
+  gap:10px;
+}
+.packet-option{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+}
+.packet-option small{
+  display:block;
+  color:var(--muted);
+  margin-top:3px;
+}
+.packet-option input{
+  accent-color:var(--teal);
+}
+@media(max-width:1050px){
+  .studio-command-grid{grid-template-columns:1fr}
+  .system-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .main{padding:0 14px 94px}
+  .topbar{min-height:76px;padding-top:12px}
+  .topbar h1{font-size:24px}
+  .studio-status{display:none}
+  .hero-main{padding:22px;min-height:390px}
+  .episode-title{font-size:clamp(38px,12vw,58px)}
+  .system-check-grid{grid-template-columns:1fr}
+}

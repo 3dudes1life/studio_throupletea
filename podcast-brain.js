@@ -37,6 +37,7 @@ function save(){
   localStorage.setItem(KEY,JSON.stringify(state));
   localStorage.setItem(BACKUP_KEY,JSON.stringify(state));
   updateSaveState();
+  updateStudioStatus();
 }
 function el(id){return document.getElementById(id)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -247,14 +248,90 @@ function downloadMarkerReport(){
   downloadText(`ALT-Episode-${state.episode.number||'episode'}-marker-report.txt`,buildMarkerReport());
 }
 
+
+function systemChecks(){
+  ensureSession();
+  return [
+    ['Browser storage',storageAvailable()?'Ready':'Unavailable',storageAvailable()?'good':'warn'],
+    ['Recovery',readSnapshots().length?'Protected':'Create first backup',readSnapshots().length?'good':'warn'],
+    ['Wake lock',('wakeLock' in navigator)?'Supported':'Not supported',('wakeLock' in navigator)?'good':'warn'],
+    ['OBS timing',state.session.obsSyncedAt?formatOffset():'Not synced',state.session.obsSyncedAt?'good':'warn']
+  ];
+}
+function updateStudioStatus(){
+  const node=el('studioStatus');
+  if(!node)return;
+  const label=node.querySelector('span');
+  if(label)label.textContent=state.running?`Recording ${fmt(currentElapsed())}`:`Saved ${state.lastSavedAt?'just now':'locally'}`;
+  node.classList.toggle('recording',state.running);
+}
+function createProductionPacket(){
+  ensureSession();
+  const packet={
+    schema:'podcast-brain-production-packet',
+    version:'4.0',
+    createdAt:new Date().toISOString(),
+    show:'A Little Throuple Tea',
+    hosts:['William','Daniel','Caleb'],
+    episode:clone(state.episode),
+    studio:{
+      stage:state.stage,
+      durationSeconds:currentElapsed(),
+      duration:fmt(currentElapsed()),
+      obsOffsetSeconds:Number(state.session.obsOffset||0),
+      obsOffset:formatOffset(),
+      pauseCount:Number(state.session.pauseCount||0),
+      pausedSeconds:Math.round(pausedDuration())
+    },
+    runOfShow:clone(state.segments),
+    questions:clone(state.questions),
+    mustMentions:clone(state.mustMentions),
+    markers:state.markers.map((marker,index)=>({
+      id:index+1,
+      ...clone(marker),
+      studioTimecode:fmt(marker.time),
+      adjustedSeconds:adjustedMarkerTime(marker),
+      adjustedTimecode:fmt(adjustedMarkerTime(marker))
+    })),
+    wrap:clone(state.wrap),
+    editing:{
+      reviewedMarkerIndexes:clone(state.editDone),
+      clipCandidates:state.markers.filter(marker=>['Funny','Highlight','Reel','Best Moment'].includes(marker.type)).length
+    },
+    publishing:clone(state.publish),
+    vaultAdditions:{
+      runningJoke:state.wrap.runningJoke||'',
+      futureEpisode:state.wrap.futureEpisode||''
+    }
+  };
+  return packet;
+}
+function downloadProductionPacket(){
+  const packet=createProductionPacket();
+  downloadText(
+    `ALT-Episode-${state.episode.number||'episode'}-production-packet.json`,
+    JSON.stringify(packet,null,2),
+    'application/json;charset=utf-8'
+  );
+}
+function openProductionPacketModal(){
+  const modal=document.createElement('div');
+  modal.className='modal';
+  modal.innerHTML=`<div class="modal-panel"><div class="section-head"><div><div class="eyebrow">Production packet</div><h2>Everything from this episode, in one file.</h2><p class="muted">Built for the Dashboard handoff and future Premiere companion.</p></div></div><div class="production-packet"><div class="packet-option"><div><b>Episode plan</b><small>Metadata, run of show, questions and must-mentions</small></div><span>Included</span></div><div class="packet-option"><div><b>Recording session</b><small>Duration, pauses, OBS offset and adjusted timestamps</small></div><span>Included</span></div><div class="packet-option"><div><b>Markers and Wrap</b><small>Clip leads, notes, titles, thumbnail and follow-ups</small></div><span>Included</span></div><div class="packet-option"><div><b>Editing and publishing</b><small>Review status and launch checklist</small></div><span>Included</span></div></div><div class="button-row" style="margin-top:18px"><button class="btn" id="closePacket">Cancel</button><button class="btn primary" id="downloadPacket">Download Packet</button></div></div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#closePacket').onclick=()=>modal.remove();
+  modal.querySelector('#downloadPacket').onclick=()=>{downloadProductionPacket();modal.remove();toast('Production packet downloaded')};
+}
+
 function toast(msg){const t=el('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function fmt(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return [Math.floor(sec/3600),Math.floor(sec/60)%60,sec%60].map(n=>String(n).padStart(2,'0')).join(':')}
 function prepPct(){const checks=[state.episode.title,state.episode.topic,state.episode.intro,state.episode.outro,state.episode.hotline,state.episode.game,...state.preflight.map(x=>x.done),...state.mustMentions.map(x=>x.done)];return Math.round(checks.filter(Boolean).length/checks.length*100)}
 function stageIndex(){return ['prepare','record','wrap','edit','publish'].indexOf(state.stage)}
 function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.floor((Date.now()-state.startedAt)/1000)):Math.max(0,state.elapsed)}
 function updateDocumentTitle(){
+  updateStudioStatus();
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 3.4 — Live Recording Ready';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 4.0 — Studio';
 }
 function updateSaveState(){
   const node=el('saveState');
@@ -295,9 +372,15 @@ function render(view=document.querySelector('.section.active')?.id||'home'){
   updateDocumentTitle();
 }
 function home(){
-  let pct=prepPct();
-  el('home').innerHTML=`<div class="hero"><article class="card hero-main"><div><span class="status-pill"><i></i>${pct>=80?'Ready to record':'Preparation in progress'}</span><h2 class="episode-title">Episode ${esc(state.episode.number)}<br>${esc(state.episode.title)}</h2><p class="muted">Everything the three of you need before, during and after recording—without replacing OBS or Premiere.</p></div><div><div class="stage-row">${['Prepare','Record','Wrap','Edit','Publish'].map((s,i)=>`<div class="stage ${i===stageIndex()?'active':''}">${s}</div>`).join('')}</div><div style="margin-top:18px"><div class="metric"><small>Production readiness</small><strong>${pct}%</strong></div><div class="progress"><i style="width:${pct}%"></i></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:22px"><button class="btn primary" data-go="${state.stage}">Continue ${state.stage}</button><button class="btn" data-go="prepare">Open episode plan</button></div></div></article><aside class="grid"><article class="card producer"><div class="eyebrow">Producer Brain</div><div class="producer-message">${producerMessage()}</div><p class="muted">Quiet reminders based on the episode—not fake AI chatter.</p></article><article class="card"><div class="metric"><div><small>Markers captured</small><strong>${state.markers.length}</strong></div><div><small>Recording time</small><strong>${fmt(currentElapsed())}</strong></div></div></article></aside></div>`;
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setView(b.dataset.go));
+  const pct=prepPct();
+  const checks=systemChecks();
+  const nextAction=state.stage==='prepare'?'Open Prepare':state.stage==='record'?'Open Studio':state.stage==='wrap'?'Finish Wrap':state.stage==='edit'?'Open Edit':'Open Publish';
+  el('home').innerHTML=`<div class="hero"><article class="card hero-main"><div><span class="status-pill"><i></i>${state.running?'Recording in progress':pct>=80?'Ready to record':'Episode setup in progress'}</span><h2 class="episode-title">Episode ${esc(state.episode.number)}<br>${esc(state.episode.title)}</h2><p class="muted">One calm production workspace for preparing, recording and wrapping the show.</p></div><div><div class="stage-row">${['Prepare','Record','Wrap','Edit','Publish'].map((s,i)=>`<div class="stage ${i===stageIndex()?'active':''}">${s}</div>`).join('')}</div><div style="margin-top:20px"><div class="metric"><small>Production readiness</small><strong>${pct}%</strong></div><div class="progress"><i style="width:${pct}%"></i></div></div><div class="button-row" style="margin-top:22px"><button class="btn primary" data-go="${state.stage}">${nextAction}</button><button class="btn" id="homeRemote">Recording Remote</button><button class="btn" id="homeNewSession">New Session</button></div></div></article><aside class="grid"><article class="card producer"><div class="eyebrow">Producer Brain</div><div class="producer-message">${producerMessage()}</div><p class="muted">Useful prompts only. No clutter while the three of you are recording.</p></article><article class="card"><div class="metric"><div><small>Markers</small><strong>${state.markers.length}</strong></div><div><small>Studio time</small><strong>${fmt(currentElapsed())}</strong></div></div></article></aside></div><div class="grid two" style="margin-top:18px"><article class="card"><div class="section-head compact"><div><div class="eyebrow">Studio commands</div><h3>Everything important, one tap away.</h3></div></div><div class="studio-command-grid"><button class="studio-command" data-go="prepare"><span>✎</span><b>Prepare episode</b><small>Plan segments, questions, mentions and the preflight.</small></button><button class="studio-command" data-go="record"><span>●</span><b>Open recording studio</b><small>Run the timer, capture markers and protect the session.</small></button><button class="studio-command" data-go="wrap"><span>✓</span><b>Complete Wrap</b><small>Save the strongest moments, titles and future ideas.</small></button></div></article><article class="card"><div class="section-head compact"><div><div class="eyebrow">System check</div><h3>Ready for a real recording.</h3></div></div><div class="system-check-grid">${checks.map(row=>`<div class="system-check"><small>${row[0]}</small><b class="${row[2]}">${row[1]}</b></div>`).join('')}</div><div class="button-row" style="margin-top:16px"><button class="btn" id="homeBackup">Create Backup</button><button class="btn" id="homePacket">Production Packet</button></div></article></div>`;
+  document.querySelectorAll('[data-go]').forEach(button=>button.onclick=()=>setView(button.dataset.go));
+  el('homeRemote').onclick=()=>setMobileRecordingMode(true);
+  el('homeNewSession').onclick=openNewSessionModal;
+  el('homeBackup').onclick=()=>{saveSnapshot('manual dashboard backup');toast('Backup created')};
+  el('homePacket').onclick=openProductionPacketModal;
 }
 function producerMessage(){
   if(!state.preflight.every(x=>x.done))return 'Finish the preflight before anyone starts talking.';
@@ -604,7 +687,7 @@ function resetAll(){if(confirm('Reset Podcast Brain and erase this episode from 
 
 document.addEventListener('keydown',keyboardHandler);
 buildNav();
-el('exportBtn').onclick=exportEpisode;
+el('exportBtn').onclick=openProductionPacketModal;
 el('resetBtn').onclick=resetAll;
 render(mobileRecordingMode?'record':'home');
 document.querySelectorAll(`[data-view="${mobileRecordingMode?'record':'home'}"]`).forEach(x=>x.classList.add('active'));
@@ -615,6 +698,7 @@ document.addEventListener('visibilitychange',()=>{
 startSnapshotTimer();
 
 ensureSession();
+updateStudioStatus();
 document.body.classList.toggle('session-locked',activeSession());
 
 window.addEventListener('beforeunload',event=>{
