@@ -1,11 +1,13 @@
-# Podcast Brain 4.1 — Superhuman UX
+# Podcast Brain 4.2 — Sexy UX
 
-Upload `index.html`, `podcast-brain.css`, and `podcast-brain.js` to the ROOT of `studio_throupletea`.
+Upload these files to the root of `studio_throupletea`:
 
-Keep `.nojekyll` and the existing `assets/` folder.
+- index.html
+- podcast-brain.css
+- podcast-brain.js
 
-Hard refresh Safari with `Command + Option + R`.
+Keep `.nojekyll` and the current `assets` folder.
 
-4.1 replaces the card-heavy dashboard with an episode-first Today experience, gives every headline more breathing room, removes repeated actions, and rebuilds Recording Remote as a true full-screen, safe-area-aware control surface.
+Then hard refresh Safari with Command + Option + R.
 
-Existing local Episode 29 data is preserved because the storage keys are unchanged.
+4.2 rebuilds Today, Studio, and Recording Remote to match the approved visual direction. Existing browser episode data is preserved.

@@ -1,12 +1,13 @@
-# Podcast Brain 4.1
+# Podcast Brain 4.2
 
-- Episode-first Today screen
-- One context-aware primary action
-- Quiet five-step journey
-- Fewer duplicate controls
-- Improved headline letter spacing and hierarchy
-- Simplified navigation
-- Full-screen Recording Remote
-- iPhone safe-area handling
-- Responsive ten-button marker grid
-- Short-phone and tablet layouts
+- Mockup-inspired Today dashboard
+- Neon tropical production visual system
+- Dedicated right-side command and health rail
+- Rebuilt Studio with one clear recording bar
+- Compact current-prompt experience
+- Ten-button marker deck
+- Cleaner OBS sync
+- Flawless full-screen mobile remote
+- Start control reduced to a deliberate circular control
+- Three-column phone marker grid
+- Existing autosave, recovery, exports, markers, and session logic preserved

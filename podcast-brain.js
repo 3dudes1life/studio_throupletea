@@ -331,7 +331,7 @@ function currentElapsed(){return state.running?Math.max(0,state.elapsed+Math.flo
 function updateDocumentTitle(){
   updateStudioStatus();
   document.body.classList.toggle('recording-browser-state',state.running);
-  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 4.1 — Studio';
+  document.title=state.running?`● ${fmt(currentElapsed())} — Episode ${state.episode.number}`:'Podcast Brain 4.2 — Studio';
 }
 function updateSaveState(){
   const node=el('saveState');
@@ -373,65 +373,107 @@ function render(view=document.querySelector('.section.active')?.id||'home'){
 }
 function home(){
   const pct=prepPct();
-  const incompletePreflight=state.preflight.filter(item=>!item.done);
-  const incompleteMentions=state.mustMentions.filter(item=>!item.done);
-  const remaining=[...incompletePreflight.map(item=>item.text),...incompleteMentions.map(item=>item.text)];
-  const primaryStage=state.running?'record':pct<100?'prepare':state.stage==='wrap'?'wrap':'record';
-  const primaryLabel=state.running?'Return to recording':pct<100?'Continue preparing':'Open recording studio';
-  const primaryNote=state.running?`${fmt(currentElapsed())} live session protected`:pct<100?`${remaining.length} ${remaining.length===1?'item':'items'} left before recording`:'Everything essential is ready';
-  const todayLabel=new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
-  const markerCount=state.markers.length;
-  const clipLeads=state.markers.filter(marker=>['Funny','Highlight','Reel','Best Moment'].includes(marker.type)).length;
+  const remaining=[...state.preflight.filter(x=>!x.done),...state.mustMentions.filter(x=>!x.done)];
+  const current=stageIndex();
+  const currentSegment=state.segments[state.currentSegment]||'—';
+  const questionCount=state.questions.length;
+  const nextStage=state.running?'record':pct<100?'prepare':'record';
+  const nextLabel=state.running?'Return to Studio':pct<100?'Continue Preparing':'Open Studio';
 
   el('home').innerHTML=`
-    <section class="today-hero">
-      <div class="today-date">${todayLabel}</div>
-      <div class="today-status">${state.running?'<i class="live-dot"></i> Recording now':pct===100?'Ready when you are':'Episode in progress'}</div>
-      <div class="episode-lockup">
-        <span>Episode ${esc(state.episode.number)}</span>
-        <h2>${esc(state.episode.title)}</h2>
-      </div>
-      <button class="next-action" data-go="${primaryStage}">
-        <span class="next-action-copy">
-          <small>Next</small>
-          <strong>${primaryLabel}</strong>
-          <em>${primaryNote}</em>
-        </span>
-        <span class="next-action-arrow">→</span>
-      </button>
-      <div class="journey" aria-label="Episode workflow">
-        ${[['prepare','Prepare'],['record','Record'],['wrap','Wrap'],['edit','Edit'],['publish','Publish']].map(([key,label],index)=>{
-          const current=stageIndex();
-          return `<button class="journey-step ${index<current?'complete':''} ${index===current?'current':''}" data-go="${key}"><i>${index<current?'✓':index+1}</i><span>${label}</span></button>`;
-        }).join('<b></b>')}
-      </div>
-    </section>
-    <section class="today-lower">
-      <article class="focus-panel">
-        <div class="section-label">Producer</div>
-        <h3>${producerMessage()}</h3>
-        ${remaining.length?`<div class="focus-list">${remaining.slice(0,3).map(item=>`<button data-go="prepare"><i></i><span>${esc(item)}</span><b>→</b></button>`).join('')}</div>`:`<p class="quiet-copy">Nothing is blocking the recording. Open Studio whenever the room is ready.</p>`}
-      </article>
-      <aside class="episode-glance">
-        <div class="section-label">At a glance</div>
-        <div class="glance-grid">
-          <button data-go="prepare"><small>Readiness</small><strong>${pct}%</strong><span>${remaining.length?`${remaining.length} left`:'Ready'}</span></button>
-          <button data-go="record"><small>Studio time</small><strong>${fmt(currentElapsed())}</strong><span>${state.running?'Live':'Standby'}</span></button>
-          <button data-go="record"><small>Markers</small><strong>${markerCount}</strong><span>${clipLeads} clip leads</span></button>
-          <button id="homeRemote"><small>Remote</small><strong>Open</strong><span>Phone marker pad</span></button>
+    <div class="command-home">
+      <header class="welcome-row">
+        <div>
+          <h2>Good morning, William <span>👋</span></h2>
+          <p>Let’s make today’s episode amazing.</p>
         </div>
-      </aside>
-    </section>
-    <section class="utility-strip">
-      <button id="homeBackup"><span>Backup</span><small>${readSnapshots().length?'Protected':'Create now'}</small></button>
-      <button id="homePacket"><span>Production Packet</span><small>Episode handoff</small></button>
-      <button id="homeNewSession"><span>New Session</span><small>Archive and reset</small></button>
-      <div class="utility-health"><i></i><span>Studio healthy</span><small>${state.session.obsSyncedAt?'OBS timing synced':'OBS timing not synced'}</small></div>
-    </section>`;
+        <div class="welcome-health">
+          <div><i>✓</i><span><small>Production health</small><b>All systems go</b></span></div>
+          <div><i>✓</i><span><small>Last saved</small><b>${state.lastSavedAt?new Date(state.lastSavedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'Just now'}</b></span></div>
+        </div>
+      </header>
+
+      <div class="home-layout">
+        <main>
+          <section class="episode-art-card">
+            <div class="episode-art-shade"></div>
+            <div class="episode-art-copy">
+              <div class="episode-number">Episode ${esc(state.episode.number)}</div>
+              <h3>${esc(state.episode.title)}</h3>
+              <div class="episode-meta">
+                <span>◌ Segment ${state.currentSegment+1} of ${state.segments.length}</span>
+                <span>? Question ${questionCount?state.currentQuestion+1:0} of ${questionCount}</span>
+                <span>◷ Est. 75 min</span>
+              </div>
+            </div>
+            <button class="episode-continue" data-go="${nextStage}"><small>Next step</small><b>${nextLabel}</b><span>→</span></button>
+            <div class="episode-progress">
+              <div><small>Prepare progress</small><strong>${pct}%</strong></div>
+              <div class="lux-progress"><i style="width:${pct}%"></i></div>
+              <p>${remaining.length?`${remaining.length} things left to lock this episode`:'Episode is locked and ready'}</p>
+            </div>
+          </section>
+
+          <section class="journey-card">
+            <div class="section-label">Your production journey</div>
+            <div class="journey-42">
+              ${[
+                ['✎','Prepare','Plan the perfect episode.'],
+                ['●','Record','Capture every moment.'],
+                ['▣','Wrap','Lock in the good stuff.'],
+                ['✐','Edit','Polish it to perfection.'],
+                ['↑','Publish','Share with the world.']
+              ].map((item,index)=>`
+                <button class="journey-node ${index===current?'active':''} ${index<current?'done':''}" data-go="${['prepare','record','wrap','edit','publish'][index]}">
+                  <i>${index<current?'✓':item[0]}</i>
+                  <b>${item[1]}</b>
+                  <span>${item[2]}</span>
+                  <small>${index<current?'Complete':index===current?`${pct}% active`:'Locked'}</small>
+                </button>${index<4?'<em>→</em>':''}`).join('')}
+            </div>
+          </section>
+
+          <section class="next-up-card">
+            <div>
+              <div class="section-label">Next up</div>
+              <h3>${pct<100?`Finish preparing Episode ${esc(state.episode.number)}`:'Start today’s recording'}</h3>
+              <p>${pct<100?'You’re close. Let’s lock it in.':'Everything is ready when the room is.'}</p>
+            </div>
+            <button class="gradient-action" data-go="${nextStage}">${nextLabel} →</button>
+            <div class="next-mini-grid">
+              <div><i>⭐</i><span><small>Must-mentions</small><b>${state.mustMentions.filter(x=>!x.done).length} items to cover</b></span></div>
+              <div><i>☎</i><span><small>Hotline</small><b>${state.episode.hotline?'Loaded':'Needs review'}</b></span></div>
+              <div><i>✨</i><span><small>Current segment</small><b>${esc(currentSegment)}</b></span></div>
+            </div>
+          </section>
+        </main>
+
+        <aside class="home-rail">
+          <section class="rail-card">
+            <div class="section-label">Studio commands</div>
+            <button id="homeNewSession">＋ <span>New Session</span></button>
+            <button data-go="record">🔴 <span>Start Recording</span></button>
+            <button data-go="record">⌁ <span>Test Recording</span></button>
+            <button data-go="wrap">⚑ <span>Finish Recording</span></button>
+            <button id="homePacket">📦 <span>Production Packet</span></button>
+          </section>
+
+          <section class="rail-card obs-home">
+            <div class="rail-title"><b>OBS sync</b><span>${state.session.obsSyncedAt?'Ready':'Not synced'}</span></div>
+            <small>Offset</small>
+            <strong>${formatOffset()}</strong>
+            <button data-go="record">Sync in Studio</button>
+          </section>
+
+          <section class="rail-card">
+            <div class="rail-title"><b>Recording health</b><span>All good</span></div>
+            ${systemChecks().map(row=>`<div class="health-line"><span>${row[0]}</span><b class="${row[2]}">${row[1]}</b></div>`).join('')}
+          </section>
+        </aside>
+      </div>
+    </div>`;
   document.querySelectorAll('[data-go]').forEach(button=>button.onclick=()=>setView(button.dataset.go));
-  el('homeRemote').onclick=()=>setMobileRecordingMode(true);
   el('homeNewSession').onclick=openNewSessionModal;
-  el('homeBackup').onclick=()=>{saveSnapshot('manual dashboard backup');toast('Backup created')};
   el('homePacket').onclick=openProductionPacketModal;
 }
 function producerMessage(){
@@ -512,8 +554,120 @@ function record(){
   const seg=state.segments[state.currentSegment]||'—';
   const q=state.questions[state.currentQuestion]||'No question selected';
   const nextSeg=state.segments[state.currentSegment+1]||'Wrap';
-  const recovery=recoveredRunningSession?`<div class="recovery-banner">↻ Recovered your active recording session. Timer and markers were preserved.</div>`:'';
-  el('record').innerHTML=`${recovery}<div class="mobile-mode-launch"><div><strong>Recording Remote</strong><small>Open the simplified timer + marker buttons view.</small></div><button class="btn teal mobile-mode-toggle" id="openMobileMode">Open Recording Remote</button></div><div class="section-head"><div><div class="eyebrow">Record</div><h2>Run the room. Mark the moments.</h2></div><div class="button-row"><button class="btn" id="newSessionBtn">New Session</button><button class="btn ${state.running?'danger':'primary'}" id="timerBtn">${state.running?'Pause timer':'Start recording timer'}</button><button class="btn" id="testModeBtn">${testMode?'End Test':'Test Recording Mode'}</button><button class="btn finish-btn" id="finishRecording">Finish recording →</button></div></div><div class="record-status-row"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><span class="save-state" id="saveState"></span></div><div class="record-command"><div class="record-command-side"><span class="record-command-label">Episode</span><span class="record-command-value">${esc(state.episode.number||'—')} · ${esc(state.episode.title||'Untitled')}</span><span class="record-progress">Segment ${state.currentSegment+1} of ${state.segments.length}</span></div><div><div class="record-command-timer" id="commandTimer">${fmt(currentElapsed())}</div><div class="record-command-status"><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span></div></div><div class="record-command-side right"><span class="record-command-label">Current</span><span class="record-command-value">${esc(seg)}</span><span class="record-progress">Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span></div></div><div class="producer-strip"><span class="producer-strip-title">Producer</span>${producerStrip()}</div><div class="session-lock-banner"><div><strong>${activeSession()?'Session locked':'Session ready'}</strong><small>${activeSession()?'Episode changes are protected until you finish the session.':'Starting the timer will lock this episode as the active session.'}</small></div><span class="save-state">${activeSession()?'Protected':'Unlocked'}</span></div><div class="marker-confirm-tray" id="markerConfirmTray" hidden><div class="marker-confirm-copy" id="markerConfirmCopy"></div><div class="marker-confirm-actions"><button class="btn" id="trayUndo">Undo</button><button class="btn teal" id="trayAddNote">Add note</button></div></div><div class="record-shell ${state.running?'recording-active':''}"><article class="card record-main"><div class="test-banner" ${testMode?'':'hidden'}><span><strong>Test Recording Mode</strong><br><small>Practice safely, then restore your episode.</small></span><button class="btn" id="endTestMode">End Test</button></div><div class="mobile-remote-topbar"><div><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><div class="wake-status ${wakeLock?'active':''}" id="wakeStatus">${wakeLock?'Screen awake':'Screen may sleep'}</div></div><button class="mobile-remote-exit" id="exitMobileMode">Done</button></div><div class="remote-episode-line"><span>EP ${esc(state.episode.number)}</span><b>${esc(state.episode.title)}</b></div><div class="timer" id="timer">${fmt(currentElapsed())}</div><div class="current-focus"><div class="focus-segment">${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</div><h3>${esc(q)}</h3><div class="focus-next">Next segment: ${esc(nextSeg)}</div></div><div class="record-toolbar"><button class="btn" id="prevSeg">← Segment</button><button class="btn teal" id="nextSeg">Next Segment →</button><button class="btn" id="prevQ">← Question</button><button class="btn" id="nextQ">Next Question →</button><button class="btn" id="minusFive">Timer −5 sec</button><button class="btn" id="plusFive">Timer +5 sec</button></div><div class="mobile-remote-controls"><button class="btn ${state.running?'danger':'primary'} mobile-record-button" id="mobileTimerBtn">${state.running?'Pause':'Start Recording'}</button><button class="btn remote-undo-button" id="remoteUndo">Undo</button></div><div class="marker-summary">${markerSummary()}</div><div class="remote-marker-grid">${remoteMarkerButtons()}</div><div class="marker-grid desktop-marker-grid">${[['😂','Funny'],['❤️','Highlight'],['✂️','Cut'],['⚠️','Sensitive'],['💡','Future Episode'],['📞','Hotline Callback'],['🔁','Running Joke'],['📝','Edit Note'],['⭐','Best Moment']].map(m=>`<button class="marker" data-marker="${m[1]}"><div style="font-size:25px;margin-bottom:7px">${m[0]}</div>${m[1]}</button>`).join('')}</div><div class="quick-note"><input class="input" id="quickNote" placeholder="Quick timestamped note…"><button class="btn teal" id="saveQuickNote">Save Note</button></div><div class="marker-feedback" id="markerFeedback" ${lastMarkerUndo?'':'hidden'}><span><b>✓ ${lastMarkerUndo?esc(lastMarkerUndo.type):''}</b> saved at ${lastMarkerUndo?fmt(lastMarkerUndo.time):'00:00:00'}</span><button class="btn" id="undoMarker">Undo</button></div></article><aside class="record-side-stack"><section class="card"><div class="eyebrow">Timeline</div><h3>Editing map</h3><div class="timeline">${timeline()}</div></section><section class="record-mini-card"><h3>Tonight’s must-mentions</h3><div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div></section><section class="record-mini-card obs-sync-card"><h3>OBS sync</h3><p class="muted">Correct exported timestamps without needing WebSocket control.</p><div class="obs-offset-display"><div><small>Export offset</small><strong>${formatOffset()}</strong></div><span class="sync-status ${state.session.obsSyncedAt?'ready':''}">${state.session.obsSyncedAt?'✓ Synced':'Not synced'}</span></div><div class="obs-offset-controls"><button class="btn" data-obs-offset="-5">−5s</button><button class="btn" data-obs-offset="-1">−1s</button><button class="btn" data-obs-offset="1">+1s</button><button class="btn" data-obs-offset="5">+5s</button></div><button class="btn teal" id="syncObsNow" style="width:100%;margin-top:8px">Sync OBS Now</button></section><section class="record-mini-card"><h3>Recording health</h3><div class="record-health">${healthRows()}</div></section><section class="record-mini-card"><h3>Marker heatmap</h3><p class="muted">See the balance of usable moments.</p><div class="marker-heatmap">${heatmap()}</div></section><section class="record-mini-card"><h3>Real episode test</h3><div class="record-test-checklist">${['Prepare episode','Start timer','Tap every marker once','Pause and resume','Refresh browser','Recover session','Open mobile view','Finish recording','Export editing notes','Confirm Wrap data'].map((item,index)=>`<label class="record-test-check"><input type="checkbox" data-test-check="${index}" ${((state.testChecklist||[])[index])?'checked':''}> <span>${item}</span></label>`).join('')}</div></section><section class="record-mini-card safety-card"><h3>Safety backups</h3><p class="muted">Podcast Brain keeps the latest three snapshots.</p><div class="safety-list">${readSnapshots().length?readSnapshots().map(snapshot=>`<div class="safety-row"><div><b>${new Date(snapshot.savedAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</b><small>${esc(snapshot.reason)}</small></div><button class="btn" data-snapshot="${snapshot.id}">Restore</button></div>`).join(''):'<div class="muted">No snapshots saved yet.</div>'}</div><button class="btn" id="saveSnapshot" style="margin-top:10px">Save backup now</button></section><section class="record-mini-card"><h3>Keyboard shortcuts</h3><div class="shortcuts"><kbd>Space</kbd><span>Start / pause</span><kbd>F</kbd><span>Funny marker</span><kbd>H</kbd><span>Highlight marker</span><kbd>C</kbd><span>Cut marker</span><kbd>R</kbd><span>Running joke</span><kbd>→</kbd><span>Next question</span><kbd>⇧ →</kbd><span>Next segment</span><kbd>⌘ Z</kbd><span>Undo marker</span></div></section></aside></div>`;
+  const recovery=recoveredRunningSession?`<div class="recovery-banner">↻ Active session recovered. Timer and markers were preserved.</div>`:'';
+
+  el('record').innerHTML=`${recovery}
+    <div class="studio-42">
+      <header class="studio-top">
+        <div>
+          <div class="eyebrow">Episode ${esc(state.episode.number)}</div>
+          <h2>${esc(state.episode.title)}</h2>
+        </div>
+        <div class="studio-top-actions">
+          <button class="btn" id="newSessionBtn">New Session</button>
+          <button class="btn" id="testModeBtn">${testMode?'End Test':'Test Mode'}</button>
+          <button class="btn" id="finishRecording">Finish</button>
+        </div>
+      </header>
+
+      <section class="studio-live-bar">
+        <span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span>
+        <div class="studio-live-timer" id="commandTimer">${fmt(currentElapsed())}</div>
+        <button class="studio-start ${state.running?'pause':''}" id="timerBtn">${state.running?'Pause':'Start Recording'}</button>
+        <button class="studio-remote" id="openMobileMode">Open Remote</button>
+      </section>
+
+      <div class="studio-workspace">
+        <main class="studio-primary">
+          <section class="prompt-card">
+            <div class="prompt-meta">
+              <span>${esc(seg)} · ${state.currentSegment+1} of ${state.segments.length}</span>
+              <span>Question ${state.questions.length?state.currentQuestion+1:0} of ${state.questions.length}</span>
+            </div>
+            <h3>${esc(q)}</h3>
+            <p>Next: ${esc(nextSeg)}</p>
+            <div class="prompt-controls">
+              <button id="prevSeg">← Segment</button>
+              <button id="nextSeg">Next Segment →</button>
+              <button id="prevQ">← Question</button>
+              <button id="nextQ">Next Question →</button>
+            </div>
+          </section>
+
+          <section class="marker-deck">
+            <div class="deck-head">
+              <div><div class="section-label">Live markers</div><h3>Mark the moment.</h3></div>
+              <div class="deck-tools">
+                <button id="minusFive">−5s</button>
+                <button id="plusFive">+5s</button>
+                <button id="undoMarker">Undo</button>
+              </div>
+            </div>
+            <div class="marker-grid-42">
+              ${[
+                ['😂','Funny'],['❤️','Highlight'],['🎬','Reel'],['⭐','Best Moment'],
+                ['✂️','Cut'],['⚠️','Sensitive'],['📝','Edit Note'],['🔁','Running Joke'],
+                ['📞','Hotline Callback'],['💡','Future Episode']
+              ].map(m=>`<button data-marker="${m[1]}"><i>${m[0]}</i><span>${m[1].replace(' Episode','').replace(' Callback','').replace(' Moment','')}</span></button>`).join('')}
+            </div>
+            <div class="note-row">
+              <input class="input" id="quickNote" placeholder="Add a timestamped note…">
+              <button id="saveQuickNote">Save Note</button>
+            </div>
+          </section>
+
+          <section class="timeline-42">
+            <div class="deck-head"><div><div class="section-label">Editing map</div><h3>${state.markers.length?`${state.markers.length} moments captured`:'Your timeline starts here'}</h3></div></div>
+            <div class="timeline">${timeline()}</div>
+          </section>
+        </main>
+
+        <aside class="studio-rail">
+          <section class="rail-card">
+            <div class="rail-title"><b>Must-mentions</b><span>${state.mustMentions.filter(x=>!x.done).length} left</span></div>
+            <div class="record-mentions">${state.mustMentions.map((x,i)=>`<label class="check"><input type="checkbox" data-record-mention="${i}" ${x.done?'checked':''}><span>${esc(x.text)}</span></label>`).join('')}</div>
+          </section>
+
+          <section class="rail-card obs-sync-card">
+            <div class="rail-title"><b>OBS sync</b><span>${state.session.obsSyncedAt?'Ready':'Not synced'}</span></div>
+            <div class="obs-number">${formatOffset()}</div>
+            <div class="obs-buttons">
+              <button data-obs-offset="-5">−5s</button><button data-obs-offset="-1">−1s</button>
+              <button data-obs-offset="1">+1s</button><button data-obs-offset="5">+5s</button>
+            </div>
+            <button class="gradient-action" id="syncObsNow">Sync OBS Now</button>
+          </section>
+
+          <section class="rail-card">
+            <div class="rail-title"><b>Recording health</b><span>All good</span></div>
+            <div class="record-health">${healthRows()}</div>
+            <button class="subtle-button" id="saveSnapshot">Save backup now</button>
+          </section>
+
+          <details class="studio-utility">
+            <summary>Advanced tools</summary>
+            <div>
+              <button id="mobileTimerBtn">${state.running?'Pause':'Start Recording'}</button>
+              <button id="remoteUndo">Undo Marker</button>
+              <div class="record-test-checklist">${['Prepare episode','Start timer','Tap every marker once','Pause and resume','Refresh browser','Recover session','Open mobile view','Finish recording','Export editing notes','Confirm Wrap data'].map((item,index)=>`<label><input type="checkbox" data-test-check="${index}" ${((state.testChecklist||[])[index])?'checked':''}> ${item}</label>`).join('')}</div>
+            </div>
+          </details>
+        </aside>
+      </div>
+
+      <div class="mobile-remote-topbar">
+        <div><span class="live-recording ${state.running?'active':''}"><i></i>${state.running?'RECORDING':'STANDBY'}</span><div class="wake-status">${wakeLock?'Screen awake':'Screen may sleep'}</div></div>
+        <button id="exitMobileMode">Done</button>
+      </div>
+      <div class="remote-episode-line"><span>EP ${esc(state.episode.number)}</span><b>${esc(state.episode.title)}</b></div>
+      <div class="remote-timer" id="timer">${fmt(currentElapsed())}</div>
+      <div class="remote-main-control">
+        <button class="${state.running?'pause':''}" id="mobileTimerBtn">${state.running?'Ⅱ':'●'}<span>${state.running?'Pause':'Start'}</span></button>
+        <button id="remoteUndo">↶<span>Undo</span></button>
+      </div>
+      <div class="remote-marker-grid">${remoteMarkerButtons()}</div>
+      <div class="marker-confirm-tray" id="markerConfirmTray" hidden><div id="markerConfirmCopy"></div><button id="trayUndo">Undo</button><button id="trayAddNote">Add note</button></div>
+    </div>`;
   bindRecord();
   updateSaveState();
   recoveredRunningSession=false;
