@@ -102,12 +102,6 @@
       admitted: false,
       checkInStage: 'tech',
       checkInCompletedAt: null,
-      waitingSince: null,
-      invitedAt: null,
-      status: 'invited',
-      admitted: false,
-      checkInStage: 'tech',
-      checkInCompletedAt: null,
       waitingSince: null
     },
     studio: {
@@ -457,24 +451,7 @@
   }
 
   function applyUrlParams() {
-    const params = new URLSearchParams(window.location.search || '');
-    if (!params.toString()) return getState();
-    return update((next) => {
-      const guestName = params.get('guest');
-      if (guestName) next.guest.name = guestName;
-      if (params.has('pronouns')) next.guest.pronouns = params.get('pronouns') || '';
-      if (params.has('title')) next.guest.title = params.get('title') || '';
-      if (params.has('social')) next.guest.social = params.get('social') || '';
-      if (params.has('promo')) next.guest.promo = params.get('promo') || '';
-      if (params.has('season')) next.episode.season = params.get('season') || next.episode.season;
-      if (params.has('episode')) next.episode.number = params.get('episode') || next.episode.number;
-      if (params.has('episodeTitle')) next.episode.title = params.get('episodeTitle') || next.episode.title;
-      if (params.has('topic')) next.episode.mainTopic = params.get('topic') || next.episode.mainTopic;
-      if (guestName) {
-        next.guest.status = next.guest.ready ? next.guest.status : 'invited';
-        next.guest.admitted = false;
-      }
-    }, 'guest-url-params');
+    return getState();
   }
 
   window.TTStudio = {

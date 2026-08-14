@@ -1,10 +1,8 @@
-# Guest Studio 5.0
+# Guest Studio 4.4
 
-Guest Studio 5.0 removes the overbuilt producer dashboard and makes the root application guest-first.
+Guest First is a scope reset.
 
-The existing trusted workflow remains:
-OBS records video.
-The podcast recorder captures audio.
-Guest Studio handles the guest.
+The root app is now a Guest Hub instead of a producer dashboard. OBS and the dedicated podcast recorder remain responsible for recording.
 
-The main screen is now an invitation/status desk, while the guest gets a private professional check-in and green-room experience.
+The Studio now focuses on:
+Invite → Tech Check → Green Room → Admit → Record → Complete.

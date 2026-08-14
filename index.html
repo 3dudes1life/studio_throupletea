@@ -3,142 +3,143 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#06070b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Throuple Tea Guest Studio 5.0</title>
-  <link rel="stylesheet" href="guest-desk.css?v=5.0">
+  <meta name="theme-color" content="#06080d">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Throuple Tea Guest Hub 4.4</title>
+  <link rel="stylesheet" href="guest-hub.css?v=4.4">
 </head>
 <body>
-  <div class="desk-shell">
-    <header class="desk-topbar">
-      <a class="desk-brand" href="./">
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
         <img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea">
-        <span><strong>Throuple Tea Studio</strong><small>Guest Studio 5.0</small></span>
-      </a>
-      <div class="desk-top-actions">
-        <span class="desk-save" id="saveState"><i></i>Saved locally</span>
-        <a class="secondary-btn" href="host.html">Host Control</a>
+        <div><strong>Throuple Tea</strong><span>Guest Studio</span></div>
       </div>
-    </header>
 
-    <main class="desk-main">
-      <section class="desk-hero">
-        <div class="hero-copy">
-          <div class="eyebrow">Guest-first production</div>
-          <h1>Book the guest.<br><span>We’ll handle the room.</span></h1>
-          <p>This Studio no longer tries to replace OBS or your podcast recorder. You start those exactly like you already do. This screen is for one thing: making a guest feel like they walked into a real show.</p>
+      <nav>
+        <button class="active" data-tab="guests"><span>👥</span>Guests</button>
+        <a href="host.html"><span>🎙️</span>Guest Control</a>
+        <a href="guest.html" target="_blank" rel="noopener"><span>🔗</span>Guest Lounge</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="hosts">
+          <div class="host-dots"><span>W</span><span>D</span><span>C</span></div>
+          <strong>William · Daniel · Caleb</strong>
+          <small>3Dudes1Life</small>
         </div>
-        <div class="hero-state">
-          <span class="hero-state-label">Current guest</span>
-          <strong id="currentGuestName">No guest yet</strong>
-          <small id="currentGuestStatus">Create an invitation to begin.</small>
-          <div class="status-track"><i id="statusTrack"></i></div>
+        <div class="ready-chip"><i></i><span><b>Guest system ready</b><small>OBS stays separate</small></span></div>
+        <div class="version">Guest Studio 4.4</div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <header class="page-top">
+        <div>
+          <div class="eyebrow">A Little Throuple Tea</div>
+          <h1>Guest Hub</h1>
+          <p>Invite someone, get them checked in, and bring them into the conversation.</p>
         </div>
-      </section>
+        <button class="primary" id="inviteGuest">＋ Invite Guest</button>
+      </header>
 
-      <section class="desk-grid">
-        <article class="desk-card invite-card">
-          <div class="card-header">
-            <div>
-              <div class="eyebrow">1 · Invite</div>
-              <h2>Build the private guest link.</h2>
-              <p>Everything entered here is pre-filled for the guest and saved into the host intro card.</p>
+      <div class="tabs">
+        <button class="active">Current Guest</button>
+        <button id="openGuestLounge">Open Guest Lounge</button>
+      </div>
+
+      <section class="guest-card" id="guestCard">
+        <div class="guest-main">
+          <div class="guest-avatar" id="guestAvatar">G</div>
+          <div class="guest-copy">
+            <div class="guest-headline">
+              <h2 id="guestName">No guest yet</h2>
+              <span class="status invited" id="guestStatus"><i></i>Not invited</span>
             </div>
-            <span class="step-badge">Start here</span>
+            <p id="guestRole">Create a private guest link when you are ready.</p>
+            <div class="guest-meta">
+              <span id="guestSocial">No social added</span>
+              <span id="episodeLabel">Episode —</span>
+            </div>
           </div>
-
-          <div class="form-grid">
-            <label><span>Guest name</span><input id="guestName" placeholder="Guest name"></label>
-            <label><span>Pronouns</span><input id="guestPronouns" placeholder="Optional"></label>
-            <label><span>Title / what they do</span><input id="guestTitle" placeholder="Actor, author, creator…"></label>
-            <label><span>Social handle</span><input id="guestSocial" placeholder="@handle"></label>
-            <label class="full"><span>What should we plug?</span><textarea id="guestPromo" placeholder="Project, show, book, tour, release date, website…"></textarea></label>
-            <label><span>Season</span><input id="season" inputmode="numeric"></label>
-            <label><span>Episode</span><input id="episodeNumber" inputmode="numeric"></label>
-            <label class="full"><span>Working episode title</span><input id="episodeTitle"></label>
-            <label class="full"><span>Main topic / guest context</span><textarea id="episodeTopic"></textarea></label>
+          <div class="guest-actions">
+            <button class="gradient" id="copyGuestLink">🔗 Guest Link</button>
+            <small id="guestLinkHint">Create the guest first</small>
           </div>
-
-          <div class="invite-preview">
-            <div>
-              <small>Guest will see</small>
-              <strong id="invitePreviewName">Private Guest Lounge</strong>
-              <span id="invitePreviewMeta">Add the guest details above.</span>
-            </div>
-            <button class="primary-btn" id="createInvite">Create Guest Link</button>
-          </div>
-
-          <div class="link-box" id="linkBox" hidden>
-            <div>
-              <small>Private guest link</small>
-              <input id="guestLink" readonly>
-            </div>
-            <button class="primary-btn" id="copyLink">Copy Link</button>
-            <a class="secondary-btn" id="previewLink" target="_blank" rel="noopener">Preview</a>
-          </div>
-        </article>
-
-        <aside class="desk-side">
-          <article class="desk-card guest-state-card">
-            <div class="card-header compact">
-              <div><div class="eyebrow">2 · Guest status</div><h2>Guest room</h2></div>
-              <span class="live-chip" id="guestChip"><i></i>Not invited</span>
-            </div>
-            <div class="guest-state">
-              <div class="guest-avatar" id="guestInitial">?</div>
-              <div><strong id="sideGuestName">Waiting for guest</strong><span id="sideGuestMeta">No invitation created yet.</span></div>
-            </div>
-            <div class="status-list">
-              <div><span>Invitation</span><b id="inviteStatus">Not created</b></div>
-              <div><span>Tech check</span><b id="techStatus">Waiting</b></div>
-              <div><span>Intro + promo</span><b id="introStatus">Waiting</b></div>
-              <div><span>Green room</span><b id="greenStatus">Waiting</b></div>
-            </div>
-            <div class="side-actions">
-              <a class="primary-btn" href="host.html">Open Host Control</a>
-              <a class="secondary-btn" href="guest.html" target="_blank">Open Guest Lounge</a>
-            </div>
-          </article>
-
-          <article class="desk-card simple-card">
-            <div class="eyebrow">3 · Record</div>
-            <h2>Keep your recording setup.</h2>
-            <div class="record-stack">
-              <div><i>1</i><span><strong>Start OBS</strong><small>Your video recording stays exactly as-is.</small></span></div>
-              <div><i>2</i><span><strong>Start your podcast recorder</strong><small>Your separate audio stays exactly as-is.</small></span></div>
-              <div><i>3</i><span><strong>Bring the guest in</strong><small>Host Control handles the guest experience.</small></span></div>
-            </div>
-            <p class="quiet-note">No fake OBS sync. No duplicate timer. No producer dashboard pretending to replace the tools you already trust.</p>
-          </article>
-        </aside>
-      </section>
-
-      <section class="desk-card day-of-card">
-        <div class="card-header">
-          <div><div class="eyebrow">Day of the interview</div><h2>The entire flow in one line.</h2></div>
         </div>
-        <div class="day-flow">
-          <div><i>✓</i><strong>Guest link</strong><span>They check camera, mic, intro and promo.</span></div>
-          <b>→</b>
-          <div><i>✓</i><strong>Green room</strong><span>They wait in a private branded room.</span></div>
-          <b>→</b>
-          <div><i>✓</i><strong>Admit</strong><span>You bring them in from Host Control.</span></div>
-          <b>→</b>
-          <div><i>●</i><strong>Record</strong><span>OBS + podcast recorder, like always.</span></div>
-          <b>→</b>
-          <div><i>♥</i><strong>Thank you</strong><span>Guest gets a clean post-show exit.</span></div>
+
+        <div class="journey">
+          <div class="journey-step" data-step="invited"><i>✉️</i><b>Invited</b></div>
+          <span>→</span>
+          <div class="journey-step" data-step="tech"><i>🎧</i><b>Tech Check</b></div>
+          <span>→</span>
+          <div class="journey-step" data-step="waiting"><i>🚪</i><b>Green Room</b></div>
+          <span>→</span>
+          <div class="journey-step" data-step="admitted"><i>🎥</i><b>In Studio</b></div>
+          <span>→</span>
+          <div class="journey-step" data-step="recording"><i>🔴</i><b>Recording</b></div>
+          <span>→</span>
+          <div class="journey-step" data-step="complete"><i>✓</i><b>Complete</b></div>
         </div>
       </section>
 
-      <section class="transport-note">
-        <span>Next engineering target</span>
-        <strong>Live guest video/audio transport → OBS.</strong>
-        <p>The guest UX is now separated from your recording workflow. The next build can focus only on WebRTC/signaling and the OBS connection instead of redesigning the whole app again.</p>
+      <section class="quick-grid">
+        <button class="quick-card" id="quickInvite"><i>🔗</i><span><b>Invite a Guest</b><small>Create their private link</small></span></button>
+        <a class="quick-card" href="host.html"><i>🎙️</i><span><b>Guest Control</b><small>Admit and manage the guest</small></span></a>
+        <button class="quick-card" id="copyGuide"><i>?</i><span><b>Guest Guide</b><small>Copy simple prep instructions</small></span></button>
       </section>
-    </main>
-  </div>
-  <div class="desk-toast" id="toast"></div>
-  <script src="shared-state.js?v=5.0"></script>
-  <script src="guest-desk.js?v=5.0"></script>
+
+      <section class="experience">
+        <div class="section-title">The guest experience</div>
+        <div class="experience-row">
+          <div><i>✉️</i><b>Invite</b><span>Private link</span></div>
+          <em>→</em>
+          <div><i>🎧</i><b>Tech Check</b><span>Camera + mic</span></div>
+          <em>→</em>
+          <div><i>🚪</i><b>Green Room</b><span>Wait comfortably</span></div>
+          <em>→</em>
+          <div><i>🎥</i><b>Studio</b><span>Hosts admit them</span></div>
+          <em>→</em>
+          <div><i>🔴</i><b>Record</b><span>OBS + recorder</span></div>
+          <em>→</em>
+          <div><i>✓</i><b>Done</b><span>Thank-you exit</span></div>
+        </div>
+      </section>
+
+      <section class="value-row">
+        <div><i>🔒</i><span><b>Private</b><small>Guest-only check-in link</small></span></div>
+        <div><i>✨</i><span><b>Easy</b><small>No producer dashboard for guests</small></span></div>
+        <div><i>🎧</i><span><b>Professional</b><small>Camera, mic and headphone check</small></span></div>
+        <div><i>❤️</i><span><b>Human</b><small>Feels like your show, not enterprise software</small></span></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="inviteDialog">
+    <form method="dialog" class="dialog-card" id="inviteForm">
+      <div class="dialog-head">
+        <div><div class="eyebrow">Private invitation</div><h2>Invite a guest</h2><p>This builds the link they will use for check-in.</p></div>
+        <button class="icon-close" value="cancel" aria-label="Close">×</button>
+      </div>
+      <div class="form-grid">
+        <label><span>Name</span><input id="inviteName" required></label>
+        <label><span>Pronouns</span><input id="invitePronouns" placeholder="Optional"></label>
+        <label><span>Title / what they do</span><input id="inviteTitle"></label>
+        <label><span>Social handle</span><input id="inviteSocial" placeholder="@handle"></label>
+        <label class="full"><span>What should we promote?</span><textarea id="invitePromo"></textarea></label>
+        <label><span>Season</span><input id="inviteSeason"></label>
+        <label><span>Episode</span><input id="inviteEpisode"></label>
+        <label class="full"><span>Episode title</span><input id="inviteEpisodeTitle"></label>
+      </div>
+      <div class="dialog-actions">
+        <button value="cancel">Cancel</button>
+        <button class="primary" id="saveInvite" value="default">Create Guest Link</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+  <script src="shared-state.js"></script>
+  <script src="guest-hub.js?v=4.4"></script>
 </body>
 </html>

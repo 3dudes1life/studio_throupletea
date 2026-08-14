@@ -1,47 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#05070b">
-  <title>Green Room — A Little Throuple Tea</title>
-  <link rel="stylesheet" href="guest-experience.css?v=5.0">
-</head>
-<body class="guest-os">
-  <main class="green-room">
-    <header class="green-topbar">
-      <a class="guest-brand" href="#"><img src="assets/podcast-artwork.jpg" alt=""><span><strong>A Little Throuple Tea</strong><span>Private Guest Studio</span></span></a>
-      <span class="guest-status ready"><i></i><span id="roomStatus">Green room</span></span>
-    </header>
-    <section class="green-main">
-      <div class="green-video">
-        <video id="roomVideo" playsinline muted></video>
-        <div class="preview-placeholder" id="roomPreviewEmpty"><div><i>🎥</i><strong>Starting your camera…</strong><span>Keep this tab open.</span></div></div>
-        <div class="green-video-overlay"><span class="name-badge" id="guestBadge">Guest</span><span class="conn-badge" id="connectionBadge">Local preview ready</span></div>
-      </div>
-      <aside class="green-side">
-        <section class="green-card">
-          <div class="guest-eyebrow">Green room</div>
-          <h1 id="roomHeadline">You’re in.</h1>
-          <div class="waiting-pulse" id="waitingPulse"><i></i><span id="waitingText">Waiting for the hosts to bring you in.</span></div>
-          <p id="roomDetail">Relax, keep your headphones on, and leave this tab open. We’ll let you know when the room is ready.</p>
-        </section>
-        <section class="green-card">
-          <h2>When we start</h2>
-          <p>You’ll see a clear recording indicator. Keep your camera tab open, stay on headphones, and talk naturally—William, Daniel and Caleb will guide the conversation.</p>
-        </section>
-        <section class="green-card">
-          <h2>Host feed</h2>
-          <div class="host-placeholder"><div><i>🎙️</i><span id="hostFeedText">The live host feed connects here when the remote transport is enabled.</span></div></div>
-        </section>
-      </aside>
-    </section>
-    <footer class="room-controls">
-      <button class="room-control" id="toggleMic"><i>🎙️</i><span>Mute</span></button>
-      <button class="room-control" id="toggleCamera"><i>🎥</i><span>Camera</span></button>
-      <button class="room-control leave" id="leaveRoom"><i>↗</i><span>Leave</span></button>
-    </footer>
-  </main>
-  <div class="toast-guest" id="toast"></div>
-  <script src="shared-state.js"></script><script src="media-tools.js"></script><script src="guest-room.js?v=5.0"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#05070b"><title>Green Room — A Little Throuple Tea</title><link rel="stylesheet" href="guest-room.css?v=4.4"></head><body>
+<main class="room"><header><div class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>A Little Throuple Tea</b><small>Guest Studio</small></span></div><span class="rec-pill" id="roomStatus"><i></i>Green Room</span></header>
+<section class="room-grid"><div class="video-card"><video id="roomVideo" playsinline muted></video><div class="placeholder" id="roomEmpty">Starting camera…</div><span class="name" id="guestBadge">Guest</span></div><aside><div class="state-card"><div class="eyebrow">Guest status</div><h1 id="headline">You’re in.</h1><div class="waiting" id="waiting"><i></i><span id="waitingText">Waiting for the hosts to bring you in.</span></div><p id="detail">Keep your headphones on and this tab open.</p></div><div class="state-card"><div class="eyebrow">Hosts</div><div class="host-placeholder">🎙️<span>Host video/audio connects here when the live remote transport is enabled.</span></div></div><div class="state-card health"><span>Connection</span><b id="connection">Camera preview ready</b></div></aside></section>
+<footer><button id="mic">🎙️<span>Mute</span></button><button id="camera">🎥<span>Camera</span></button><button class="leave" id="leave">↗<span>Leave</span></button></footer></main>
+<div class="toast" id="toast"></div><script src="shared-state.js"></script><script src="media-tools.js"></script><script src="guest-room.js?v=4.4"></script></body></html>

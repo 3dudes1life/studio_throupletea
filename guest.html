@@ -1,130 +1,20 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#05070b">
-  <title>Private Guest Lounge — A Little Throuple Tea</title>
-  <link rel="stylesheet" href="guest-experience.css?v=5.0">
-</head>
-<body class="guest-os">
-  <main class="guest-shell">
-    <header class="guest-topbar">
-      <a class="guest-brand" href="#">
-        <img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea">
-        <span><strong>A Little Throuple Tea</strong><span>Private Guest Lounge</span></span>
-      </a>
-      <span class="guest-status" id="readyPill"><i></i><span>Check-in in progress</span></span>
-    </header>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#05070b"><title>Guest Lounge — A Little Throuple Tea</title><link rel="stylesheet" href="guest.css?v=4.4"></head>
+<body>
+<main class="shell">
+<header class="top"><div class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>A Little Throuple Tea</b><span>Private Guest Lounge</span></span></div><span class="pill" id="readyPill"><i></i><span>Check-in</span></span></header>
+<section class="hero"><div class="eyebrow">You’re our guest</div><h1 id="welcomeTitle">Welcome.<span>We’ll handle the tech.</span></h1><p>About one minute of setup, then you can relax in the green room until William, Daniel and Caleb are ready.</p><div class="episode"><img src="assets/podcast-artwork.jpg" alt=""><div><b id="episodeTitle">Loading episode…</b><span id="episodeMeta"></span><span id="episodeTopic"></span></div></div></section>
+<nav class="steps"><button data-stage="tech" class="active"><i>1</i>Tech</button><b></b><button data-stage="intro"><i>2</i>Intro</button><b></b><button data-stage="prep"><i>3</i>Ready</button><b></b><button data-stage="done"><i>4</i>Green Room</button></nav>
 
-    <section class="guest-hero">
-      <div class="guest-eyebrow">You’re our guest</div>
-      <h1 id="welcomeTitle">Welcome.<span>We’ll handle the tech.</span></h1>
-      <p>Take about a minute to check your camera and audio. After that, you’ll wait comfortably in the green room until William, Daniel and Caleb are ready for you.</p>
-      <div class="episode-pill">
-        <img src="assets/podcast-artwork.jpg" alt="">
-        <div><strong id="episodeTitle">Loading episode…</strong><span id="episodeMeta"></span><span id="episodeTopic"></span></div>
-      </div>
-    </section>
+<section id="stage-tech" class="stage active"><article class="card"><div class="card-head"><small>Step 1</small><h2>Make sure you look and sound great.</h2><p>Your preview stays in your browser during this check.</p></div><div class="tech-grid"><div class="preview-wrap"><div class="preview"><video id="previewVideo" playsinline muted></video><div class="placeholder" id="previewEmpty"><div><i>🎥</i><b>Camera preview</b><span>Allow camera and microphone access when asked.</span></div></div></div><div class="meter"><i id="audioMeter"></i></div><div class="readiness"><div class="ready"><small>Camera</small><b id="cameraStatus">Waiting</b></div><div class="ready"><small>Mic</small><b id="micStatus">Waiting</b></div><div class="ready"><small>Browser</small><b id="browserStatus">Checking</b></div><div class="ready"><small>Connection</small><b id="networkStatus">Checking</b></div></div></div><aside class="device-panel"><div class="field"><label>Camera</label><select id="cameraSelect"><option value="">Default camera</option></select></div><div class="field"><label>Microphone</label><select id="micSelect"><option value="">Default microphone</option></select></div><div class="buttons"><button class="btn teal" id="testDevices">Start tech check</button><button class="btn" id="testSpeaker">Play sound</button></div><div class="buttons"><button class="btn primary" id="techContinue" disabled>Looks & sounds good →</button></div><div class="help">Headphones are strongly recommended. Face a soft light or window, keep the camera near eye level, and close apps that may be using your microphone.</div></aside></div></article></section>
 
-    <nav class="guest-progress" aria-label="Guest check-in">
-      <button data-stage="tech" class="active"><i>1</i><span>Tech check</span></button><b></b>
-      <button data-stage="intro"><i>2</i><span>Your intro</span></button><b></b>
-      <button data-stage="prep"><i>3</i><span>Ready up</span></button><b></b>
-      <button data-stage="done"><i>4</i><span>Green room</span></button>
-    </nav>
+<section id="stage-intro" class="stage"><article class="card"><div class="card-head"><small>Step 2</small><h2>How should we introduce you?</h2><p>This becomes the hosts’ intro card.</p></div><div class="form"><div class="form-grid"><div class="field"><label>Name</label><input id="guestName"></div><div class="field"><label>Pronouns</label><input id="pronouns"></div><div class="field"><label>Title / what you do</label><input id="guestTitle"></div><div class="field"><label>Social</label><input id="social"></div><div class="field full"><label>What should we plug?</label><textarea id="promo"></textarea></div></div><div class="intro-preview"><small>Host intro</small><b id="introPreviewName">Guest</b><span id="introPreviewMeta"></span><span id="introPreviewPromo"></span></div><div class="buttons"><button class="btn" id="introBack">← Back</button><button class="btn primary" id="introContinue">Save & continue →</button></div></div></article></section>
 
-    <section id="stage-tech" class="guest-stage active">
-      <div class="guest-grid">
-        <article class="guest-card">
-          <div class="guest-card-head"><div><div class="step-kicker">Step 1 · Camera + audio</div><h2>Let’s make sure you look and sound great.</h2><p>Your preview stays in your browser during this check.</p></div></div>
-          <div class="device-main">
-            <div class="device-preview">
-              <video id="previewVideo" playsinline muted></video>
-              <div class="preview-placeholder" id="previewEmpty"><div><i>🎥</i><strong>Camera preview</strong><span>Allow access when your browser asks.</span></div></div>
-              <div class="frame-guide" aria-hidden="true"></div>
-            </div>
-            <div class="audio-meter" aria-label="Microphone level"><span id="audioMeter"></span></div>
-            <div class="readiness-grid">
-              <div class="ready-tile"><small>Camera</small><b id="cameraStatus">Waiting</b></div>
-              <div class="ready-tile"><small>Microphone</small><b id="micStatus">Waiting</b></div>
-              <div class="ready-tile"><small>Browser</small><b id="browserStatus">Checking</b></div>
-              <div class="ready-tile"><small>Connection</small><b id="networkStatus">Checking</b></div>
-            </div>
-          </div>
-        </article>
+<section id="stage-prep" class="stage"><article class="card"><div class="card-head"><small>Step 3</small><h2>Four tiny things, then you’re done.</h2></div><div class="prep"><label><input class="prep-check" type="checkbox"><span><b>Headphones are on</b><span>Prevents echo.</span></span></label><label><input class="prep-check" type="checkbox"><span><b>Notifications are silenced</b><span>No surprise dings mid-story.</span></span></label><label><input class="prep-check" type="checkbox"><span><b>Lighting + framing look good</b><span>Camera near eye level.</span></span></label><label><input class="prep-check" type="checkbox"><span><b>You’re ready to have fun</b><span>Conversation, not press conference.</span></span></label></div><div class="release"><label><input id="releaseAccepted" type="checkbox"><span>I understand this conversation will be recorded and excerpts may be used to promote this episode and A Little Throuple Tea. Any separate formal release provided by the hosts still applies.</span></label></div><div class="buttons" style="padding:0 17px 17px"><button class="btn" id="prepBack">← Back</button><button class="btn primary" id="prepContinue" disabled>Finish check-in →</button></div></article></section>
 
-        <aside class="guest-card">
-          <div class="guest-card-head"><div><div class="step-kicker">Devices</div><h2>Your setup</h2><p>Choose the gear you want to use for the interview.</p></div></div>
-          <div class="device-side">
-            <div class="guest-field"><label for="cameraSelect">Camera</label><select id="cameraSelect"><option value="">Default camera</option></select></div>
-            <div class="guest-field"><label for="micSelect">Microphone</label><select id="micSelect"><option value="">Default microphone</option></select></div>
-            <div class="guest-field"><label for="speakerSelect">Headphones / speakers</label><select id="speakerSelect"><option value="">Default output</option></select></div>
-            <div class="guest-button-row">
-              <button class="guest-btn teal" id="testDevices" type="button">Start tech check</button>
-              <button class="guest-btn" id="testSpeaker" type="button">Play sound</button>
-            </div>
-            <div class="guest-button-row"><button class="guest-btn primary large" id="techContinue" disabled type="button">Looks & sounds good →</button></div>
-            <div class="device-help">
-              <details><summary>Camera or mic not working?</summary><p>Make sure this site is allowed to use your camera and microphone in your browser settings, then reload the page and try again.</p></details>
-              <details><summary>Best setup</summary><p>Headphones are strongly recommended. Face a window or soft light, keep your camera near eye level, and close apps that may be using your microphone.</p></details>
-            </div>
-            <div id="mediaNotice" hidden></div>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="stage-intro" class="guest-stage">
-      <article class="guest-card">
-        <div class="guest-card-head"><div><div class="step-kicker">Step 2 · Your introduction</div><h2>Tell us how you want to be introduced.</h2><p>This goes directly into our host notes so we don’t butcher your title or forget what you’re promoting.</p></div></div>
-        <div class="intro-form">
-          <div class="form-grid-guest">
-            <div class="guest-field"><label for="guestName">Name</label><input id="guestName" autocomplete="name"></div>
-            <div class="guest-field"><label for="pronouns">Pronouns</label><input id="pronouns" placeholder="Optional"></div>
-            <div class="guest-field"><label for="guestTitle">Title / what you do</label><input id="guestTitle"></div>
-            <div class="guest-field"><label for="social">Social handle</label><input id="social" placeholder="@handle"></div>
-            <div class="guest-field full"><label for="promo">What should we mention or plug?</label><textarea id="promo" placeholder="Project, show, book, tour, website, release date…"></textarea></div>
-          </div>
-          <div class="intro-preview"><small>Host intro card</small><strong id="introPreviewName">Guest</strong><span id="introPreviewMeta">Add your title and social.</span><span id="introPreviewPromo"></span></div>
-          <div class="guest-button-row"><button class="guest-btn" id="introBack">← Back</button><button class="guest-btn primary large" id="introContinue">Save & continue →</button></div>
-        </div>
-      </article>
-    </section>
-
-    <section id="stage-prep" class="guest-stage">
-      <article class="guest-card">
-        <div class="guest-card-head"><div><div class="step-kicker">Step 3 · Final check</div><h2>Five tiny things, then you’re done.</h2><p>No producer homework. Just the stuff that makes a remote interview sound professional.</p></div></div>
-        <div class="prep-grid">
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>Headphones are on</b><span>Prevents echo and makes the edit dramatically cleaner.</span></span></label>
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>Notifications are silenced</b><span>Phone, messages, Slack, email—anything that can ding mid-story.</span></span></label>
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>Extra tabs and apps are closed</b><span>Especially anything else that may use your camera or microphone.</span></span></label>
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>Lighting and framing look good</b><span>Camera near eye level, face lit, and a little room above your head.</span></span></label>
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>Water is nearby</b><span>We support tea. We strongly support hydration.</span></span></label>
-          <label class="prep-card"><input class="prep-check" type="checkbox"><span><b>You’re ready to have fun</b><span>It’s a conversation, not a press conference.</span></span></label>
-        </div>
-        <div class="release-card">
-          <label><input id="releaseAccepted" type="checkbox"><span>I understand this conversation will be recorded and that excerpts may be used to promote this episode and A Little Throuple Tea. Any separate formal release or usage agreement provided by the hosts still applies.</span></label>
-        </div>
-        <div class="guest-button-row" style="padding:0 20px 20px"><button class="guest-btn" id="prepBack">← Back</button><button class="guest-btn primary large" id="prepContinue" disabled>Finish check-in →</button></div>
-      </article>
-    </section>
-
-    <section id="stage-done" class="guest-stage">
-      <article class="guest-card ready-panel">
-        <div class="ready-orb">✓</div>
-        <div class="guest-eyebrow">You’re ready</div>
-        <h2 id="doneTitle">We’ll see you in the green room.</h2>
-        <p>Your camera, microphone, introduction and prep are saved. Keep this tab open and we’ll take it from here.</p>
-        <button class="guest-btn primary large" id="enterStudio">Enter Green Room →</button>
-      </article>
-    </section>
-  </main>
-
-  <div class="toast-guest" id="toast" role="status" aria-live="polite"></div>
-  <script src="shared-state.js"></script>
-  <script src="media-tools.js"></script>
-  <script src="guest.js?v=5.0"></script>
-</body>
-</html>
+<section id="stage-done" class="stage"><article class="card ready-final"><div class="orb">✓</div><div class="eyebrow">You’re ready</div><h2>See you in the green room.</h2><p>Keep this tab open. We’ll bring you in when the room is ready.</p><button class="btn primary" id="enterStudio">Enter Green Room →</button></article></section>
+</main>
+<div class="toast" id="toast"></div>
+<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="guest.js?v=4.4"></script>
+</body></html>
