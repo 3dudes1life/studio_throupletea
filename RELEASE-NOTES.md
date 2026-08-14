@@ -1,11 +1,10 @@
-# 4.6 — Production Capture
+# 4.7 — Guest Video ISO
 
-- Dedicated clean OBS Guest Feed
-- Second isolated WebRTC connection for OBS
-- Guest local high-quality ISO audio recording
-- Private ISO upload to Cloudflare R2
-- Host-side ISO upload status
-- Download Guest ISO from Guest Capture
-- PodTrak guest-audio output selector with system-output fallback
-- Start Guest ISO / End + Upload ISO production controls
-- Keeps OBS and PodTrak recording manual by design
+- Adds local guest video master recording
+- Keeps separate local guest audio master
+- Records both from guest-device camera/mic tracks
+- Uploads both privately to existing Cloudflare R2
+- Host waits for both uploads before ending safely
+- Adds Download Guest Audio
+- Adds Download Guest Video
+- No Cloudflare Worker redeploy required

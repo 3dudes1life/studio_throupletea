@@ -1,55 +1,59 @@
-# Throuple Tea Studio 4.6 — Production Capture
+# Throuple Tea Guest Studio 4.7 — Guest Video ISO
 
-This is the OBS + PodTrak + Guest ISO release.
+This is the missing production-test piece.
 
-## Cloudflare — one new storage step
+## Upload ONLY these website files
 
-The high-quality guest audio ISO needs private object storage.
+- index.html
+- host.html
+- guest-control.js
+- guest-control.css
+- guest-room.html
+- guest-room.js
+- guest-room.css
 
-In Terminal inside `cloudflare-signaling-worker`:
+## Cloudflare
 
-```bash
-npm install
-npx wrangler r2 bucket create throuple-tea-guest-iso
-npm run deploy
-```
+NO Worker redeploy is required.
 
-Your existing Worker URL stays the same.
+Your existing 4.6 Worker + R2 bucket already accepts both audio and video objects.
 
-After deploy, open:
+Health can continue to report:
 
-`https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev/health`
+`"version":"4.6","isoStorage":true`
 
-It should show:
-- version: 4.6
-- isoStorage: true
+That is correct. 4.7 is the website/capture layer.
 
-## GitHub
+## What 4.7 adds
 
-Upload the updated website files from this ZIP. Keep your existing assets folder.
+When the host clicks **Start Guest AV ISO**, the guest device records TWO independent local masters:
 
-4.6 adds:
-- `guest-obs.html`
-- `guest-obs.css`
-- `guest-obs.js`
-- updated Guest Control production capture
-- guest local ISO audio recording/upload
-- clean OBS guest feed
-- PodTrak guest-output selection/fallback guidance
+1. Guest Audio ISO
+2. Guest Video + Audio ISO
 
-## Critical first test
+Both are created from the guest's local camera/microphone tracks — not from the internet/WebRTC return.
 
-Do NOT use a real guest first.
+When the host clicks **End + Upload Guest AV**:
 
-Run a 5-minute test:
-1. Connect guest.
-2. Admit.
-3. Verify clean OBS Browser Source.
-4. Verify P4 Track 4 receives guest audio.
-5. Start OBS + P4.
-6. Start Guest ISO.
-7. Talk for 5 minutes.
-8. End + Upload ISO.
-9. Wait for safely uploaded.
-10. Download ISO.
-11. Compare/sync all three recordings.
+- both local recorders stop
+- both files upload privately to the existing R2 bucket
+- Host Control waits for BOTH uploads
+- two download buttons appear:
+  - Download Guest Audio
+  - Download Guest Video
+- only when both are safely received does the host get the safe-to-stop message
+
+## Test workflow
+
+1. Guest connects.
+2. Host admits guest.
+3. OBS records ONLY your full-screen studio camera.
+4. PodTrak records your normal host audio.
+5. Click Start Guest AV ISO.
+6. Record 2–5 minutes.
+7. Click End + Upload Guest AV.
+8. DO NOT stop/clear anything until BOTH Audio and Video say Safely uploaded.
+9. Download both guest files.
+10. Stop OBS/P4 and compare/sync the files.
+
+No guest Browser source needs to be visible on the OBS canvas for the final recording.

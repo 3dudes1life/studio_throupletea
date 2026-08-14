@@ -2,7 +2,7 @@
 'use strict';
 const $=s=>document.querySelector(s);
 const toast=$('#toast');let toastTimer,live=null,hostStream=null,remoteGuest=null;
-let isoDownloadKey='',finishingTimer=null;
+let audioIsoKey='',videoIsoKey='',finishingTimer=null;
 
 function show(msg,error){toast.textContent=msg;toast.style.background=error?'#ff6266':'white';toast.style.color=error?'white':'#111';toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
 function rank(s){return({invited:0,tech:1,ready:1,waiting:2,admitted:3,recording:4,complete:5,left:5})[s]??0}
@@ -80,19 +80,44 @@ function handlePeerMessage(message){
   }
   if(message.type==='control'&&message.action==='iso-started'){
     $('#isoHostStatus').textContent='Recording locally';
-    $('#captureStatus').textContent='Guest ISO recording — start OBS + PodTrak now';
+    $('#audioIsoHostStatus').textContent='Recording';
+    $('#videoIsoHostStatus').textContent='Recording';
+    $('#captureStatus').textContent='Guest audio + video ISOs recording — OBS + PodTrak stay manual';
     $('.capture-state').addClass('recording');
   }
   if(message.type==='control'&&message.action==='iso-upload-complete'){
-    isoDownloadKey=message.value&&message.value.key||'';
-    $('#isoHostStatus').textContent='Safely uploaded ✓';
-    if(isoDownloadKey){$('#downloadIso').href=isoDownloadUrl(isoDownloadKey);$('#downloadIso').hidden=false}
-    finalizeSession('ISO received — safe to stop/close');
+    const payload=message.value||{};
+    audioIsoKey=payload.audio&&payload.audio.key||'';
+    videoIsoKey=payload.video&&payload.video.key||'';
+
+    $('#isoHostStatus').textContent='Both safely uploaded ✓';
+    $('#audioIsoHostStatus').textContent=audioIsoKey?'Safely uploaded ✓':'Missing';
+    $('#videoIsoHostStatus').textContent=videoIsoKey?'Safely uploaded ✓':'Missing';
+    $('#audioIsoHostStatus').classList.toggle('safe',Boolean(audioIsoKey));
+    $('#videoIsoHostStatus').classList.toggle('safe',Boolean(videoIsoKey));
+
+    if(audioIsoKey){
+      $('#downloadAudioIso').href=isoDownloadUrl(audioIsoKey);
+      $('#downloadAudioIso').hidden=false;
+    }
+    if(videoIsoKey){
+      $('#downloadVideoIso').href=isoDownloadUrl(videoIsoKey);
+      $('#downloadVideoIso').hidden=false;
+    }
+
+    if(audioIsoKey&&videoIsoKey){
+      finalizeSession('Guest audio + video safely received — safe to stop OBS/P4');
+    }else{
+      $('#captureStatus').textContent='One guest master is missing — do not clear guest';
+      show('Audio/video ISO set is incomplete. Do not clear the guest.',true);
+    }
   }
   if(message.type==='control'&&message.action==='iso-upload-failed'){
     clearTimeout(finishingTimer);
     $('#isoHostStatus').textContent='Upload failed — keep guest connected';
-    $('#captureStatus').textContent='Guest ISO upload needs attention';
+    $('#audioIsoHostStatus').textContent='Check upload';
+    $('#videoIsoHostStatus').textContent='Check upload';
+    $('#captureStatus').textContent='Guest audio/video upload needs attention';
     show('Guest ISO upload failed. Do not clear the guest yet.',true);
   }
 }
@@ -123,18 +148,22 @@ $('#startCapture').onclick=()=>{
   TTStudio.update(n=>{n.guest.status='recording'},'start-guest-iso');
   if(remoteGuest)remoteGuest.status='recording';
   live.sendControl('start-iso',true);
-  $('#captureStatus').textContent='Starting guest ISO — start OBS + PodTrak now';
+  $('#captureStatus').textContent='Starting guest audio + video ISOs — start OBS + PodTrak now';
   $('#isoHostStatus').textContent='Starting…';
+  $('#audioIsoHostStatus').textContent='Starting…';
+  $('#videoIsoHostStatus').textContent='Starting…';
   $('.capture-state').addClass('recording');
   render(TTStudio.getState());
 };
 $('#finishCapture').onclick=()=>{
-  if(!confirm('End the interview and upload the guest ISO audio? Keep OBS/PodTrak running until the ISO confirms safe.'))return;
+  if(!confirm('End the interview and upload BOTH guest audio + video masters? Keep OBS/PodTrak running until both confirm safe.'))return;
   $('#finishCapture').disabled=true;
-  $('#captureStatus').textContent='Finishing + uploading guest ISO…';
-  $('#isoHostStatus').textContent='Waiting for upload…';
+  $('#captureStatus').textContent='Finishing + uploading guest audio/video…';
+  $('#isoHostStatus').textContent='Waiting for both uploads…';
+  $('#audioIsoHostStatus').textContent='Uploading…';
+  $('#videoIsoHostStatus').textContent='Uploading…';
   live.sendControl('finish-session',true);
-  finishingTimer=setTimeout(()=>{show('Still waiting for the guest ISO upload. Keep the session open.',true);$('#captureStatus').textContent='Still uploading — do not clear guest';},20000);
+  finishingTimer=setTimeout(()=>{show('Still waiting for guest audio/video uploads. Keep the session open.',true);$('#captureStatus').textContent='Still uploading — do not clear guest';},30000);
 };
 $('#admit').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=true;n.guest.status='admitted'},'admit-guest');if(remoteGuest){remoteGuest.admitted=true;remoteGuest.status='admitted'}if(live)live.sendControl('admitted',true);show('Guest admitted');render(TTStudio.getState())};
 $('#return').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='waiting'},'return-guest');if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='waiting'}if(live)live.sendControl('admitted',false);show('Guest returned to Green Room');render(TTStudio.getState())};

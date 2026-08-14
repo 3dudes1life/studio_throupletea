@@ -14,3 +14,5 @@ footer{display:flex;justify-content:center;gap:9px;padding:13px;border-top:1px s
 @media(max-width:760px){.live-stage{grid-template-columns:1fr;align-content:center}.live-card{order:-1}.self-feed{width:118px;left:12px;bottom:25px}.room{padding-bottom:env(safe-area-inset-bottom)}}
 
 #isoStatus.live{color:#ff6f73!important}
+
+#videoIsoStatus.live{color:#ff6f73!important}
