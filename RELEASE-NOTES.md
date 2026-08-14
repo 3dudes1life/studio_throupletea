@@ -1,14 +1,7 @@
-# Guest Studio 4.5 — Live Guest Connection
+# 4.5.1
 
-- Real WebRTC audio/video between host and guest devices
-- Cloudflare Durable Object WebSocket signaling
-- Private room ID + token generated for every new guest invitation
-- Host camera and audio source selection
-- Guest live feed on Host Control
-- Host live feed on Guest Studio
-- WebRTC reconnect behavior
-- Connection state and basic incoming video/network stats
-- Existing Tech Check → Green Room → Admit → Complete guest flow preserved
-- OBS and podcast recorder remain separate and unchanged
-
-This is the connection milestone. The next milestone is OBS capture/routing and production reliability (including TURN).
+- Fixes guest presence/status across separate devices
+- Guest profile/status now travels through the signaling room
+- Durable Object stores latest guest state and replays it to a host joining later
+- Guest Control links now carry private room/token credentials
+- Host Control no longer depends on guest-device localStorage

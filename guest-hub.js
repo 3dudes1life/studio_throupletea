@@ -7,6 +7,12 @@
     toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
   }
   function esc(v){return String(v||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function buildHostUrl(state){
+    const url=new URL('host.html',location.href);
+    if(state.liveRoom&&state.liveRoom.roomId)url.searchParams.set('room',state.liveRoom.roomId);
+    if(state.liveRoom&&state.liveRoom.token)url.searchParams.set('token',state.liveRoom.token);
+    return url.href;
+  }
   function buildGuestUrl(state){
     const url=new URL('guest.html',location.href);
     const params={
@@ -45,7 +51,7 @@
     const pill=$('#guestStatus');pill.className=`status ${status}`;pill.innerHTML=`<i></i>${exists?statusLabel(status):'Not invited'}`;
     guestUrl=exists?buildGuestUrl(state):'';
     $('#guestLinkHint').textContent=exists?'Copy private check-in link':'Create the guest first';
-    $('#copyGuestLink').disabled=!exists;
+    $('#copyGuestLink').disabled=!exists;const hostUrl=buildHostUrl(state);if($('#sidebarGuestControl'))$('#sidebarGuestControl').href=hostUrl;if($('#quickGuestControl'))$('#quickGuestControl').href=hostUrl;
 
     const rank=journeyRank(status);
     document.querySelectorAll('.journey-step').forEach((step,index)=>{

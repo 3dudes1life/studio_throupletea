@@ -1,6 +1,28 @@
 (function(){
 'use strict';
 const $=s=>document.querySelector(s);let stage='tech',mediaReady=false,speakerReady=false,timer;const toast=$('#toast');
+let checkinSocket=null;
+function roomParams(){const q=new URLSearchParams(location.search);return{room:q.get('room')||'',token:q.get('token')||''}}
+function openCheckinSignal(){
+  const cfg=window.TT_LIVE_GUEST_CONFIG||{},rp=roomParams();
+  if(!cfg.signalingBaseUrl||!rp.room||!rp.token)return;
+  try{
+    const u=new URL(cfg.signalingBaseUrl);u.protocol=u.protocol==='https:'?'wss:':'ws:';
+    u.pathname=`/room/${encodeURIComponent(rp.room)}/websocket`;
+    u.search=`?role=guest&token=${encodeURIComponent(rp.token)}`;
+    checkinSocket=new WebSocket(u.href);
+    checkinSocket.addEventListener('open',()=>sendGuestState());
+  }catch{}
+}
+function sendGuestState(){
+  if(!checkinSocket||checkinSocket.readyState!==WebSocket.OPEN)return;
+  const s=TTStudio.getState(),g=s.guest||{};
+  checkinSocket.send(JSON.stringify({type:'guest-state',guest:{
+    name:g.name||'Guest',pronouns:g.pronouns||'',title:g.title||'',social:g.social||'',promo:g.promo||'',
+    ready:Boolean(g.ready),admitted:Boolean(g.admitted),status:g.status||stage,
+    episode:{season:s.episode.season||'',number:s.episode.number||'',title:s.episode.title||''}
+  }}));
+}
 if(location.search)TTStudio.applyUrlParams();
 const media=new TTMediaController({video:$('#previewVideo'),meter:$('#audioMeter'),cameraSelect:$('#cameraSelect'),micSelect:$('#micSelect'),onStatus(s){mediaReady=!!(s.ready&&s.camera&&s.microphone);$('#previewEmpty').hidden=!!s.camera;set('#cameraStatus',s.camera?'Ready':'Unavailable',!!s.camera);set('#micStatus',s.microphone?'Ready':'Unavailable',!!s.microphone);updateTech()}});
 function show(m,e){toast.textContent=m;toast.classList.toggle('error',!!e);toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),2300)}
@@ -13,7 +35,7 @@ function intro(){const name=$('#guestName').value.trim()||'Guest',title=$('#gues
 function prepReady(){$('#prepContinue').disabled=![...document.querySelectorAll('.prep-check')].every(x=>x.checked)||!$('#releaseAccepted').checked}
 function render(state){const g=state.guest||{};$('#welcomeTitle').innerHTML=`Welcome${g.name&&g.name!=='Future Guest'?', '+g.name:''}.<span>We’ll handle the tech.</span>`;$('#episodeTitle').textContent=`S${state.episode.season} Ep${state.episode.number} · ${state.episode.title}`;$('#episodeMeta').textContent='Private guest check-in';$('#episodeTopic').textContent=state.episode.mainTopic||'';if(document.activeElement!==$('#guestName'))$('#guestName').value=g.name==='Future Guest'?'':g.name||'';if(document.activeElement!==$('#pronouns'))$('#pronouns').value=g.pronouns||'';if(document.activeElement!==$('#guestTitle'))$('#guestTitle').value=g.title||'';if(document.activeElement!==$('#social'))$('#social').value=g.social||'';if(document.activeElement!==$('#promo'))$('#promo').value=g.promo||'';intro()}
 function save(){TTStudio.update(n=>{n.guest.name=$('#guestName').value.trim()||'Guest';n.guest.pronouns=$('#pronouns').value.trim();n.guest.title=$('#guestTitle').value.trim();n.guest.social=$('#social').value.trim();n.guest.promo=$('#promo').value.trim();n.guest.status='tech';},'guest-details')}
-TTStudio.subscribe(render);browser();network();addEventListener('online',network);addEventListener('offline',network);
+TTStudio.subscribe(state=>{render(state);sendGuestState()});browser();network();openCheckinSignal();addEventListener('online',network);addEventListener('offline',network);
 $('#testDevices').onclick=async()=>{try{await media.start();show('Camera and microphone are live. Say a few words.')}catch(e){show('Camera or microphone permission is blocked.',true)}};
 $('#testSpeaker').onclick=()=>{speakerReady=true;updateTech();show('Headphone check marked ready.')};
 $('#techContinue').onclick=()=>{TTStudio.update(n=>{n.guest.status='tech'},'guest-tech');showStage('intro')};$('#introBack').onclick=()=>showStage('tech');
@@ -21,5 +43,5 @@ $('#techContinue').onclick=()=>{TTStudio.update(n=>{n.guest.status='tech'},'gues
 $('#introContinue').onclick=()=>{save();showStage('prep')};$('#prepBack').onclick=()=>showStage('intro');document.querySelectorAll('.prep-check').forEach(x=>x.onchange=prepReady);$('#releaseAccepted').onchange=prepReady;
 $('#prepContinue').onclick=()=>{save();TTStudio.update(n=>{n.guest.releaseAccepted=true;n.guest.ready=true;n.guest.status='ready';n.guest.checkInCompletedAt=new Date().toISOString()},'guest-ready');showStage('done');$('#readyPill').classList.add('ready');$('#readyPill').querySelector('span').textContent='Ready'};
 $('#enterStudio').onclick=async()=>{TTStudio.update(n=>{n.guest.status='waiting';n.guest.waitingSince=new Date().toISOString();n.guest.admitted=false},'guest-waiting');await media.stop();(()=>{const q=new URLSearchParams(location.search);const u=new URL('guest-room.html',location.href);['room','token'].forEach(k=>{if(q.get(k))u.searchParams.set(k,q.get(k))});location.href=u.href})()};
-addEventListener('beforeunload',()=>media.destroy());
+addEventListener('beforeunload',()=>{try{if(checkinSocket)checkinSocket.close()}catch{};media.destroy()});
 })();

@@ -14,6 +14,9 @@ function setLiveState(event){
   $('#connection').textContent=connectionText(state);
   $('#roomStatus').classList.toggle('connected',state==='connected');
   $('#waiting').classList.toggle('connected',state==='connected');
+  if((state==='waiting'||state==='connected')&&live){
+    try{live.sendGuestState(guestPayload(TTStudio.getState()))}catch{}
+  }
   if(state==='setup-required'){
     $('#headline').textContent='One setup step remains.';
     $('#waitingText').textContent='The live signaling Worker has not been connected yet.';
@@ -29,6 +32,24 @@ function setLiveState(event){
     $('#hostPlaceholder').hidden=false;
   }
 }
+function guestPayload(state){
+  const g=state.guest||{};
+  return {
+    name:g.name||'Guest',
+    pronouns:g.pronouns||'',
+    title:g.title||'',
+    social:g.social||'',
+    promo:g.promo||'',
+    ready:Boolean(g.ready),
+    admitted:Boolean(g.admitted),
+    status:g.status||'waiting',
+    episode:{
+      season:state.episode&&state.episode.season||'',
+      number:state.episode&&state.episode.number||'',
+      title:state.episode&&state.episode.title||''
+    }
+  };
+}
 function render(state){
   const g=state.guest||{};
   $('#guestBadge').textContent=g.name||'You';
@@ -38,6 +59,9 @@ function render(state){
     $('#roomStatus').innerHTML='<i></i>Recording';
     $('#headline').textContent='You’re live.';
     $('#waitingText').textContent='The hosts are recording.';
+  }
+  if(live&&live.ws&&live.ws.readyState===WebSocket.OPEN){
+    live.sendGuestState(guestPayload(state));
   }
 }
 
@@ -57,6 +81,7 @@ async function start(){
       }
     });
     await live.connect();
+    setTimeout(()=>{try{live.sendGuestState(guestPayload(TTStudio.getState()))}catch{}},700);
   }catch(error){
     $('#connection').textContent='Media blocked';
     show('Camera and microphone permission are required.',true);

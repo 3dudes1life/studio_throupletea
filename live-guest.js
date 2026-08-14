@@ -273,6 +273,10 @@
       this.send({type:'control',action,value});
     }
 
+    sendGuestState(payload){
+      this.send({type:'guest-state',guest:payload||{}});
+    }
+
     close(){
       this.closed=true;
       clearTimeout(this.reconnectTimer);
