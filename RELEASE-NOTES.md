@@ -1,8 +1,14 @@
-# Guest Studio 4.4
+# Guest Studio 4.5 — Live Guest Connection
 
-Guest First is a scope reset.
+- Real WebRTC audio/video between host and guest devices
+- Cloudflare Durable Object WebSocket signaling
+- Private room ID + token generated for every new guest invitation
+- Host camera and audio source selection
+- Guest live feed on Host Control
+- Host live feed on Guest Studio
+- WebRTC reconnect behavior
+- Connection state and basic incoming video/network stats
+- Existing Tech Check → Green Room → Admit → Complete guest flow preserved
+- OBS and podcast recorder remain separate and unchanged
 
-The root app is now a Guest Hub instead of a producer dashboard. OBS and the dedicated podcast recorder remain responsible for recording.
-
-The Studio now focuses on:
-Invite → Tech Check → Green Room → Admit → Record → Complete.
+This is the connection milestone. The next milestone is OBS capture/routing and production reliability (including TURN).

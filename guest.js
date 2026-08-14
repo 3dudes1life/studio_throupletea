@@ -20,6 +20,6 @@ $('#techContinue').onclick=()=>{TTStudio.update(n=>{n.guest.status='tech'},'gues
 ['#guestName','#pronouns','#guestTitle','#social','#promo'].forEach(s=>$(s).oninput=intro);
 $('#introContinue').onclick=()=>{save();showStage('prep')};$('#prepBack').onclick=()=>showStage('intro');document.querySelectorAll('.prep-check').forEach(x=>x.onchange=prepReady);$('#releaseAccepted').onchange=prepReady;
 $('#prepContinue').onclick=()=>{save();TTStudio.update(n=>{n.guest.releaseAccepted=true;n.guest.ready=true;n.guest.status='ready';n.guest.checkInCompletedAt=new Date().toISOString()},'guest-ready');showStage('done');$('#readyPill').classList.add('ready');$('#readyPill').querySelector('span').textContent='Ready'};
-$('#enterStudio').onclick=async()=>{TTStudio.update(n=>{n.guest.status='waiting';n.guest.waitingSince=new Date().toISOString();n.guest.admitted=false},'guest-waiting');await media.stop();location.href='guest-room.html'};
+$('#enterStudio').onclick=async()=>{TTStudio.update(n=>{n.guest.status='waiting';n.guest.waitingSince=new Date().toISOString();n.guest.admitted=false},'guest-waiting');await media.stop();(()=>{const q=new URLSearchParams(location.search);const u=new URL('guest-room.html',location.href);['room','token'].forEach(k=>{if(q.get(k))u.searchParams.set(k,q.get(k))});location.href=u.href})()};
 addEventListener('beforeunload',()=>media.destroy());
 })();

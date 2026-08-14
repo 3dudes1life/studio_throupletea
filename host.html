@@ -1,8 +1,36 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#06080d"><title>Guest Control — Throuple Tea</title><link rel="stylesheet" href="guest-control.css?v=4.4"></head><body>
-<main class="control-shell"><header><a href="index.html" class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>Throuple Tea</b><small>Guest Control</small></span></a><a href="index.html" class="back">← Guest Hub</a></header>
-<section class="control-title"><div class="eyebrow">Hosts only</div><h1>Guest Control</h1><p>That’s it. No producer dashboard. OBS and your recorder do the recording—this page only manages the guest.</p></section>
-<section class="guest-control-card"><div class="guest-profile"><div class="avatar" id="avatar">G</div><div><div class="status" id="status"><i></i>Not ready</div><h2 id="name">No guest checked in</h2><p id="role">Waiting for a guest.</p></div></div><div class="control-actions"><button id="admit" disabled>Admit Guest</button><button id="return" disabled>Return to Green Room</button><button id="complete" disabled>Mark Complete</button></div></section>
-<section class="control-grid"><article><div class="eyebrow">Host intro</div><h3 id="intro">—</h3><p id="social">—</p></article><article><div class="eyebrow">Promote</div><h3 id="promo">Nothing requested</h3></article><article><div class="eyebrow">Episode</div><h3 id="episode">—</h3></article></section>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#06080d"><title>Live Guest Control — Throuple Tea</title><link rel="stylesheet" href="guest-control.css?v=4.5"></head>
+<body>
+<main class="control-shell">
+<header><a href="index.html" class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>Throuple Tea</b><small>Live Guest Control</small></span></a><a href="index.html" class="back">← Guest Hub</a></header>
+<section class="control-title"><div class="eyebrow">Hosts only</div><h1>Guest Control</h1><p>OBS and your podcast recorder still record the show. This page only connects and manages the remote guest.</p></section>
+
+<section class="connection-setup" id="connectionSetup">
+  <div><div class="eyebrow">Live connection</div><h2 id="setupHeadline">Connect the guest</h2><p id="setupDetail">Choose the host camera and audio mix the guest should see and hear.</p></div>
+  <div class="setup-fields">
+    <label><span>Host video</span><select id="hostCamera"><option value="">Default camera</option></select></label>
+    <label><span>Host audio</span><select id="hostMic"><option value="">Default microphone</option></select></label>
+  </div>
+  <button id="connectLive">Start Live Connection</button>
+</section>
+
+<section class="live-grid">
+  <div class="guest-video">
+    <video id="guestVideo" playsinline autoplay></video>
+    <div class="guest-placeholder" id="guestPlaceholder"><div><i>👤</i><b id="guestPlaceholderTitle">Waiting for guest</b><span id="guestPlaceholderText">Their live video appears here after both sides connect.</span></div></div>
+    <span class="video-label" id="guestVideoLabel">Guest</span>
+  </div>
+
+  <aside>
+    <section class="guest-control-card"><div class="guest-profile"><div class="avatar" id="avatar">G</div><div><div class="status" id="status"><i></i>Not ready</div><h2 id="name">No guest checked in</h2><p id="role">Waiting for a guest.</p></div></div><div class="control-actions"><button id="admit" disabled>Admit Guest</button><button id="return" disabled>Green Room</button><button id="complete" disabled>Complete</button></div></section>
+    <section class="connection-card"><div class="rail-title"><b>Live connection</b><span id="connectionState">Offline</span></div><div class="metric"><small>Incoming video</small><strong id="incomingQuality">—</strong></div><div class="metric"><small>Network</small><strong id="networkQuality">—</strong></div></section>
+    <section class="info-card"><div class="eyebrow">Host intro</div><h3 id="intro">—</h3><p id="social">—</p><div class="eyebrow promo-label">Promote</div><h3 id="promo">Nothing requested</h3></section>
+  </aside>
+</section>
+
 <section class="journey"><div data-step="invited"><i>✉️</i><b>Invited</b></div><span>→</span><div data-step="tech"><i>🎧</i><b>Tech</b></div><span>→</span><div data-step="waiting"><i>🚪</i><b>Green Room</b></div><span>→</span><div data-step="admitted"><i>🎥</i><b>In Studio</b></div><span>→</span><div data-step="recording"><i>🔴</i><b>Recording</b></div><span>→</span><div data-step="complete"><i>✓</i><b>Done</b></div></section>
-<div class="transport-note"><b>Next connection step:</b> live guest video/audio transport between separate devices. This control page is intentionally focused only on the guest.</div>
-</main><div class="toast" id="toast"></div><script src="shared-state.js"></script><script src="guest-control.js?v=4.4"></script></body></html>
+</main>
+<div class="toast" id="toast"></div>
+<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="live-guest-config.js?v=4.5"></script><script src="live-guest.js?v=4.5"></script><script src="guest-control.js?v=4.5"></script>
+</body></html>

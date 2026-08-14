@@ -17,7 +17,9 @@
       promo:state.guest.promo||'',
       season:state.episode.season||'',
       episode:state.episode.number||'',
-      episodeTitle:state.episode.title||''
+      episodeTitle:state.episode.title||'',
+      room:state.liveRoom&&state.liveRoom.roomId||'',
+      token:state.liveRoom&&state.liveRoom.token||''
     };
     Object.entries(params).forEach(([key,value])=>{if(value)url.searchParams.set(key,value)});
     return url.href;
@@ -77,6 +79,11 @@
       next.guest.social=$('#inviteSocial').value.trim();
       next.guest.promo=$('#invitePromo').value.trim();
       next.guest.ready=false;next.guest.admitted=false;next.guest.status='invited';
+      next.liveRoom=next.liveRoom||{};
+      next.liveRoom.roomId=TTLiveGuest.randomToken(8);
+      next.liveRoom.token=TTLiveGuest.randomToken(18);
+      next.liveRoom.createdAt=new Date().toISOString();
+      next.liveRoom.signalingReady=Boolean(window.TT_LIVE_GUEST_CONFIG&&window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl);
       next.episode.season=$('#inviteSeason').value.trim()||next.episode.season;
       next.episode.number=$('#inviteEpisode').value.trim()||next.episode.number;
       next.episode.title=$('#inviteEpisodeTitle').value.trim()||next.episode.title;

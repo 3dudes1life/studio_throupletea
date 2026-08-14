@@ -39,7 +39,13 @@
     schemaVersion: 4,
     revision: 0,
     updatedAt: null,
-    mode: 'hosts-only',
+    mode: 'guest-first',
+    liveRoom: {
+      roomId: '',
+      token: '',
+      createdAt: null,
+      signalingReady: false
+    },
     show: {
       title: '3Dudes1Life: A Little Throuple Tea',
       shortTitle: 'A Little Throuple Tea',
