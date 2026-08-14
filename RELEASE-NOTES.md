@@ -1,8 +1,11 @@
-# 4.5.5 — Green Room Alert
+# 4.6 — Production Capture
 
-- Live cross-device Green Room presence on Guest Hub
-- Pulsing green waiting alert
-- Flashing WAITING badge on Guest Control
-- One-click jump directly to the correct Guest Control room
-- Adds non-invasive Cloudflare observer WebSocket role
-- Observer does not replace or interfere with Host Control
+- Dedicated clean OBS Guest Feed
+- Second isolated WebRTC connection for OBS
+- Guest local high-quality ISO audio recording
+- Private ISO upload to Cloudflare R2
+- Host-side ISO upload status
+- Download Guest ISO from Guest Capture
+- PodTrak guest-audio output selector with system-output fallback
+- Start Guest ISO / End + Upload ISO production controls
+- Keeps OBS and PodTrak recording manual by design

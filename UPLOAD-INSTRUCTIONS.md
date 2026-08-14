@@ -1,40 +1,55 @@
-# Guest Studio 4.5.5 — Green Room Alert
+# Throuple Tea Studio 4.6 — Production Capture
 
-This adds the live Green Room alert to Guest Hub.
+This is the OBS + PodTrak + Guest ISO release.
 
-## IMPORTANT — Worker update required
+## Cloudflare — one new storage step
 
-The Hub now connects to Cloudflare as an `observer`, so it can watch guest presence WITHOUT replacing the real Host Control WebSocket.
+The high-quality guest audio ISO needs private object storage.
 
-Redeploy the included Worker:
+In Terminal inside `cloudflare-signaling-worker`:
 
 ```bash
-cd "/path/to/cloudflare-signaling-worker"
 npm install
+npx wrangler r2 bucket create throuple-tea-guest-iso
 npm run deploy
 ```
 
-Your Worker URL stays the same.
+Your existing Worker URL stays the same.
 
-## GitHub files
+After deploy, open:
 
-Upload the updated website files from this ZIP.
+`https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev/health`
 
-After deploy, hard refresh with:
+It should show:
+- version: 4.6
+- isoStorage: true
 
-Command + Option + R
+## GitHub
 
-Bottom-left must say:
+Upload the updated website files from this ZIP. Keep your existing assets folder.
 
-Guest Studio 4.5.5
+4.6 adds:
+- `guest-obs.html`
+- `guest-obs.css`
+- `guest-obs.js`
+- updated Guest Control production capture
+- guest local ISO audio recording/upload
+- clean OBS guest feed
+- PodTrak guest-output selection/fallback guidance
 
-## New behavior
+## Critical first test
 
-When a guest reaches Ready / Green Room:
+Do NOT use a real guest first.
 
-- a pulsing green alert appears across the top of Guest Hub
-- it says `<Guest Name> is waiting in the Green Room`
-- the Guest Control quick card gets a flashing WAITING badge
-- clicking the alert takes you directly into Guest Control for that private room
-
-The Hub watcher is a separate Cloudflare observer connection, so it does not interfere with Host Control.
+Run a 5-minute test:
+1. Connect guest.
+2. Admit.
+3. Verify clean OBS Browser Source.
+4. Verify P4 Track 4 receives guest audio.
+5. Start OBS + P4.
+6. Start Guest ISO.
+7. Talk for 5 minutes.
+8. End + Upload ISO.
+9. Wait for safely uploaded.
+10. Download ISO.
+11. Compare/sync all three recordings.

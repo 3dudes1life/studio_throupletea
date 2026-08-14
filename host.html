@@ -1,20 +1,29 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#06080d"><title>Live Guest Control — Throuple Tea</title><link rel="stylesheet" href="guest-control.css?v=4.5.3"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#06080d"><title>Production Guest Control — Throuple Tea</title><link rel="stylesheet" href="guest-control.css?v=4.6"></head>
 <body>
 <main class="control-shell">
 <header><a href="index.html" class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>Throuple Tea</b><small>Live Guest Control</small></span></a><a href="index.html" class="back">← Guest Hub</a></header>
-<section class="control-title"><div class="eyebrow">Hosts only</div><h1>Guest Control</h1><p>OBS and your podcast recorder still record the show. This page only connects and manages the remote guest.</p></section>
+<section class="control-title"><div class="eyebrow">Hosts only</div><h1>Guest Capture</h1><p>Connect the guest, route their live audio to your PodTrak, feed clean video to OBS, and capture a high-quality local guest ISO.</p></section>
 
 <section class="connection-setup" id="connectionSetup">
   <div><div class="eyebrow">Live connection</div><h2 id="setupHeadline">Connect the guest</h2><p id="setupDetail">Choose the host camera and audio mix the guest should see and hear.</p></div>
   <div class="setup-fields">
     <label><span>Host video</span><select id="hostCamera"><option value="">Default camera</option></select></label>
-    <label><span>Host audio</span><select id="hostMic"><option value="">Default microphone</option></select></label>
+    <label><span>Host audio sent to guest</span><select id="hostMic"><option value="">Default microphone</option></select></label>
+    <label><span>Guest audio output / PodTrak</span><select id="guestOutput"><option value="">System default output</option></select></label>
   </div>
   <button id="connectLive">Start Live Connection</button>
 </section>
 
+<section class="capture-bar">
+  <div class="capture-state"><i></i><span><small>Production capture</small><b id="captureStatus">Armed — OBS + P4 remain manual</b></span></div>
+  <div class="capture-actions">
+    <button id="obsFeedButton">Copy OBS Guest Feed</button>
+    <button id="startCapture" disabled>Start Guest ISO</button>
+    <button class="finish" id="finishCapture" disabled>End + Upload ISO</button>
+  </div>
+</section>
 <section class="live-grid">
   <div class="guest-video">
     <video id="guestVideo" playsinline autoplay></video>
@@ -25,6 +34,11 @@
   <aside>
     <section class="guest-control-card"><div class="guest-profile"><div class="avatar" id="avatar">G</div><div><div class="status" id="status"><i></i>Not ready</div><h2 id="name">No guest checked in</h2><p id="role">Waiting for a guest.</p></div></div><div class="control-actions"><button id="admit" disabled>Admit Guest</button><button id="return" disabled>Green Room</button><button id="complete" disabled>End Session</button></div></section>
     <section class="connection-card"><div class="rail-title"><b>Live connection</b><span id="connectionState">Offline</span></div><div class="metric"><small>Incoming video</small><strong id="incomingQuality">—</strong></div><div class="metric"><small>Network</small><strong id="networkQuality">—</strong></div></section>
+    <section class="connection-card iso-card">
+      <div class="rail-title"><b>Guest ISO audio</b><span id="isoHostStatus">Armed</span></div>
+      <p class="iso-help">Recorded locally on the guest device so internet glitches do not become the master audio.</p>
+      <a id="downloadIso" class="download-iso" hidden>Download Guest ISO</a>
+    </section>
     <section class="info-card"><div class="eyebrow">Host intro</div><h3 id="intro">—</h3><p id="social">—</p><div class="eyebrow promo-label">Promote</div><h3 id="promo">Nothing requested</h3></section>
   </aside>
 </section>
@@ -32,5 +46,5 @@
 <section class="journey"><div data-step="invited"><i>✉️</i><b>Invited</b></div><span>→</span><div data-step="tech"><i>🎧</i><b>Tech</b></div><span>→</span><div data-step="waiting"><i>🚪</i><b>Green Room</b></div><span>→</span><div data-step="admitted"><i>🎥</i><b>In Studio</b></div><span>→</span><div data-step="recording"><i>🔴</i><b>Recording</b></div><span>→</span><div data-step="complete"><i>✓</i><b>Done</b></div></section>
 </main>
 <div class="toast" id="toast"></div>
-<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="live-guest-config.js?v=4.5.3"></script><script src="live-guest.js?v=4.5.3"></script><script src="guest-control.js?v=4.5.3"></script>
+<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="live-guest-config.js?v=4.6"></script><script src="live-guest.js?v=4.6"></script><script src="guest-control.js?v=4.6"></script>
 </body></html>

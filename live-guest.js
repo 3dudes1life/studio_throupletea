@@ -34,7 +34,7 @@
       this.closed=false;
       this.statsTimer=null;
       this.pendingCandidates=[];
-      this.remoteRole=this.role==='host'?'guest':'host';
+      this.remoteRole=({host:'guest',guest:'host',obs:'guest-obs','guest-obs':'obs'})[this.role]||'guest';
     }
 
     get config(){
@@ -166,13 +166,13 @@
 
       if(message.type==='joined'){
         this.state('waiting',message.peerPresent?'Guest room ready. Connecting…':'Waiting for the other side…');
-        if(message.peerPresent&&this.role==='host')await this.makeOffer();
+        if(message.peerPresent&&['host','obs'].includes(this.role))await this.makeOffer();
         return;
       }
 
       if(message.type==='peer-joined'){
         this.state('connecting','Other side joined.');
-        if(this.role==='host')await this.makeOffer();
+        if(['host','obs'].includes(this.role))await this.makeOffer();
         return;
       }
 
@@ -186,7 +186,7 @@
       }
 
       if(message.type==='restart-request'){
-        if(this.role==='host')await this.restartAndOffer();
+        if(['host','obs'].includes(this.role))await this.restartAndOffer();
         return;
       }
 

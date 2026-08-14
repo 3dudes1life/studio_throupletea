@@ -2,36 +2,41 @@
 'use strict';
 const $=s=>document.querySelector(s);
 const toast=$('#toast');let toastTimer,live=null,hostStream=null,remoteGuest=null;
+let isoDownloadKey='',finishingTimer=null;
 
-function show(msg,error){toast.textContent=msg;toast.style.background=error?'#ff6266':'white';toast.style.color=error?'white':'#111';toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2000)}
+function show(msg,error){toast.textContent=msg;toast.style.background=error?'#ff6266':'white';toast.style.color=error?'white':'#111';toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
 function rank(s){return({invited:0,tech:1,ready:1,waiting:2,admitted:3,recording:4,complete:5,left:5})[s]??0}
 function statusLabel(s){return({invited:'Invited',tech:'Tech Check',ready:'Ready',waiting:'Green Room',admitted:'In Studio',recording:'Recording',complete:'Complete',left:'Complete'})[s]||'Not ready'}
-
+function connectionCredentials(){const q=new URLSearchParams(location.search),s=TTStudio.getState();return{room:q.get('room')||(s.liveRoom&&s.liveRoom.roomId)||'',token:q.get('token')||(s.liveRoom&&s.liveRoom.token)||''}}
+function obsFeedUrl(){const c=connectionCredentials(),u=new URL('guest-obs.html',location.href);if(c.room)u.searchParams.set('room',c.room);if(c.token)u.searchParams.set('token',c.token);return u.href}
+function isoDownloadUrl(key){const c=connectionCredentials(),base=(window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl||'').replace(/\/+$/,'');return `${base}/room/${encodeURIComponent(c.room)}/iso-file?token=${encodeURIComponent(c.token)}&key=${encodeURIComponent(key)}`}
 function render(state){
   const g=remoteGuest||(state.guest||{}),exists=g.name&&g.name!=='Future Guest',status=exists?(g.status||'invited'):'none';
   $('#name').textContent=exists?g.name:'No guest checked in';$('#avatar').textContent=exists?g.name[0].toUpperCase():'G';$('#guestVideoLabel').textContent=exists?g.name:'Guest';
   $('#role').textContent=[g.title,g.pronouns].filter(Boolean).join(' · ')||'Waiting for a guest.';
   $('#intro').textContent=exists?([g.name,g.title].filter(Boolean).join(' — ')):'—';$('#social').textContent=g.social||'—';$('#promo').textContent=g.promo||'Nothing requested';
   $('#status').className=`status ${status}`;$('#status').innerHTML=`<i></i>${statusLabel(status)}`;
-  $('#admit').disabled=!(g.ready||status==='waiting')||g.admitted;$('#return').disabled=!g.admitted;$('#complete').disabled=!exists;
+  $('#admit').disabled=!(g.ready||['waiting','admitted','recording'].includes(status))||g.admitted;
+  $('#return').disabled=!g.admitted;$('#complete').disabled=!exists;
+  $('#startCapture').disabled=!(live&&live.pc&&live.pc.connectionState==='connected')||status==='recording';
+  $('#finishCapture').disabled=status!=='recording';
   const r=rank(status);document.querySelectorAll('.journey>div').forEach((n,i)=>{n.classList.toggle('active',exists&&i===r);n.classList.toggle('done',exists&&i<r)});
 }
-
 async function populateDevices(){
   if(!navigator.mediaDevices)return;
-  try{
-    const initial=await navigator.mediaDevices.getUserMedia({audio:true,video:true});
-    initial.getTracks().forEach(t=>t.stop());
-  }catch{}
+  try{const initial=await navigator.mediaDevices.getUserMedia({audio:true,video:true});initial.getTracks().forEach(t=>t.stop())}catch{}
   const devices=await navigator.mediaDevices.enumerateDevices();
   fill($('#hostCamera'),devices.filter(d=>d.kind==='videoinput'),'Camera');
   fill($('#hostMic'),devices.filter(d=>d.kind==='audioinput'),'Audio input');
+  fill($('#guestOutput'),devices.filter(d=>d.kind==='audiooutput'),'Audio output');
 }
-function fill(select,devices,label){
-  select.innerHTML='<option value="">Default</option>';
-  devices.forEach((d,i)=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`${label} ${i+1}`;select.appendChild(o)});
+function fill(select,devices,label){select.innerHTML='<option value="">System default</option>';devices.forEach((d,i)=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`${label} ${i+1}`;select.appendChild(o)})}
+async function applyGuestOutput(){
+  const device=$('#guestOutput').value;
+  if(typeof $('#guestVideo').setSinkId==='function'){
+    try{await $('#guestVideo').setSinkId(device||'default');show('Guest audio output updated')}catch{show('Browser could not switch audio output. Use macOS Sound Output instead.',true)}
+  }else if(device){show('This browser cannot switch output directly. Set the PodTrak as macOS Sound Output.',true)}
 }
-
 async function startHostMedia(){
   const camera=$('#hostCamera').value,mic=$('#hostMic').value;
   if(hostStream)hostStream.getTracks().forEach(t=>t.stop());
@@ -41,54 +46,68 @@ async function startHostMedia(){
   });
   return hostStream;
 }
-
 function stateHandler(event){
   $('#connectionState').textContent=({connecting:'Connecting',waiting:'Waiting',connected:'Live',reconnecting:'Reconnecting','setup-required':'Setup required',error:'Error'})[event.state]||event.state;
   if(event.state==='connected'){
-    $('#guestPlaceholder').hidden=true;
-    show('Guest audio + video connected');
+    $('#guestPlaceholder').hidden=true;$('#startCapture').disabled=false;applyGuestOutput();show('Guest audio + video connected');
   }else if(event.state==='setup-required'){
     $('#guestPlaceholderTitle').textContent='Signaling Worker not configured';
-    $('#guestPlaceholderText').textContent='Deploy the Worker included in the 4.5 ZIP, then paste its URL into live-guest-config.js.';
+    $('#guestPlaceholderText').textContent='Finish the Cloudflare setup first.';
   }else if(event.state==='waiting'){
-    $('#guestPlaceholder').hidden=false;
-    $('#guestPlaceholderTitle').textContent='Waiting for guest';
-    $('#guestPlaceholderText').textContent='Send the private guest link and have them enter the green room.';
+    $('#guestPlaceholder').hidden=false;$('#guestPlaceholderTitle').textContent='Waiting for guest';$('#guestPlaceholderText').textContent='Have the guest enter the Green Room.';
   }
+  render(TTStudio.getState());
 }
-
-
-function connectionCredentials(){
-  const query=new URLSearchParams(location.search),state=TTStudio.getState();
-  return {
-    room:query.get('room')||(state.liveRoom&&state.liveRoom.roomId)||'',
-    token:query.get('token')||(state.liveRoom&&state.liveRoom.token)||''
-  };
+function finalizeSession(message){
+  clearTimeout(finishingTimer);
+  TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='complete'},'complete-guest');
+  if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='complete'}
+  if(live){setTimeout(()=>live.close(),250)}
+  if(hostStream){hostStream.getTracks().forEach(t=>t.stop());hostStream=null}
+  $('#guestVideo').srcObject=null;$('#guestPlaceholder').hidden=false;
+  $('#guestPlaceholderTitle').textContent='Session ended';$('#guestPlaceholderText').textContent='Guest disconnected. ISO is safe.';
+  $('#connectionState').textContent='Ended';
+  $('#captureStatus').textContent=message||'Session complete';
+  $('.capture-state').classList.remove('recording');$('.capture-state').classList.add('safe');
+  render(TTStudio.getState());
 }
 function handlePeerMessage(message){
-  if(message&&message.type==='guest-state'&&message.guest){
-    remoteGuest=message.guest;
-    render(TTStudio.getState());
-    $('#guestPlaceholderTitle').textContent=remoteGuest.status==='waiting'?'Guest is in the green room':'Guest connected';
+  if(!message)return;
+  if(message.type==='guest-state'&&message.guest){
+    remoteGuest=message.guest;render(TTStudio.getState());
+    $('#guestPlaceholderTitle').textContent=remoteGuest.status==='waiting'?'Guest is in the Green Room':'Guest connected';
     $('#guestPlaceholderText').textContent=`${remoteGuest.name||'Guest'} is connected to this private room.`;
   }
+  if(message.type==='control'&&message.action==='iso-started'){
+    $('#isoHostStatus').textContent='Recording locally';
+    $('#captureStatus').textContent='Guest ISO recording — start OBS + PodTrak now';
+    $('.capture-state').addClass('recording');
+  }
+  if(message.type==='control'&&message.action==='iso-upload-complete'){
+    isoDownloadKey=message.value&&message.value.key||'';
+    $('#isoHostStatus').textContent='Safely uploaded ✓';
+    if(isoDownloadKey){$('#downloadIso').href=isoDownloadUrl(isoDownloadKey);$('#downloadIso').hidden=false}
+    finalizeSession('ISO received — safe to stop/close');
+  }
+  if(message.type==='control'&&message.action==='iso-upload-failed'){
+    clearTimeout(finishingTimer);
+    $('#isoHostStatus').textContent='Upload failed — keep guest connected';
+    $('#captureStatus').textContent='Guest ISO upload needs attention';
+    show('Guest ISO upload failed. Do not clear the guest yet.',true);
+  }
 }
-
 async function connect(){
   const creds=connectionCredentials();
-  if(!creds.room||!creds.token){show('Open Guest Control from the Guest Hub for this invitation.',true);return}
+  if(!creds.room||!creds.token){show('Open Guest Control from Guest Hub for this invitation.',true);return}
   try{
     const stream=await startHostMedia();
     if(live)live.close();
     live=new TTLiveGuest.LiveGuestConnection({
       role:'host',room:creds.room,token:creds.token,localStream:stream,remoteVideo:$('#guestVideo'),
-      onState:stateHandler,
-      onMessage:handlePeerMessage,
+      onState:stateHandler,onMessage:handlePeerMessage,
       onStats(stats){
-        const v=stats.video;
-        $('#incomingQuality').textContent=v&&v.frameWidth?`${v.frameWidth}×${v.frameHeight}`:'Live';
-        const pair=stats.candidatePair;
-        $('#networkQuality').textContent=pair&&pair.currentRoundTripTime!=null?`${Math.round(pair.currentRoundTripTime*1000)} ms`:'Connected';
+        const v=stats.video;$('#incomingQuality').textContent=v&&v.frameWidth?`${v.frameWidth}×${v.frameHeight}`:'Live';
+        const pair=stats.candidatePair;$('#networkQuality').textContent=pair&&pair.currentRoundTripTime!=null?`${Math.round(pair.currentRoundTripTime*1000)} ms`:'Connected';
       }
     });
     await live.connect();
@@ -96,34 +115,29 @@ async function connect(){
 }
 
 TTStudio.subscribe(render);populateDevices();
+$('#guestOutput').onchange=applyGuestOutput;
 $('#connectLive').onclick=connect;
-$('#admit').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=true;n.guest.status='admitted'},'admit-guest');if(remoteGuest){remoteGuest.admitted=true;remoteGuest.status='admitted';render(TTStudio.getState())}if(live)live.sendControl('admitted',true);show('Guest admitted')};
-$('#return').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='waiting'},'return-guest');if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='waiting';render(TTStudio.getState())}if(live)live.sendControl('admitted',false);show('Guest returned to green room')};
-$('#complete').onclick=()=>{
-  if(!confirm('End this guest session for everyone?'))return;
-  TTStudio.update(n=>{
-    n.guest.admitted=false;
-    n.guest.status='complete';
-  },'complete-guest');
-  if(remoteGuest){
-    remoteGuest.admitted=false;
-    remoteGuest.status='complete';
-    render(TTStudio.getState());
-  }
-  if(live){
-    live.sendControl('end-session',true);
-    setTimeout(()=>live.close(),250);
-  }
-  if(hostStream){
-    hostStream.getTracks().forEach(track=>track.stop());
-    hostStream=null;
-  }
-  $('#guestVideo').srcObject=null;
-  $('#guestPlaceholder').hidden=false;
-  $('#guestPlaceholderTitle').textContent='Session ended';
-  $('#guestPlaceholderText').textContent='The guest has been disconnected.';
-  $('#connectionState').textContent='Ended';
-  show('Guest session ended');
+$('#obsFeedButton').onclick=async()=>{await navigator.clipboard.writeText(obsFeedUrl());show('Clean OBS Guest Feed URL copied')};
+$('#startCapture').onclick=()=>{
+  if(!live){show('Connect the guest first.',true);return}
+  TTStudio.update(n=>{n.guest.status='recording'},'start-guest-iso');
+  if(remoteGuest)remoteGuest.status='recording';
+  live.sendControl('start-iso',true);
+  $('#captureStatus').textContent='Starting guest ISO — start OBS + PodTrak now';
+  $('#isoHostStatus').textContent='Starting…';
+  $('.capture-state').addClass('recording');
+  render(TTStudio.getState());
 };
+$('#finishCapture').onclick=()=>{
+  if(!confirm('End the interview and upload the guest ISO audio? Keep OBS/PodTrak running until the ISO confirms safe.'))return;
+  $('#finishCapture').disabled=true;
+  $('#captureStatus').textContent='Finishing + uploading guest ISO…';
+  $('#isoHostStatus').textContent='Waiting for upload…';
+  live.sendControl('finish-session',true);
+  finishingTimer=setTimeout(()=>{show('Still waiting for the guest ISO upload. Keep the session open.',true);$('#captureStatus').textContent='Still uploading — do not clear guest';},20000);
+};
+$('#admit').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=true;n.guest.status='admitted'},'admit-guest');if(remoteGuest){remoteGuest.admitted=true;remoteGuest.status='admitted'}if(live)live.sendControl('admitted',true);show('Guest admitted');render(TTStudio.getState())};
+$('#return').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='waiting'},'return-guest');if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='waiting'}if(live)live.sendControl('admitted',false);show('Guest returned to Green Room');render(TTStudio.getState())};
+$('#complete').onclick=()=>{show('Use End + Upload ISO so the guest recording is safely received.',true)};
 addEventListener('beforeunload',()=>{if(live)live.close();if(hostStream)hostStream.getTracks().forEach(t=>t.stop())});
 })();
