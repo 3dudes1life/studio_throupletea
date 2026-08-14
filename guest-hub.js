@@ -104,4 +104,55 @@
     const text='For the best Throuple Tea guest experience: use Chrome or Safari, wear headphones, place your camera near eye level, face a soft light or window, silence notifications, and join from the private guest link a few minutes early.';
     await navigator.clipboard.writeText(text);showToast('Guest guide copied');
   };
+  const clearGuestButton=$('#clearGuest');
+  if(clearGuestButton){
+    clearGuestButton.disabled=false;
+    clearGuestButton.removeAttribute('disabled');
+    clearGuestButton.addEventListener('click',(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+
+      const state=TTStudio.getState();
+      const currentName=(state.guest&&state.guest.name&&state.guest.name!=='Future Guest')
+        ? state.guest.name
+        : 'the current guest';
+
+      if(!confirm(`Clear ${currentName} from Guest Hub?`))return;
+
+      TTStudio.update(next=>{
+        next.guest={
+          name:'Future Guest',
+          pronouns:'',
+          title:'',
+          social:'',
+          promo:'',
+          notes:'',
+          releaseAccepted:false,
+          ready:false,
+          status:'invited',
+          admitted:false,
+          checkInStage:'tech',
+          checkInCompletedAt:null,
+          waitingSince:null
+        };
+
+        next.lowerThird={name:'',title:'',social:''};
+
+        next.liveRoom={
+          roomId:'',
+          token:'',
+          createdAt:null,
+          signalingReady:Boolean(
+            window.TT_LIVE_GUEST_CONFIG &&
+            window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl
+          )
+        };
+
+        TTStudio.addActivity(next,'Current guest cleared from Guest Hub');
+      },'clear-guest');
+
+      guestUrl='';
+      showToast('Guest cleared — ready for the next guest');
+    });
+  }
 })();

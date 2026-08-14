@@ -1,32 +1,19 @@
-# Throuple Tea Studio 4.5.2 — Host End Session
+# Guest Studio 4.5.4 — Clear Guest Fix
 
-This fixes the exact issue where the host could mark a guest Complete, but the guest remained connected until they manually left.
+Upload ONLY:
 
-Upload these updated root files:
+- index.html
+- guest-hub.js
+- guest-hub.css
 
-- host.html
-- guest-control.js
-- guest-control.css
-- guest-room.js
-- guest-goodbye.html
+No Cloudflare Worker redeploy is needed.
 
-You can leave every other 4.5.1 file exactly as-is.
+After GitHub Pages deploys, hard refresh with:
 
-## New behavior
+Command + Option + R
 
-On Guest Control:
+The bottom-left version must read:
 
-**End Session**
+Guest Studio 4.5.4
 
-now does all of the following:
-
-1. Asks the host to confirm.
-2. Sends an `end-session` control message through the existing Cloudflare signaling room.
-3. Marks the guest Complete.
-4. Disconnects the WebRTC host connection.
-5. Stops the host camera/audio stream used for the guest call.
-6. Clears the guest video on Host Control.
-7. Forces the guest side to close its WebRTC/media stream.
-8. Sends the guest automatically to the branded Thank You page.
-
-The guest no longer needs to press Leave to end the call.
+The Clear Guest button is now always clickable. It confirms, clears the current guest profile, private room credentials, and lower-third data, then returns Guest Hub to the No guest yet state.
