@@ -3,50 +3,142 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#08080c">
+  <meta name="theme-color" content="#06070b">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Podcast Brain 4.2 — Studio</title>
-  <link rel="stylesheet" href="podcast-brain.css?v=4.2.0">
+  <title>Throuple Tea Guest Studio 5.0</title>
+  <link rel="stylesheet" href="guest-desk.css?v=5.0">
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
+  <div class="desk-shell">
+    <header class="desk-topbar">
+      <a class="desk-brand" href="./">
         <img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea">
-        <div><strong>Podcast Brain</strong><span>A Little Throuple Tea · Studio 4.2</span></div>
+        <span><strong>Throuple Tea Studio</strong><small>Guest Studio 5.0</small></span>
+      </a>
+      <div class="desk-top-actions">
+        <span class="desk-save" id="saveState"><i></i>Saved locally</span>
+        <a class="secondary-btn" href="host.html">Host Control</a>
       </div>
-      <nav class="nav" id="desktopNav"></nav>
-      <button class="mobile-side-launch" id="mobileSideLaunch" type="button">
-        <span class="mobile-side-icon">📱</span>
-        <span><strong>Recording Remote</strong><small>Timer + marker pad</small></span>
-      </button>
-      <div class="sidebar-foot"><span class="version-chip">Studio 4.2</span><br>OBS records. Premiere edits.<br><b>Podcast Brain remembers.</b></div>
-    </aside>
+    </header>
 
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <div class="eyebrow app-kicker">A Little Throuple Tea</div>
-          <h1 id="pageTitle">Today</h1>
+    <main class="desk-main">
+      <section class="desk-hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Guest-first production</div>
+          <h1>Book the guest.<br><span>We’ll handle the room.</span></h1>
+          <p>This Studio no longer tries to replace OBS or your podcast recorder. You start those exactly like you already do. This screen is for one thing: making a guest feel like they walked into a real show.</p>
         </div>
-        <div class="top-actions">
-          <span class="studio-status" id="studioStatus"><i></i><span>Saved locally</span></span><button class="btn" id="exportBtn">Production Packet</button>
-          <button class="btn danger" id="resetBtn">Reset</button>
+        <div class="hero-state">
+          <span class="hero-state-label">Current guest</span>
+          <strong id="currentGuestName">No guest yet</strong>
+          <small id="currentGuestStatus">Create an invitation to begin.</small>
+          <div class="status-track"><i id="statusTrack"></i></div>
         </div>
-      </header>
+      </section>
 
-      <section id="home" class="section active"></section>
-      <section id="prepare" class="section"></section>
-      <section id="record" class="section"></section>
-      <section id="wrap" class="section"></section>
-      <section id="edit" class="section"></section>
-      <section id="publish" class="section"></section>
-      <section id="vault" class="section"></section>
+      <section class="desk-grid">
+        <article class="desk-card invite-card">
+          <div class="card-header">
+            <div>
+              <div class="eyebrow">1 · Invite</div>
+              <h2>Build the private guest link.</h2>
+              <p>Everything entered here is pre-filled for the guest and saved into the host intro card.</p>
+            </div>
+            <span class="step-badge">Start here</span>
+          </div>
+
+          <div class="form-grid">
+            <label><span>Guest name</span><input id="guestName" placeholder="Guest name"></label>
+            <label><span>Pronouns</span><input id="guestPronouns" placeholder="Optional"></label>
+            <label><span>Title / what they do</span><input id="guestTitle" placeholder="Actor, author, creator…"></label>
+            <label><span>Social handle</span><input id="guestSocial" placeholder="@handle"></label>
+            <label class="full"><span>What should we plug?</span><textarea id="guestPromo" placeholder="Project, show, book, tour, release date, website…"></textarea></label>
+            <label><span>Season</span><input id="season" inputmode="numeric"></label>
+            <label><span>Episode</span><input id="episodeNumber" inputmode="numeric"></label>
+            <label class="full"><span>Working episode title</span><input id="episodeTitle"></label>
+            <label class="full"><span>Main topic / guest context</span><textarea id="episodeTopic"></textarea></label>
+          </div>
+
+          <div class="invite-preview">
+            <div>
+              <small>Guest will see</small>
+              <strong id="invitePreviewName">Private Guest Lounge</strong>
+              <span id="invitePreviewMeta">Add the guest details above.</span>
+            </div>
+            <button class="primary-btn" id="createInvite">Create Guest Link</button>
+          </div>
+
+          <div class="link-box" id="linkBox" hidden>
+            <div>
+              <small>Private guest link</small>
+              <input id="guestLink" readonly>
+            </div>
+            <button class="primary-btn" id="copyLink">Copy Link</button>
+            <a class="secondary-btn" id="previewLink" target="_blank" rel="noopener">Preview</a>
+          </div>
+        </article>
+
+        <aside class="desk-side">
+          <article class="desk-card guest-state-card">
+            <div class="card-header compact">
+              <div><div class="eyebrow">2 · Guest status</div><h2>Guest room</h2></div>
+              <span class="live-chip" id="guestChip"><i></i>Not invited</span>
+            </div>
+            <div class="guest-state">
+              <div class="guest-avatar" id="guestInitial">?</div>
+              <div><strong id="sideGuestName">Waiting for guest</strong><span id="sideGuestMeta">No invitation created yet.</span></div>
+            </div>
+            <div class="status-list">
+              <div><span>Invitation</span><b id="inviteStatus">Not created</b></div>
+              <div><span>Tech check</span><b id="techStatus">Waiting</b></div>
+              <div><span>Intro + promo</span><b id="introStatus">Waiting</b></div>
+              <div><span>Green room</span><b id="greenStatus">Waiting</b></div>
+            </div>
+            <div class="side-actions">
+              <a class="primary-btn" href="host.html">Open Host Control</a>
+              <a class="secondary-btn" href="guest.html" target="_blank">Open Guest Lounge</a>
+            </div>
+          </article>
+
+          <article class="desk-card simple-card">
+            <div class="eyebrow">3 · Record</div>
+            <h2>Keep your recording setup.</h2>
+            <div class="record-stack">
+              <div><i>1</i><span><strong>Start OBS</strong><small>Your video recording stays exactly as-is.</small></span></div>
+              <div><i>2</i><span><strong>Start your podcast recorder</strong><small>Your separate audio stays exactly as-is.</small></span></div>
+              <div><i>3</i><span><strong>Bring the guest in</strong><small>Host Control handles the guest experience.</small></span></div>
+            </div>
+            <p class="quiet-note">No fake OBS sync. No duplicate timer. No producer dashboard pretending to replace the tools you already trust.</p>
+          </article>
+        </aside>
+      </section>
+
+      <section class="desk-card day-of-card">
+        <div class="card-header">
+          <div><div class="eyebrow">Day of the interview</div><h2>The entire flow in one line.</h2></div>
+        </div>
+        <div class="day-flow">
+          <div><i>✓</i><strong>Guest link</strong><span>They check camera, mic, intro and promo.</span></div>
+          <b>→</b>
+          <div><i>✓</i><strong>Green room</strong><span>They wait in a private branded room.</span></div>
+          <b>→</b>
+          <div><i>✓</i><strong>Admit</strong><span>You bring them in from Host Control.</span></div>
+          <b>→</b>
+          <div><i>●</i><strong>Record</strong><span>OBS + podcast recorder, like always.</span></div>
+          <b>→</b>
+          <div><i>♥</i><strong>Thank you</strong><span>Guest gets a clean post-show exit.</span></div>
+        </div>
+      </section>
+
+      <section class="transport-note">
+        <span>Next engineering target</span>
+        <strong>Live guest video/audio transport → OBS.</strong>
+        <p>The guest UX is now separated from your recording workflow. The next build can focus only on WebRTC/signaling and the OBS connection instead of redesigning the whole app again.</p>
+      </section>
     </main>
   </div>
-
-  <nav class="mobile-nav" id="mobileNav"></nav>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="podcast-brain.js?v=4.2.0"></script>
+  <div class="desk-toast" id="toast"></div>
+  <script src="shared-state.js?v=5.0"></script>
+  <script src="guest-desk.js?v=5.0"></script>
 </body>
 </html>

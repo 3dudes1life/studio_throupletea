@@ -1,7 +1,10 @@
-# Studio 4.3 — Guest Ready
+# Guest Studio 5.0
 
-The priority shifts from the producer dashboard to a professional guest experience.
+Guest Studio 5.0 removes the overbuilt producer dashboard and makes the root application guest-first.
 
-This release replaces the old prototype Guest Lounge with a guided check-in, branded green room, host admission controls, guest intro/promo data, device testing, and a clean post-show exit.
+The existing trusted workflow remains:
+OBS records video.
+The podcast recorder captures audio.
+Guest Studio handles the guest.
 
-It deliberately keeps the live WebRTC transport separate so the remote media connection can be added and tested without destabilizing the guest UX.
+The main screen is now an invitation/status desk, while the guest gets a private professional check-in and green-room experience.
