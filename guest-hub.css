@@ -59,3 +59,98 @@ dialog{width:min(700px,calc(100% - 24px));padding:0;border:1px solid var(--line)
 .guest-actions .clear-guest:hover{
   background:rgba(255,98,102,.18)!important;
 }
+
+/* 4.5.5 — Green Room live alert */
+.green-room-alert{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:14px;
+  margin:0 0 14px;
+  padding:14px 16px;
+  border:1px solid rgba(43,228,151,.34);
+  border-radius:16px;
+  background:
+    linear-gradient(110deg,rgba(43,228,151,.13),rgba(93,227,207,.08)),
+    #0c1218;
+  color:white;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 0 0 1px rgba(43,228,151,.04),0 16px 45px rgba(43,228,151,.08);
+  animation:greenRoomGlow 1.4s ease-in-out infinite;
+}
+.green-room-alert[hidden]{display:none!important}
+.green-room-beacon{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+}
+.green-room-beacon i{
+  position:absolute;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:#2be497;
+}
+.green-room-beacon i:nth-child(2){
+  width:27px;height:27px;background:rgba(43,228,151,.12);
+  animation:greenRoomPulse 1.2s ease-out infinite;
+}
+.green-room-beacon i:nth-child(3){
+  width:42px;height:42px;background:rgba(43,228,151,.05);
+  animation:greenRoomPulse 1.2s .18s ease-out infinite;
+}
+.green-room-alert-copy small,
+.green-room-alert-copy strong,
+.green-room-alert-copy em{display:block}
+.green-room-alert-copy small{
+  color:#6ff2bc;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+.green-room-alert-copy strong{
+  margin-top:3px;
+  font-size:15px;
+}
+.green-room-alert-copy em{
+  margin-top:3px;
+  color:#98a4af;
+  font-size:10px;
+  font-style:normal;
+}
+.green-room-arrow{
+  font-size:25px;
+  color:#62ebb6;
+}
+.guest-control-card-link{
+  position:relative;
+}
+.guest-control-card-link mark{
+  margin-left:auto;
+  padding:5px 7px;
+  border-radius:999px;
+  background:#2be497;
+  color:#06110f;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.08em;
+  animation:guestBadgeBlink 1s step-end infinite;
+}
+.guest-control-card-link mark[hidden]{display:none!important}
+.guest-control-card-link.guest-waiting-now{
+  border-color:rgba(43,228,151,.42);
+  box-shadow:0 0 0 1px rgba(43,228,151,.06),0 0 30px rgba(43,228,151,.08);
+}
+@keyframes greenRoomPulse{
+  0%{transform:scale(.55);opacity:.9}
+  100%{transform:scale(1.15);opacity:0}
+}
+@keyframes greenRoomGlow{
+  50%{border-color:rgba(43,228,151,.68);box-shadow:0 0 0 1px rgba(43,228,151,.08),0 0 32px rgba(43,228,151,.13)}
+}
+@keyframes guestBadgeBlink{50%{opacity:.45}}

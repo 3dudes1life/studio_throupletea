@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   const $=s=>document.querySelector(s);
-  const toast=$('#toast');let toastTimer;let guestUrl='';
+  const toast=$('#toast');let toastTimer;let guestUrl='';let presenceSocket=null;let presenceRoom='';let remoteGuestPresence=null;
 
   function showToast(msg){
     toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
@@ -39,19 +39,88 @@
   function journeyRank(status){
     return ({invited:0,tech:1,ready:1,waiting:2,admitted:3,recording:4,complete:5,left:5})[status]??0;
   }
-  function render(state){
+  
+  function closePresenceSocket(){
+    if(presenceSocket){try{presenceSocket.close(1000,'Hub watcher refresh')}catch{}}
+    presenceSocket=null;presenceRoom='';
+  }
+
+  function showGreenRoomAlert(guest,state){
+    const waiting=guest&&['waiting','ready'].includes(guest.status);
+    const alert=$('#greenRoomAlert');
+    const badge=$('#guestWaitingBadge');
+    const control=$('#quickGuestControl');
+    if(alert){
+      alert.hidden=!waiting;
+      if(waiting){
+        $('#greenRoomAlertName').textContent=`${guest.name||'Your guest'} is waiting in the Green Room`;
+        alert.onclick=()=>{location.href=buildHostUrl(state)};
+      }
+    }
+    if(badge)badge.hidden=!waiting;
+    if(control)control.classList.toggle('guest-waiting-now',Boolean(waiting));
+  }
+
+  function connectPresenceWatcher(state){
+    const cfg=window.TT_LIVE_GUEST_CONFIG||{};
+    const room=state.liveRoom&&state.liveRoom.roomId||'';
+    const token=state.liveRoom&&state.liveRoom.token||'';
+    if(!cfg.signalingBaseUrl||!room||!token){closePresenceSocket();showGreenRoomAlert(null,state);return}
+    if(presenceSocket&&presenceRoom===room&&(presenceSocket.readyState===WebSocket.OPEN||presenceSocket.readyState===WebSocket.CONNECTING))return;
+
+    closePresenceSocket();
+    presenceRoom=room;
+    try{
+      const u=new URL(cfg.signalingBaseUrl);
+      u.protocol=u.protocol==='https:'?'wss:':'ws:';
+      u.pathname=`/room/${encodeURIComponent(room)}/websocket`;
+      u.search=`?role=observer&token=${encodeURIComponent(token)}`;
+      presenceSocket=new WebSocket(u.href);
+
+      presenceSocket.addEventListener('message',event=>{
+        let message;try{message=JSON.parse(event.data)}catch{return}
+        if(message.type==='guest-state'&&message.guest){
+          remoteGuestPresence=message.guest;
+          showGreenRoomAlert(remoteGuestPresence,TTStudio.getState());
+        }
+        if(message.type==='peer-left'&&message.role==='guest'){
+          // Don't instantly erase a stored waiting state; the guest may just be reconnecting.
+          setTimeout(()=>{
+            if(remoteGuestPresence&&remoteGuestPresence.status==='waiting'){
+              showGreenRoomAlert(remoteGuestPresence,TTStudio.getState());
+            }
+          },1500);
+        }
+      });
+
+      presenceSocket.addEventListener('close',()=>{
+        presenceSocket=null;
+        if(presenceRoom===room){
+          setTimeout(()=>connectPresenceWatcher(TTStudio.getState()),1800);
+        }
+      });
+    }catch(error){
+      closePresenceSocket();
+    }
+  }
+
+function render(state){
     const guest=state.guest||{};
     const exists=guest.name&&guest.name!=='Future Guest';
-    const status=exists?(guest.status||'invited'):'none';
+    const liveGuest=remoteGuestPresence&&remoteGuestPresence.name?remoteGuestPresence:guest;
+    const status=exists?(liveGuest.status||guest.status||'invited'):'none';
     $('#guestName').textContent=exists?guest.name:'No guest yet';
     $('#guestAvatar').textContent=exists?(guest.name.trim()[0]||'G').toUpperCase():'G';
-    $('#guestRole').textContent=exists?([guest.title,guest.pronouns].filter(Boolean).join(' · ')||'Guest'):'Create a private guest link when you are ready.';
-    $('#guestSocial').textContent=guest.social||'No social added';
+    $('#guestRole').textContent=exists?([liveGuest.title||guest.title,liveGuest.pronouns||guest.pronouns].filter(Boolean).join(' · ')||'Guest'):'Create a private guest link when you are ready.';
+    $('#guestSocial').textContent=liveGuest.social||guest.social||'No social added';
     $('#episodeLabel').textContent=`Episode ${state.episode.number||'—'}`;
     const pill=$('#guestStatus');pill.className=`status ${status}`;pill.innerHTML=`<i></i>${exists?statusLabel(status):'Not invited'}`;
     guestUrl=exists?buildGuestUrl(state):'';
     $('#guestLinkHint').textContent=exists?'Copy private check-in link':'Create the guest first';
     $('#copyGuestLink').disabled=!exists;const hostUrl=buildHostUrl(state);if($('#sidebarGuestControl'))$('#sidebarGuestControl').href=hostUrl;if($('#quickGuestControl'))$('#quickGuestControl').href=hostUrl;
+
+    connectPresenceWatcher(state);
+    showGreenRoomAlert(remoteGuestPresence,state);
 
     const rank=journeyRank(status);
     document.querySelectorAll('.journey-step').forEach((step,index)=>{
@@ -152,7 +221,11 @@
       },'clear-guest');
 
       guestUrl='';
+      remoteGuestPresence=null;
+      closePresenceSocket();
+      showGreenRoomAlert(null,TTStudio.getState());
       showToast('Guest cleared — ready for the next guest');
     });
   }
+  addEventListener('beforeunload',closePresenceSocket);
 })();

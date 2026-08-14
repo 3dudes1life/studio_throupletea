@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#06080d">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Throuple Tea Guest Hub 4.5.4</title>
-  <link rel="stylesheet" href="guest-hub.css?v=4.5.4">
+  <title>Throuple Tea Guest Hub 4.5.5</title>
+  <link rel="stylesheet" href="guest-hub.css?v=4.5.5">
 </head>
 <body>
   <main class="app-shell">
@@ -29,7 +29,7 @@
           <small>3Dudes1Life</small>
         </div>
         <div class="ready-chip"><i></i><span><b>Guest system ready</b><small>OBS stays separate</small></span></div>
-        <div class="version">Guest Studio 4.5.4</div>
+        <div class="version">Guest Studio 4.5.5</div>
       </div>
     </aside>
 
@@ -47,6 +47,16 @@
         <button class="active">Current Guest</button>
         <button id="openGuestLounge">Open Guest Lounge</button>
       </div>
+
+      <button class="green-room-alert" id="greenRoomAlert" hidden>
+        <span class="green-room-beacon"><i></i><i></i><i></i></span>
+        <span class="green-room-alert-copy">
+          <small>Guest waiting</small>
+          <strong id="greenRoomAlertName">Your guest is in the Green Room</strong>
+          <em>Open Guest Control now</em>
+        </span>
+        <span class="green-room-arrow">→</span>
+      </button>
 
       <section class="guest-card" id="guestCard">
         <div class="guest-main">
@@ -86,7 +96,7 @@
 
       <section class="quick-grid">
         <button class="quick-card" id="quickInvite"><i>🔗</i><span><b>Invite a Guest</b><small>Create their private link</small></span></button>
-        <a class="quick-card" href="host.html" id="quickGuestControl"><i>🎙️</i><span><b>Guest Control</b><small>Admit and manage the guest</small></span></a>
+        <a class="quick-card guest-control-card-link" href="host.html" id="quickGuestControl"><i>🎙️</i><span><b>Guest Control</b><small>Admit and manage the guest</small></span><mark id="guestWaitingBadge" hidden>WAITING</mark></a>
         <button class="quick-card" id="copyGuide"><i>?</i><span><b>Guest Guide</b><small>Copy simple prep instructions</small></span></button>
       </section>
 
@@ -141,6 +151,6 @@
 
   <div class="toast" id="toast"></div>
   <script src="shared-state.js"></script><script src="live-guest-config.js?v=4.5.3"></script><script src="live-guest.js?v=4.5.3"></script>
-  <script src="guest-hub.js?v=4.5.4"></script>
+  <script src="guest-hub.js?v=4.5.5"></script>
 </body>
 </html>

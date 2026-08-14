@@ -1,8 +1,8 @@
-# 4.5.2 — Host End Session
+# 4.5.5 — Green Room Alert
 
-- Host can end the guest call from Guest Control
-- Complete renamed to End Session
-- Host sends remote end-session command to guest
-- Guest media and WebRTC close automatically
-- Guest is sent directly to the branded Thank You page
-- Host-side media is stopped and guest feed cleared
+- Live cross-device Green Room presence on Guest Hub
+- Pulsing green waiting alert
+- Flashing WAITING badge on Guest Control
+- One-click jump directly to the correct Guest Control room
+- Adds non-invasive Cloudflare observer WebSocket role
+- Observer does not replace or interfere with Host Control
