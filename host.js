@@ -146,7 +146,24 @@
     void now;
   }
 
+  function renderGuestControl(state) {
+    const guest = state.guest || {};
+    const checkedIn = Boolean(guest.ready);
+    const waiting = guest.status === 'waiting';
+    const admitted = Boolean(guest.admitted);
+    const pill = $('#hostGuestPill');
+    $('#hostGuestName').textContent = checkedIn ? (guest.name || 'Guest') : 'No guest checked in';
+    $('#hostGuestIntro').textContent = checkedIn ? [guest.title, guest.social].filter(Boolean).join(' · ') || 'Guest details saved' : '—';
+    $('#hostGuestPromo').textContent = checkedIn ? (guest.promo || 'Nothing requested') : '—';
+    $('#hostGuestStatus').textContent = admitted ? 'Guest admitted to studio.' : waiting ? 'Guest is waiting in the green room.' : checkedIn ? 'Guest check-in is complete.' : 'Waiting for guest check-in.';
+    pill.innerHTML = `<i class="status-dot"></i>${admitted ? 'In studio' : waiting ? 'Waiting' : checkedIn ? 'Ready' : 'Not ready'}`;
+    pill.className = `status-pill${checkedIn ? '' : ' paused'}`;
+    $('#admitGuest').disabled = !checkedIn || admitted;
+    $('#returnGuest').disabled = !admitted;
+  }
+
   function render(state) {
+    renderGuestControl(state);
     const segment = state.episode.segments[state.studio.currentSegment];
     const readiness = TTStudio.readiness(state);
     $('#headerEpisode').textContent = `S${state.episode.season} Ep${state.episode.number} · Hosts Only`;
@@ -276,6 +293,24 @@
     $('#modalTime').textContent = time;
     renderSegments(state);
   }, 250);
+
+  $('#admitGuest').addEventListener('click', () => {
+    TTStudio.update((next) => {
+      next.guest.admitted = true;
+      next.guest.status = 'admitted';
+      TTStudio.addActivity(next, `${next.guest.name} admitted from green room`);
+    }, 'host-guest-admit');
+    showToast('Guest admitted to the studio.');
+  });
+
+  $('#returnGuest').addEventListener('click', () => {
+    TTStudio.update((next) => {
+      next.guest.admitted = false;
+      next.guest.status = 'waiting';
+      TTStudio.addActivity(next, `${next.guest.name} returned to green room`);
+    }, 'host-guest-return');
+    showToast('Guest returned to the green room.');
+  });
 
   $('#startRecording').addEventListener('click', () => {
     const state = TTStudio.getState();

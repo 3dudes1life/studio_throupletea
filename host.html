@@ -146,6 +146,17 @@
       </div>
 
       <aside class="stack sticky-stack">
+        <section class="card glass" id="guestControlCard">
+          <div class="card-head"><div><div class="card-kicker">Guest Room</div><h2 id="hostGuestName">No guest checked in</h2></div><span class="status-pill paused" id="hostGuestPill"><i class="status-dot"></i>Not ready</span></div>
+          <div class="cue-banner"><b>Status:</b> <span id="hostGuestStatus">Waiting for guest check-in.</span></div>
+          <div class="list" style="margin-top:12px">
+            <div class="summary-item"><small>Intro</small><strong id="hostGuestIntro">—</strong></div>
+            <div class="summary-item"><small>Promo</small><strong id="hostGuestPromo">—</strong></div>
+          </div>
+          <div class="button-row"><button class="btn teal" id="admitGuest" type="button" disabled>Admit Guest</button><button class="btn" id="returnGuest" type="button" disabled>Return to Green Room</button></div>
+          <p class="muted tiny">Admission state is ready for the live signaling layer. Separate-device guest video transport is the next connection step.</p>
+        </section>
+
         <section class="card glass">
           <div class="card-head"><div><div class="card-kicker">Who Is Talking?</div><h2>Speaker tracking</h2></div></div>
           <div class="speaker-buttons" id="speakerButtons">

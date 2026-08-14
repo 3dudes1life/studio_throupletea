@@ -36,7 +36,7 @@
   ];
 
   const DEFAULT_STATE = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     revision: 0,
     updatedAt: null,
     mode: 'hosts-only',
@@ -97,7 +97,12 @@
       promo: '',
       notes: '',
       releaseAccepted: false,
-      ready: false
+      ready: false,
+      status: 'invited',
+      admitted: false,
+      checkInStage: 'tech',
+      checkInCompletedAt: null,
+      waitingSince: null
     },
     studio: {
       mode: 'hosts-only',
@@ -210,7 +215,7 @@
     state = mergeDefaults(DEFAULT_STATE, nextState);
     state.mode = 'hosts-only';
     state.studio.mode = 'hosts-only';
-    state.schemaVersion = 3;
+    state.schemaVersion = 4;
     state.revision = Number(state.revision || 0) + 1;
     state.updatedAt = new Date().toISOString();
     try {

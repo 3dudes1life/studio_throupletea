@@ -1,13 +1,7 @@
-# Podcast Brain 4.2
+# Studio 4.3 — Guest Ready
 
-- Mockup-inspired Today dashboard
-- Neon tropical production visual system
-- Dedicated right-side command and health rail
-- Rebuilt Studio with one clear recording bar
-- Compact current-prompt experience
-- Ten-button marker deck
-- Cleaner OBS sync
-- Flawless full-screen mobile remote
-- Start control reduced to a deliberate circular control
-- Three-column phone marker grid
-- Existing autosave, recovery, exports, markers, and session logic preserved
+The priority shifts from the producer dashboard to a professional guest experience.
+
+This release replaces the old prototype Guest Lounge with a guided check-in, branded green room, host admission controls, guest intro/promo data, device testing, and a clean post-show exit.
+
+It deliberately keeps the live WebRTC transport separate so the remote media connection can be added and tested without destabilizing the guest UX.
