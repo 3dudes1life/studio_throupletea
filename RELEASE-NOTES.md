@@ -1,7 +1,8 @@
-# 4.5.1
+# 4.5.2 — Host End Session
 
-- Fixes guest presence/status across separate devices
-- Guest profile/status now travels through the signaling room
-- Durable Object stores latest guest state and replays it to a host joining later
-- Guest Control links now carry private room/token credentials
-- Host Control no longer depends on guest-device localStorage
+- Host can end the guest call from Guest Control
+- Complete renamed to End Session
+- Host sends remote end-session command to guest
+- Guest media and WebRTC close automatically
+- Guest is sent directly to the branded Thank You page
+- Host-side media is stopped and guest feed cleared

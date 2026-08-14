@@ -99,6 +99,31 @@ TTStudio.subscribe(render);populateDevices();
 $('#connectLive').onclick=connect;
 $('#admit').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=true;n.guest.status='admitted'},'admit-guest');if(remoteGuest){remoteGuest.admitted=true;remoteGuest.status='admitted';render(TTStudio.getState())}if(live)live.sendControl('admitted',true);show('Guest admitted')};
 $('#return').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='waiting'},'return-guest');if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='waiting';render(TTStudio.getState())}if(live)live.sendControl('admitted',false);show('Guest returned to green room')};
-$('#complete').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='complete'},'complete-guest');if(live)live.sendControl('complete',true);show('Guest marked complete')};
+$('#complete').onclick=()=>{
+  if(!confirm('End this guest session for everyone?'))return;
+  TTStudio.update(n=>{
+    n.guest.admitted=false;
+    n.guest.status='complete';
+  },'complete-guest');
+  if(remoteGuest){
+    remoteGuest.admitted=false;
+    remoteGuest.status='complete';
+    render(TTStudio.getState());
+  }
+  if(live){
+    live.sendControl('end-session',true);
+    setTimeout(()=>live.close(),250);
+  }
+  if(hostStream){
+    hostStream.getTracks().forEach(track=>track.stop());
+    hostStream=null;
+  }
+  $('#guestVideo').srcObject=null;
+  $('#guestPlaceholder').hidden=false;
+  $('#guestPlaceholderTitle').textContent='Session ended';
+  $('#guestPlaceholderText').textContent='The guest has been disconnected.';
+  $('#connectionState').textContent='Ended';
+  show('Guest session ended');
+};
 addEventListener('beforeunload',()=>{if(live)live.close();if(hostStream)hostStream.getTracks().forEach(t=>t.stop())});
 })();

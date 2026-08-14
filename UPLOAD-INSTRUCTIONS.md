@@ -1,29 +1,32 @@
-# 4.5.1 Cross-Device Guest State Fix
+# Throuple Tea Studio 4.5.2 — Host End Session
 
-This fixes the bug shown in your screenshots: the guest reached Green Room on one device while Host Control still said "No guest checked in."
+This fixes the exact issue where the host could mark a guest Complete, but the guest remained connected until they manually left.
 
-Cause: 4.5 stored guest status in browser localStorage, which cannot sync between separate devices.
+Upload these updated root files:
 
-## Update Cloudflare Worker
-Inside the included `cloudflare-signaling-worker` folder:
+- host.html
+- guest-control.js
+- guest-control.css
+- guest-room.js
+- guest-goodbye.html
 
-```bash
-npm install
-npm run deploy
-```
+You can leave every other 4.5.1 file exactly as-is.
 
-Your Worker URL stays:
-https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev
+## New behavior
 
-## Update GitHub
-Upload the updated root website files. The included `live-guest-config.js` already contains your Worker URL.
+On Guest Control:
 
-## Test
-1. Hard refresh GitHub Pages.
-2. Create a BRAND-NEW guest invitation.
-3. Open Guest Control FROM the Guest Hub. Its URL now carries the private room/token.
-4. Open the guest link on the separate guest device.
-5. Complete Tech → Intro → Ready → Green Room.
-6. Click Start Live Connection on Host Control.
+**End Session**
 
-Host Control should now receive the guest name/status through Cloudflare. The Durable Object also stores the latest guest state, so Host Control can open after the guest is already waiting.
+now does all of the following:
+
+1. Asks the host to confirm.
+2. Sends an `end-session` control message through the existing Cloudflare signaling room.
+3. Marks the guest Complete.
+4. Disconnects the WebRTC host connection.
+5. Stops the host camera/audio stream used for the guest call.
+6. Clears the guest video on Host Control.
+7. Forces the guest side to close its WebRTC/media stream.
+8. Sends the guest automatically to the branded Thank You page.
+
+The guest no longer needs to press Leave to end the call.

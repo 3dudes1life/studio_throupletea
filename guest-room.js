@@ -74,6 +74,23 @@ async function start(){
     live=new TTLiveGuest.LiveGuestConnection({
       role:'guest',room:roomId,token,localStream:stream,remoteVideo:$('#hostVideo'),
       onState:setLiveState,
+      onMessage(message){
+        if(message&&message.type==='control'&&message.action==='end-session'){
+          TTStudio.update(n=>{
+            n.guest.status='complete';
+            n.guest.admitted=false;
+          },'host-ended-session');
+          try{live.close()}catch{}
+          try{media.destroy()}catch{}
+          location.href='guest-goodbye.html?ended=host';
+        }
+        if(message&&message.type==='control'&&message.action==='admitted'){
+          TTStudio.update(n=>{
+            n.guest.admitted=Boolean(message.value);
+            n.guest.status=message.value?'admitted':'waiting';
+          },'host-admission-state');
+        }
+      },
       onStats(stats){
         const video=stats.video;
         if(video&&video.frameWidth&&video.frameHeight)$('#videoQuality').textContent=`${video.frameWidth}×${video.frameHeight}`;
