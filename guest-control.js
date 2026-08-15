@@ -74,9 +74,36 @@ function finalizeSession(message){
 function handlePeerMessage(message){
   if(!message)return;
   if(message.type==='guest-state'&&message.guest){
-    remoteGuest=message.guest;render(TTStudio.getState());
+    remoteGuest=message.guest;
+    const health=remoteGuest.captureHealth||{};
+    if($('#guestCaptureGuard')){
+      $('#guestCaptureGuard').textContent=health.recording?'Recording protected':(remoteGuest.status==='recording'?'Checking':'Armed');
+      $('#guestLocalWrites').textContent=health.pendingWrites!=null?`${health.pendingWrites} pending`:'—';
+    }
+    render(TTStudio.getState());
     $('#guestPlaceholderTitle').textContent=remoteGuest.status==='waiting'?'Guest is in the Green Room':'Guest connected';
     $('#guestPlaceholderText').textContent=`${remoteGuest.name||'Guest'} is connected to this private room.`;
+  }
+  if(message.type==='control'&&message.action==='capture-warning'){
+    $('#guestCaptureGuard').textContent='WARNING';
+    $('#captureStatus').textContent=`Guest capture warning: ${(message.value&&message.value.reason)||'Check guest device'}`;
+    show('Guest capture safeguard reported a warning. Keep recording, but check the guest device.',true);
+  }
+  if(message.type==='control'&&message.action==='capture-recovery-found'){
+    $('#guestCaptureGuard').textContent='Recovery copy found';
+    $('#retryUpload').hidden=false;
+    show('Guest device found a protected recovery copy from this room.',false);
+  }
+  if(message.type==='control'&&message.action==='iso-start-failed'){
+    $('#captureStatus').textContent='Guest local master did NOT start';
+    $('#isoHostStatus').textContent='Start failed';
+    $('#startCapture').disabled=false;
+    show(`Guest local recording failed to start: ${(message.value&&message.value.reason)||'unknown error'}`,true);
+  }
+  if(message.type==='control'&&message.action==='iso-upload-progress'){
+    $('#audioIsoHostStatus').textContent='Safely uploaded ✓';
+    $('#audioIsoHostStatus').classList.add('safe');
+    $('#captureStatus').textContent='Audio safe — guest video still uploading';
   }
   if(message.type==='control'&&message.action==='iso-started'){
     $('#isoHostStatus').textContent='Recording locally';
@@ -114,11 +141,12 @@ function handlePeerMessage(message){
   }
   if(message.type==='control'&&message.action==='iso-upload-failed'){
     clearTimeout(finishingTimer);
-    $('#isoHostStatus').textContent='Upload failed — keep guest connected';
+    $('#isoHostStatus').textContent='Upload failed — recovery copy retained';
     $('#audioIsoHostStatus').textContent='Check upload';
     $('#videoIsoHostStatus').textContent='Check upload';
-    $('#captureStatus').textContent='Guest audio/video upload needs attention';
-    show('Guest ISO upload failed. Do not clear the guest yet.',true);
+    $('#captureStatus').textContent='Guest audio/video upload needs attention — local recovery copy remains';
+    $('#retryUpload').hidden=false;
+    show('Guest upload failed, but the protected local recovery copy was retained. Do not clear the guest.',true);
   }
 }
 async function connect(){
@@ -168,5 +196,11 @@ $('#finishCapture').onclick=()=>{
 $('#admit').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=true;n.guest.status='admitted'},'admit-guest');if(remoteGuest){remoteGuest.admitted=true;remoteGuest.status='admitted'}if(live)live.sendControl('admitted',true);show('Guest admitted');render(TTStudio.getState())};
 $('#return').onclick=()=>{TTStudio.update(n=>{n.guest.admitted=false;n.guest.status='waiting'},'return-guest');if(remoteGuest){remoteGuest.admitted=false;remoteGuest.status='waiting'}if(live)live.sendControl('admitted',false);show('Guest returned to Green Room');render(TTStudio.getState())};
 $('#complete').onclick=()=>{show('Use End + Upload ISO so the guest recording is safely received.',true)};
+$('#retryUpload').onclick=()=>{
+  if(!live){show('Reconnect the guest first.',true);return}
+  $('#retryUpload').hidden=true;
+  $('#captureStatus').textContent='Retrying protected guest upload…';
+  live.sendControl('retry-upload',true);
+};
 addEventListener('beforeunload',()=>{if(live)live.close();if(hostStream)hostStream.getTracks().forEach(t=>t.stop())});
 })();

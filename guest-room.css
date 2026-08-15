@@ -16,3 +16,7 @@ footer{display:flex;justify-content:center;gap:9px;padding:13px;border-top:1px s
 #isoStatus.live{color:#ff6f73!important}
 
 #videoIsoStatus.live{color:#ff6f73!important}
+
+.capture-guard{margin-top:12px;padding:12px;border:1px solid rgba(43,228,151,.20);border-radius:12px;background:#090d13;text-align:center}
+.capture-guard small,.capture-guard strong{display:block}.capture-guard small{color:#8f96a6;font-size:8px;text-transform:uppercase;letter-spacing:.08em}.capture-guard strong{margin-top:5px;color:#2be497;font-size:11px;letter-spacing:.05em}
+.capture-guard strong.warn,.warn{color:#ffd166!important}.capture-guard strong.danger,.danger{color:#ff7276!important}.capture-guard strong.safe,.safe{color:#2be497!important}

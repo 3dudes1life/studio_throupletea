@@ -38,3 +38,6 @@
 .iso-master-row b{color:#ffd166}
 .iso-master-row b.safe{color:var(--green)}
 .iso-downloads{display:grid;gap:7px;margin-top:9px}
+
+.retry-upload{width:100%;min-height:36px;margin-top:9px;border:1px solid rgba(255,209,102,.24);border-radius:9px;background:rgba(255,209,102,.07);color:#ffd166;font-weight:750}
+.retry-upload[hidden]{display:none!important}

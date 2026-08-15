@@ -1,10 +1,16 @@
-# 4.7 — Guest Video ISO
+# Guest Studio 5.0 — Production Hardened
 
-- Adds local guest video master recording
-- Keeps separate local guest audio master
-- Records both from guest-device camera/mic tracks
-- Uploads both privately to existing Cloudflare R2
-- Host waits for both uploads before ending safely
-- Adds Download Guest Audio
-- Adds Download Guest Video
-- No Cloudflare Worker redeploy required
+- IndexedDB checkpointing during guest capture
+- persistent local recovery copy
+- upload-failure recovery
+- storage-space preflight
+- wake lock
+- media-device disconnect watchdog
+- chunk-write watchdog
+- offline-safe local recording state
+- close/reload protection
+- exponential upload retry
+- sequential audio/video upload
+- partial upload status to host
+- Retry Guest Upload
+- local recovery cleanup only after BOTH masters are confirmed in R2
