@@ -204,6 +204,7 @@
     $('#copyGuestCode').disabled=!codeActive;
     $('#copyGuestInvite').disabled=!codeActive;
     $('#regenerateGuestCode').disabled=!exists;
+    $('#regenerateGuestCode').textContent=codeActive?'Regenerate':'Generate Code';
     $('#revokeGuestCode').disabled=!codeActive;
 
     const hostUrl=buildHostUrl(state);
@@ -295,7 +296,7 @@
   $('#regenerateGuestCode').onclick=async()=>{
     const state=TTStudio.getState();
     if(!existsGuest(state))return;
-    if(!confirm(`Generate a new code for ${state.guest.name}? The old code will stop working.`))return;
+    if(state.guestCode&&state.guestCode.status==='active'&&!confirm(`Generate a new code for ${state.guest.name}? The old code will stop working.`))return;
     try{
       const result=await generateCode(state,{revokeExisting:true});
       showToast(`New guest code ${formatCode(result.code)} created`);

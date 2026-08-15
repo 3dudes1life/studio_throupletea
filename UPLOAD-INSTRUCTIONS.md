@@ -1,13 +1,11 @@
-# Throuple Tea Guest Studio 5.1 — Guest Codes
-
-5.1 changes the guest entrance without touching the proven 5.0 recording architecture.
+# Throuple Tea Guest Studio 5.1.1 — Guest Code Fix
 
 ## Cloudflare Worker update REQUIRED
 
-Open normal Terminal and run exactly:
+Your ZIP is unzipped in Downloads. Open normal Terminal and run:
 
 ```bash
-cd "/Users/williamzakrajshek/Downloads/Throuple-Tea-Studio-5.1-Guest-Codes/cloudflare-signaling-worker"
+cd "/Users/williamzakrajshek/Downloads/Throuple-Tea-Studio-5.1.1-Guest-Code-Fix/cloudflare-signaling-worker"
 npm install
 npm run deploy
 open "https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev/health"
@@ -16,45 +14,32 @@ open "https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev/health"
 Expected health:
 
 ```json
-{"ok":true,"service":"throuple-tea-live-guest-signal","version":"5.1","isoStorage":true}
+{"ok":true,"service":"throuple-tea-live-guest-signal","version":"5.1.1","isoStorage":true,"guestCodes":true,"roomProvisioning":true}
 ```
 
-No new R2 bucket is required.
+## GitHub
 
-## GitHub files to upload
-
-Upload these updated root files:
+Upload ONLY:
 
 - index.html
-- guest-hub.css
 - guest-hub.js
-- guest.html
-- guest.css
-- guest.js
-- guest-room.js
-- shared-state.js
-- live-guest-config.js
 
-Keep every other 5.0 file unchanged.
+No other website files need replacing.
 
-## New browser flow
+## Test the guest already sitting in your Hub
 
-Host:
-Invite Guest → 6-digit code generated automatically → Copy Code / Copy Invite
+You do NOT need to clear Test 2.
 
-Guest:
-guest.html → Enter Code → Tech Check → Green Room → recording workflow
+After Worker + GitHub deploy:
+1. Hard refresh Guest Hub.
+2. Bottom-left should read Guest Studio 5.1.1.
+3. The old `Regenerate` button should now say `Generate Code` because Test 2 has no active code.
+4. Click Generate Code.
+5. A 6-digit code should appear.
+6. Open Guest Lounge in another/private browser and enter the code.
+7. It should load the correct guest + episode and continue to Tech Check.
 
-## Security behavior
-
-- actual room token is no longer in the guest invitation URL
-- code resolves server-side into room credentials
-- credentials are kept in sessionStorage after entry, not shown in the address bar
-- codes expire after 48 hours by default
-- Regenerate revokes the old code
-- Revoke immediately disables the code
-- Clear Guest revokes the code before clearing the host session
-- code lookup is rate-limited per client
-- invalid code responses are intentionally generic
-- codes are tied to one private room/session
-- reconnects are still allowed while the code remains active
+Then test:
+- Regenerate => previous code stops working
+- Revoke => current code stops working
+- Clear Guest => code is revoked and guest disappears
