@@ -1,8 +1,22 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#05070b"><title>Guest Lounge — A Little Throuple Tea</title><link rel="stylesheet" href="guest.css?v=4.6"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#05070b"><title>Guest Lounge — A Little Throuple Tea</title><link rel="stylesheet" href="guest.css?v=5.1"></head>
 <body>
-<main class="shell">
+<section class="code-gate" id="codeGate">
+  <div class="code-gate-card">
+    <img src="assets/podcast-artwork.jpg" alt="A Little Throuple Tea">
+    <div class="eyebrow">Private Guest Studio</div>
+    <h1>Enter your guest code.</h1>
+    <p>Your six-digit code securely opens the episode and guest room prepared for you.</p>
+    <form id="codeForm">
+      <input id="codeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000 000" aria-label="Six digit guest code">
+      <button type="submit">Continue →</button>
+    </form>
+    <div class="code-gate-status" id="codeGateStatus">Codes expire automatically and can be revoked by the hosts.</div>
+  </div>
+</section>
+
+<main class="shell" id="guestShell" hidden>
 <header class="top"><div class="brand"><img src="assets/podcast-artwork.jpg" alt=""><span><b>A Little Throuple Tea</b><span>Private Guest Lounge</span></span></div><span class="pill" id="readyPill"><i></i><span>Check-in</span></span></header>
 <section class="hero"><div class="eyebrow">You’re our guest</div><h1 id="welcomeTitle">Welcome.<span>We’ll handle the tech.</span></h1><p>About one minute of setup, then you can relax in the green room until William, Daniel and Caleb are ready.</p><div class="episode"><img src="assets/podcast-artwork.jpg" alt=""><div><b id="episodeTitle">Loading episode…</b><span id="episodeMeta"></span><span id="episodeTopic"></span></div></div></section>
 <nav class="steps"><button data-stage="tech" class="active"><i>1</i>Tech</button><b></b><button data-stage="intro"><i>2</i>Intro</button><b></b><button data-stage="prep"><i>3</i>Ready</button><b></b><button data-stage="done"><i>4</i>Green Room</button></nav>
@@ -16,5 +30,5 @@
 <section id="stage-done" class="stage"><article class="card ready-final"><div class="orb">✓</div><div class="eyebrow">You’re ready</div><h2>See you in the green room.</h2><p>Keep this tab open. We’ll bring you in when the room is ready.</p><button class="btn primary" id="enterStudio">Enter Green Room →</button></article></section>
 </main>
 <div class="toast" id="toast"></div>
-<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="live-guest-config.js?v=4.6.1"></script><script src="guest.js?v=4.6.1"></script>
+<script src="shared-state.js"></script><script src="media-tools.js"></script><script src="live-guest-config.js?v=5.1.1"></script><script src="guest.js?v=5.1.1"></script>
 </body></html>

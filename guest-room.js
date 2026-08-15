@@ -20,7 +20,14 @@ function show(msg,error){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>toast.classList.remove('show'),3000);
 }
-function params(){const p=new URLSearchParams(location.search);return{room:p.get('room')||'',token:p.get('token')||''}}
+function params(){
+  try{
+    const saved=JSON.parse(sessionStorage.getItem('TT_GUEST_CODE_SESSION_V1')||'null');
+    if(saved&&saved.room&&saved.token)return{room:saved.room,token:saved.token};
+  }catch{}
+  const p=new URLSearchParams(location.search);
+  return{room:p.get('room')||'',token:p.get('token')||''};
+}
 function guestPayload(state){
   const g=state.guest||{};
   return {

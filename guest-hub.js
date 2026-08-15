@@ -1,34 +1,59 @@
 (function(){
   'use strict';
   const $=s=>document.querySelector(s);
-  const toast=$('#toast');let toastTimer;let guestUrl='';let presenceSocket=null;let presenceRoom='';let remoteGuestPresence=null;
+  const toast=$('#toast');
+  let toastTimer;
+  let guestUrl='';
+  let presenceSocket=null;
+  let presenceRoom='';
+  let remoteGuestPresence=null;
 
-  function showToast(msg){
-    toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
+  function showToast(msg,error){
+    toast.textContent=msg;
+    toast.style.background=error?'#ff6266':'white';
+    toast.style.color=error?'white':'#111';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>toast.classList.remove('show'),2500);
   }
-  function esc(v){return String(v||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function workerBase(){
+    return String(window.TT_LIVE_GUEST_CONFIG&&window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl||'').replace(/\/+$/,'');
+  }
+  function formatCode(code){
+    const d=String(code||'').replace(/\D/g,'').slice(0,6);
+    return d.length===6?`${d.slice(0,3)} ${d.slice(3)}`:(d||'— — —');
+  }
+  function formatExpiry(iso){
+    if(!iso)return 'No active code';
+    const date=new Date(iso);
+    if(Number.isNaN(date.getTime()))return 'Expiration unavailable';
+    return `Expires ${date.toLocaleString([],{dateStyle:'short',timeStyle:'short'})}`;
+  }
+  async function api(path,options={}){
+    const base=workerBase();
+    if(!base)throw new Error('Cloudflare Worker is not configured.');
+    const response=await fetch(`${base}${path}`,{
+      method:options.method||'GET',
+      headers:{'Content-Type':'application/json',...(options.headers||{})},
+      body:options.body?JSON.stringify(options.body):undefined
+    });
+    let data={};
+    try{data=await response.json()}catch{}
+    if(!response.ok)throw new Error(data.error||`Guest code request failed (${response.status})`);
+    return data;
+  }
+  function buildBrowserGuestUrl(){
+    const url=new URL('guest.html',location.href);
+    return url.href;
+  }
   function buildHostUrl(state){
     const url=new URL('host.html',location.href);
     if(state.liveRoom&&state.liveRoom.roomId)url.searchParams.set('room',state.liveRoom.roomId);
     if(state.liveRoom&&state.liveRoom.token)url.searchParams.set('token',state.liveRoom.token);
     return url.href;
   }
-  function buildGuestUrl(state){
-    const url=new URL('guest.html',location.href);
-    const params={
-      guest:state.guest.name||'',
-      pronouns:state.guest.pronouns||'',
-      title:state.guest.title||'',
-      social:state.guest.social||'',
-      promo:state.guest.promo||'',
-      season:state.episode.season||'',
-      episode:state.episode.number||'',
-      episodeTitle:state.episode.title||'',
-      room:state.liveRoom&&state.liveRoom.roomId||'',
-      token:state.liveRoom&&state.liveRoom.token||''
-    };
-    Object.entries(params).forEach(([key,value])=>{if(value)url.searchParams.set(key,value)});
-    return url.href;
+  function existsGuest(state){
+    return Boolean(state.guest&&state.guest.name&&state.guest.name!=='Future Guest');
   }
   function statusLabel(status){
     return ({
@@ -39,17 +64,81 @@
   function journeyRank(status){
     return ({invited:0,tech:1,ready:1,waiting:2,admitted:3,recording:4,complete:5,left:5})[status]??0;
   }
-  
+
+  async function generateCode(state,{revokeExisting=true}={}){
+    if(!existsGuest(state))throw new Error('Create a guest first.');
+    const room=state.liveRoom&&state.liveRoom.roomId;
+    const token=state.liveRoom&&state.liveRoom.token;
+    if(!room||!token)throw new Error('This guest is missing private room credentials.');
+
+    const current=state.guestCode&&state.guestCode.code||'';
+    if(revokeExisting&&current){
+      try{
+        await api('/code/revoke',{
+          method:'POST',
+          body:{code:current,room,token}
+        });
+      }catch{}
+    }
+
+    const result=await api('/code/create',{
+      method:'POST',
+      body:{
+        room,token,
+        guest:{
+          name:state.guest.name||'Guest',
+          pronouns:state.guest.pronouns||'',
+          title:state.guest.title||'',
+          social:state.guest.social||'',
+          promo:state.guest.promo||''
+        },
+        episode:{
+          season:state.episode.season||'',
+          number:state.episode.number||'',
+          title:state.episode.title||'',
+          mainTopic:state.episode.mainTopic||''
+        },
+        expiresHours:48
+      }
+    });
+
+    TTStudio.update(next=>{
+      next.guestCode={
+        code:result.code,
+        status:'active',
+        expiresAt:result.expiresAt,
+        createdAt:result.createdAt
+      };
+      TTStudio.addActivity(next,`Guest code ${formatCode(result.code)} created for ${next.guest.name}`);
+    },'guest-code-created');
+
+    return result;
+  }
+
+  async function revokeCode(state,reason='revoked'){
+    const code=state.guestCode&&state.guestCode.code||'';
+    const room=state.liveRoom&&state.liveRoom.roomId;
+    const token=state.liveRoom&&state.liveRoom.token;
+    if(!code||!room||!token)return;
+    await api('/code/revoke',{method:'POST',body:{code,room,token,reason}});
+    TTStudio.update(next=>{
+      next.guestCode={...(next.guestCode||{}),status:'revoked'};
+      TTStudio.addActivity(next,`Guest code ${formatCode(code)} revoked`);
+    },'guest-code-revoked');
+  }
+
+  function inviteText(state){
+    const code=formatCode(state.guestCode&&state.guestCode.code);
+    return `You’re invited to join A Little Throuple Tea. Open ${buildBrowserGuestUrl()} and enter guest code ${code}. For the best experience, use headphones, keep your device on power, and join a few minutes early.`;
+  }
+
   function closePresenceSocket(){
     if(presenceSocket){try{presenceSocket.close(1000,'Hub watcher refresh')}catch{}}
     presenceSocket=null;presenceRoom='';
   }
-
   function showGreenRoomAlert(guest,state){
     const waiting=guest&&['waiting','ready'].includes(guest.status);
-    const alert=$('#greenRoomAlert');
-    const badge=$('#guestWaitingBadge');
-    const control=$('#quickGuestControl');
+    const alert=$('#greenRoomAlert'),badge=$('#guestWaitingBadge'),control=$('#quickGuestControl');
     if(alert){
       alert.hidden=!waiting;
       if(waiting){
@@ -60,7 +149,6 @@
     if(badge)badge.hidden=!waiting;
     if(control)control.classList.toggle('guest-waiting-now',Boolean(waiting));
   }
-
   function connectPresenceWatcher(state){
     const cfg=window.TT_LIVE_GUEST_CONFIG||{};
     const room=state.liveRoom&&state.liveRoom.roomId||'';
@@ -68,56 +156,59 @@
     if(!cfg.signalingBaseUrl||!room||!token){closePresenceSocket();showGreenRoomAlert(null,state);return}
     if(presenceSocket&&presenceRoom===room&&(presenceSocket.readyState===WebSocket.OPEN||presenceSocket.readyState===WebSocket.CONNECTING))return;
 
-    closePresenceSocket();
-    presenceRoom=room;
+    closePresenceSocket();presenceRoom=room;
     try{
       const u=new URL(cfg.signalingBaseUrl);
       u.protocol=u.protocol==='https:'?'wss:':'ws:';
       u.pathname=`/room/${encodeURIComponent(room)}/websocket`;
       u.search=`?role=observer&token=${encodeURIComponent(token)}`;
       presenceSocket=new WebSocket(u.href);
-
       presenceSocket.addEventListener('message',event=>{
         let message;try{message=JSON.parse(event.data)}catch{return}
         if(message.type==='guest-state'&&message.guest){
           remoteGuestPresence=message.guest;
           showGreenRoomAlert(remoteGuestPresence,TTStudio.getState());
-        }
-        if(message.type==='peer-left'&&message.role==='guest'){
-          // Don't instantly erase a stored waiting state; the guest may just be reconnecting.
-          setTimeout(()=>{
-            if(remoteGuestPresence&&remoteGuestPresence.status==='waiting'){
-              showGreenRoomAlert(remoteGuestPresence,TTStudio.getState());
-            }
-          },1500);
+          render(TTStudio.getState());
         }
       });
-
       presenceSocket.addEventListener('close',()=>{
         presenceSocket=null;
-        if(presenceRoom===room){
-          setTimeout(()=>connectPresenceWatcher(TTStudio.getState()),1800);
-        }
+        if(presenceRoom===room)setTimeout(()=>connectPresenceWatcher(TTStudio.getState()),1800);
       });
-    }catch(error){
-      closePresenceSocket();
-    }
+    }catch{closePresenceSocket()}
   }
 
-function render(state){
+  function render(state){
     const guest=state.guest||{};
-    const exists=guest.name&&guest.name!=='Future Guest';
+    const exists=existsGuest(state);
     const liveGuest=remoteGuestPresence&&remoteGuestPresence.name?remoteGuestPresence:guest;
     const status=exists?(liveGuest.status||guest.status||'invited'):'none';
+
     $('#guestName').textContent=exists?guest.name:'No guest yet';
     $('#guestAvatar').textContent=exists?(guest.name.trim()[0]||'G').toUpperCase():'G';
-    $('#guestRole').textContent=exists?([liveGuest.title||guest.title,liveGuest.pronouns||guest.pronouns].filter(Boolean).join(' · ')||'Guest'):'Create a private guest link when you are ready.';
+    $('#guestRole').textContent=exists?([liveGuest.title||guest.title,liveGuest.pronouns||guest.pronouns].filter(Boolean).join(' · ')||'Guest'):'Create a private guest code when you are ready.';
     $('#guestSocial').textContent=liveGuest.social||guest.social||'No social added';
     $('#episodeLabel').textContent=`Episode ${state.episode.number||'—'}`;
-    const pill=$('#guestStatus');pill.className=`status ${status}`;pill.innerHTML=`<i></i>${exists?statusLabel(status):'Not invited'}`;
-    guestUrl=exists?buildGuestUrl(state):'';
-    $('#guestLinkHint').textContent=exists?'Copy private check-in link':'Create the guest first';
-    $('#copyGuestLink').disabled=!exists;const hostUrl=buildHostUrl(state);if($('#sidebarGuestControl'))$('#sidebarGuestControl').href=hostUrl;if($('#quickGuestControl'))$('#quickGuestControl').href=hostUrl;
+
+    const pill=$('#guestStatus');
+    pill.className=`status ${status}`;
+    pill.innerHTML=`<i></i>${exists?statusLabel(status):'Not invited'}`;
+
+    const code=state.guestCode||{};
+    const codeActive=exists&&code.code&&code.status==='active';
+    $('#guestCodeValue').textContent=formatCode(code.code);
+    $('#guestCodeExpiry').textContent=codeActive?formatExpiry(code.expiresAt):(exists?'No active code':'Create a guest to generate a code');
+    $('#guestCodeCard').classList.toggle('live',Boolean(codeActive));
+    $('#guestCodeCard').classList.toggle('revoked',code.status==='revoked');
+
+    $('#copyGuestCode').disabled=!codeActive;
+    $('#copyGuestInvite').disabled=!codeActive;
+    $('#regenerateGuestCode').disabled=!exists;
+    $('#revokeGuestCode').disabled=!codeActive;
+
+    const hostUrl=buildHostUrl(state);
+    if($('#sidebarGuestControl'))$('#sidebarGuestControl').href=hostUrl;
+    if($('#quickGuestControl'))$('#quickGuestControl').href=hostUrl;
 
     connectPresenceWatcher(state);
     showGreenRoomAlert(remoteGuestPresence,state);
@@ -139,14 +230,21 @@ function render(state){
   }
 
   TTStudio.subscribe(render);
-
   const dialog=$('#inviteDialog');
-  function openInvite(){dialog.showModal();setTimeout(()=>$('#inviteName').focus(),50)}
-  $('#inviteGuest').onclick=openInvite;$('#quickInvite').onclick=openInvite;
-  $('#saveInvite').onclick=(event)=>{
+
+  function openInvite(){
+    dialog.showModal();
+    setTimeout(()=>$('#inviteName').focus(),50);
+  }
+
+  $('#inviteGuest').onclick=openInvite;
+  $('#quickInvite').onclick=openInvite;
+
+  $('#saveInvite').onclick=async event=>{
     event.preventDefault();
     const name=$('#inviteName').value.trim();
-    if(!name){showToast('Add the guest name first');return}
+    if(!name){showToast('Add the guest name first',true);return}
+
     TTStudio.update(next=>{
       next.guest.name=name;
       next.guest.pronouns=$('#invitePronouns').value.trim();
@@ -154,78 +252,107 @@ function render(state){
       next.guest.social=$('#inviteSocial').value.trim();
       next.guest.promo=$('#invitePromo').value.trim();
       next.guest.ready=false;next.guest.admitted=false;next.guest.status='invited';
+
       next.liveRoom=next.liveRoom||{};
       next.liveRoom.roomId=TTLiveGuest.randomToken(8);
       next.liveRoom.token=TTLiveGuest.randomToken(18);
       next.liveRoom.createdAt=new Date().toISOString();
-      next.liveRoom.signalingReady=Boolean(window.TT_LIVE_GUEST_CONFIG&&window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl);
+      next.liveRoom.signalingReady=Boolean(workerBase());
+
+      next.guestCode={code:'',status:'creating',expiresAt:null,createdAt:null};
+
       next.episode.season=$('#inviteSeason').value.trim()||next.episode.season;
       next.episode.number=$('#inviteEpisode').value.trim()||next.episode.number;
       next.episode.title=$('#inviteEpisodeTitle').value.trim()||next.episode.title;
-      TTStudio.addActivity(next,`${name} invited as podcast guest`);
+      TTStudio.addActivity(next,`${name} created as podcast guest`);
     },'guest-invite');
+
     dialog.close();
-    setTimeout(async()=>{const state=TTStudio.getState();guestUrl=buildGuestUrl(state);await navigator.clipboard.writeText(guestUrl).catch(()=>{});showToast('Guest link created and copied')},100);
+
+    try{
+      const result=await generateCode(TTStudio.getState(),{revokeExisting:false});
+      await navigator.clipboard.writeText(formatCode(result.code)).catch(()=>{});
+      showToast(`Guest code ${formatCode(result.code)} created + copied`);
+    }catch(error){
+      TTStudio.update(next=>{next.guestCode={code:'',status:'error',expiresAt:null,createdAt:null}},'guest-code-error');
+      showToast(`Guest created, but code failed: ${error.message}`,true);
+    }
   };
-  $('#copyGuestLink').onclick=async()=>{if(!guestUrl)return;await navigator.clipboard.writeText(guestUrl);showToast('Guest link copied')};
-  $('#openGuestLounge').onclick=()=>window.open(guestUrl||'guest.html','_blank','noopener');
+
+  $('#copyGuestCode').onclick=async()=>{
+    const state=TTStudio.getState();
+    const code=formatCode(state.guestCode&&state.guestCode.code);
+    await navigator.clipboard.writeText(code);
+    showToast(`Guest code ${code} copied`);
+  };
+
+  $('#copyGuestInvite').onclick=async()=>{
+    const state=TTStudio.getState();
+    await navigator.clipboard.writeText(inviteText(state));
+    showToast('Guest invitation copied');
+  };
+
+  $('#regenerateGuestCode').onclick=async()=>{
+    const state=TTStudio.getState();
+    if(!existsGuest(state))return;
+    if(!confirm(`Generate a new code for ${state.guest.name}? The old code will stop working.`))return;
+    try{
+      const result=await generateCode(state,{revokeExisting:true});
+      showToast(`New guest code ${formatCode(result.code)} created`);
+    }catch(error){showToast(error.message,true)}
+  };
+
+  $('#revokeGuestCode').onclick=async()=>{
+    const state=TTStudio.getState();
+    if(!confirm(`Revoke ${formatCode(state.guestCode&&state.guestCode.code)}? The guest will no longer be able to enter with it.`))return;
+    try{
+      await revokeCode(state,'host-revoked');
+      showToast('Guest code revoked');
+    }catch(error){showToast(error.message,true)}
+  };
+
+  $('#openGuestLounge').onclick=()=>window.open(buildBrowserGuestUrl(),'_blank','noopener');
+
   $('#copyGuide').onclick=async()=>{
-    const text='For the best Throuple Tea guest experience: use Chrome or Safari, wear headphones, place your camera near eye level, face a soft light or window, silence notifications, and join from the private guest link a few minutes early.';
-    await navigator.clipboard.writeText(text);showToast('Guest guide copied');
+    const state=TTStudio.getState();
+    const text=state.guestCode&&state.guestCode.status==='active'
+      ? inviteText(state)
+      : 'For the best Throuple Tea guest experience: use headphones, keep your device on power, place the camera near eye level, silence notifications, and join a few minutes early.';
+    await navigator.clipboard.writeText(text);
+    showToast('Guest guide copied');
   };
-  const clearGuestButton=$('#clearGuest');
-  if(clearGuestButton){
-    clearGuestButton.disabled=false;
-    clearGuestButton.removeAttribute('disabled');
-    clearGuestButton.addEventListener('click',(event)=>{
-      event.preventDefault();
-      event.stopPropagation();
 
-      const state=TTStudio.getState();
-      const currentName=(state.guest&&state.guest.name&&state.guest.name!=='Future Guest')
-        ? state.guest.name
-        : 'the current guest';
+  $('#clearGuest').onclick=async event=>{
+    event.preventDefault();event.stopPropagation();
+    const state=TTStudio.getState();
+    const currentName=existsGuest(state)?state.guest.name:'the current guest';
+    if(!confirm(`Clear ${currentName} from Guest Hub? Their active guest code will be revoked.`))return;
 
-      if(!confirm(`Clear ${currentName} from Guest Hub?`))return;
+    try{
+      if(state.guestCode&&state.guestCode.code&&state.guestCode.status==='active'){
+        await revokeCode(state,'guest-cleared');
+      }
+    }catch(error){
+      if(!confirm(`The code could not be revoked (${error.message}). Clear the local guest anyway?`))return;
+    }
 
-      TTStudio.update(next=>{
-        next.guest={
-          name:'Future Guest',
-          pronouns:'',
-          title:'',
-          social:'',
-          promo:'',
-          notes:'',
-          releaseAccepted:false,
-          ready:false,
-          status:'invited',
-          admitted:false,
-          checkInStage:'tech',
-          checkInCompletedAt:null,
-          waitingSince:null
-        };
+    TTStudio.update(next=>{
+      next.guest={
+        name:'Future Guest',pronouns:'',title:'',social:'',promo:'',notes:'',
+        releaseAccepted:false,ready:false,status:'invited',admitted:false,
+        checkInStage:'tech',checkInCompletedAt:null,waitingSince:null
+      };
+      next.lowerThird={name:'',title:'',social:''};
+      next.liveRoom={roomId:'',token:'',createdAt:null,signalingReady:Boolean(workerBase())};
+      next.guestCode={code:'',status:'none',expiresAt:null,createdAt:null};
+      TTStudio.addActivity(next,'Current guest and code cleared from Guest Hub');
+    },'clear-guest');
 
-        next.lowerThird={name:'',title:'',social:''};
+    remoteGuestPresence=null;
+    closePresenceSocket();
+    showGreenRoomAlert(null,TTStudio.getState());
+    showToast('Guest + code cleared — ready for the next guest');
+  };
 
-        next.liveRoom={
-          roomId:'',
-          token:'',
-          createdAt:null,
-          signalingReady:Boolean(
-            window.TT_LIVE_GUEST_CONFIG &&
-            window.TT_LIVE_GUEST_CONFIG.signalingBaseUrl
-          )
-        };
-
-        TTStudio.addActivity(next,'Current guest cleared from Guest Hub');
-      },'clear-guest');
-
-      guestUrl='';
-      remoteGuestPresence=null;
-      closePresenceSocket();
-      showGreenRoomAlert(null,TTStudio.getState());
-      showToast('Guest cleared — ready for the next guest');
-    });
-  }
   addEventListener('beforeunload',closePresenceSocket);
 })();

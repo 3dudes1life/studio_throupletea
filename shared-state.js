@@ -36,7 +36,7 @@
   ];
 
   const DEFAULT_STATE = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     revision: 0,
     updatedAt: null,
     mode: 'guest-first',
@@ -45,6 +45,12 @@
       token: '',
       createdAt: null,
       signalingReady: false
+    },
+    guestCode: {
+      code: '',
+      status: 'none',
+      expiresAt: null,
+      createdAt: null
     },
     show: {
       title: '3Dudes1Life: A Little Throuple Tea',
@@ -221,7 +227,7 @@
     state = mergeDefaults(DEFAULT_STATE, nextState);
     state.mode = 'hosts-only';
     state.studio.mode = 'hosts-only';
-    state.schemaVersion = 4;
+    state.schemaVersion = 5;
     state.revision = Number(state.revision || 0) + 1;
     state.updatedAt = new Date().toISOString();
     try {

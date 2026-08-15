@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#06080d">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Throuple Tea Guest Hub 5.0</title>
-  <link rel="stylesheet" href="guest-hub.css?v=5.0">
+  <title>Throuple Tea Guest Hub 5.1</title>
+  <link rel="stylesheet" href="guest-hub.css?v=5.1">
 </head>
 <body>
   <main class="app-shell">
@@ -29,7 +29,7 @@
           <small>3Dudes1Life</small>
         </div>
         <div class="ready-chip"><i></i><span><b>Guest system ready</b><small>OBS stays separate</small></span></div>
-        <div class="version">Guest Studio 5.0</div>
+        <div class="version">Guest Studio 5.1</div>
       </div>
     </aside>
 
@@ -72,10 +72,19 @@
               <span id="episodeLabel">Episode —</span>
             </div>
           </div>
-          <div class="guest-actions">
-            <button class="gradient" id="copyGuestLink">🔗 Guest Link</button>
-            <button class="clear-guest" id="clearGuest">Clear Guest</button>
-            <small id="guestLinkHint">Create the guest first</small>
+          <div class="guest-actions code-actions">
+            <div class="guest-code-card" id="guestCodeCard">
+              <small>Guest Code</small>
+              <strong id="guestCodeValue">— — —</strong>
+              <span id="guestCodeExpiry">Create a guest to generate a code</span>
+            </div>
+            <div class="code-button-grid">
+              <button class="gradient" id="copyGuestCode" disabled>Copy Code</button>
+              <button id="copyGuestInvite" disabled>Copy Invite</button>
+              <button id="regenerateGuestCode" disabled>Regenerate</button>
+              <button class="revoke-code" id="revokeGuestCode" disabled>Revoke</button>
+              <button class="clear-guest" id="clearGuest">Clear Guest</button>
+            </div>
           </div>
         </div>
 
@@ -95,9 +104,9 @@
       </section>
 
       <section class="quick-grid">
-        <button class="quick-card" id="quickInvite"><i>🔗</i><span><b>Invite a Guest</b><small>Create their private link</small></span></button>
+        <button class="quick-card" id="quickInvite"><i>🔢</i><span><b>Invite a Guest</b><small>Generate their 6-digit code</small></span></button>
         <a class="quick-card guest-control-card-link" href="host.html" id="quickGuestControl"><i>🎙️</i><span><b>Guest Control</b><small>Admit and manage the guest</small></span><mark id="guestWaitingBadge" hidden>WAITING</mark></a>
-        <button class="quick-card" id="copyGuide"><i>?</i><span><b>Guest Guide</b><small>Copy simple prep instructions</small></span></button>
+        <button class="quick-card" id="copyGuide"><i>?</i><span><b>Guest Guide</b><small>Copy code + simple prep instructions</small></span></button>
       </section>
 
       <section class="experience">
@@ -151,6 +160,6 @@
 
   <div class="toast" id="toast"></div>
   <script src="shared-state.js"></script><script src="live-guest-config.js?v=4.5.3"></script><script src="live-guest.js?v=4.5.3"></script>
-  <script src="guest-hub.js?v=5.0"></script>
+  <script src="guest-hub.js?v=5.1"></script>
 </body>
 </html>

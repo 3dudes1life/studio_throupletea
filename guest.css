@@ -14,3 +14,78 @@ body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(105,60,
 .ready-final{text-align:center;padding:34px 20px}.orb{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 15px;border:1px solid rgba(43,228,151,.25);border-radius:50%;background:rgba(43,228,151,.09);color:var(--green);font-size:27px}.ready-final h2{margin:0;font-size:29px}.ready-final p{max-width:520px;margin:9px auto 18px;color:var(--muted);font-size:11px;line-height:1.5}
 .toast{position:fixed;right:16px;bottom:16px;padding:10px 12px;border-radius:10px;background:white;color:#111;font-size:10px;font-weight:800;opacity:0;transition:.2s}.toast.show{opacity:1}.toast.error{background:var(--red);color:white}
 @media(max-width:760px){.tech-grid{grid-template-columns:1fr}.device-panel{border-left:0;border-top:1px solid var(--line)}.form-grid,.prep{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.steps{overflow:auto;justify-content:flex-start}.steps button{flex:0 0 auto}.readiness{grid-template-columns:1fr 1fr}}
+
+/* 5.1 secure guest code entry */
+.code-gate{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(112,61,242,.20),transparent 31%),
+    radial-gradient(circle at 82% 5%,rgba(237,42,166,.12),transparent 27%),
+    #05070b;
+}
+.code-gate[hidden]{display:none!important}
+.code-gate-card{
+  width:min(480px,100%);
+  padding:30px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:26px;
+  background:linear-gradient(180deg,#121722,#0b0f17);
+  box-shadow:0 35px 110px rgba(0,0,0,.52);
+  text-align:center;
+}
+.code-gate-card>img{
+  width:68px;height:68px;
+  margin-bottom:18px;
+  border-radius:18px;
+}
+.code-gate-card h1{
+  margin:8px 0 8px;
+  font-size:36px;
+  line-height:1.05;
+}
+.code-gate-card p{
+  max-width:380px;
+  margin:0 auto 22px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+#codeForm{display:grid;gap:10px}
+#codeInput{
+  width:100%;
+  padding:15px 12px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:15px;
+  background:#070a10;
+  color:white;
+  outline:none;
+  text-align:center;
+  font-size:30px;
+  font-weight:760;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.16em;
+}
+#codeInput:focus{
+  border-color:rgba(93,227,207,.52);
+  box-shadow:0 0 0 5px rgba(93,227,207,.07);
+}
+#codeForm button{
+  min-height:48px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(100deg,#3e55ef,#ed2aa6);
+  color:white;
+  font-weight:780;
+}
+.code-gate-status{
+  min-height:16px;
+  margin-top:13px;
+  color:#777f90;
+  font-size:9px;
+  line-height:1.4;
+}
+.code-gate-status.error{color:#ff8588}
+.code-gate-status.good{color:#5fe6b0}

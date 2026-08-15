@@ -1,16 +1,14 @@
-# Guest Studio 5.0 — Production Hardened
+# Guest Studio 5.1 — Guest Codes
 
-- IndexedDB checkpointing during guest capture
-- persistent local recovery copy
-- upload-failure recovery
-- storage-space preflight
-- wake lock
-- media-device disconnect watchdog
-- chunk-write watchdog
-- offline-safe local recording state
-- close/reload protection
-- exponential upload retry
-- sequential audio/video upload
-- partial upload status to host
-- Retry Guest Upload
-- local recovery cleanup only after BOTH masters are confirmed in R2
+- 6-digit guest codes
+- automatic code generation when host creates guest
+- server-side code → private room mapping
+- 48-hour expiration
+- regenerate/revoke controls
+- Clear Guest revokes active code
+- rate-limited code lookup
+- room tokens hidden from guest invitation URL
+- sessionStorage credential handoff after code entry
+- polished browser code-entry screen
+- future iPhone/iPad/Android apps can use the exact same `/code/resolve` API
+- proven 5.0 capture/recovery system remains unchanged

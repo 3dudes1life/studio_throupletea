@@ -1,39 +1,60 @@
-# Throuple Tea Guest Studio 5.0 — Production Hardened
+# Throuple Tea Guest Studio 5.1 — Guest Codes
 
-This is a website-only hardening release.
+5.1 changes the guest entrance without touching the proven 5.0 recording architecture.
 
-## Upload these files
+## Cloudflare Worker update REQUIRED
+
+Open normal Terminal and run exactly:
+
+```bash
+cd "/Users/williamzakrajshek/Downloads/Throuple-Tea-Studio-5.1-Guest-Codes/cloudflare-signaling-worker"
+npm install
+npm run deploy
+open "https://throuple-tea-live-guest-signal.round-disk-6577.workers.dev/health"
+```
+
+Expected health:
+
+```json
+{"ok":true,"service":"throuple-tea-live-guest-signal","version":"5.1","isoStorage":true}
+```
+
+No new R2 bucket is required.
+
+## GitHub files to upload
+
+Upload these updated root files:
 
 - index.html
-- host.html
-- guest-control.js
-- guest-control.css
-- guest-room.html
+- guest-hub.css
+- guest-hub.js
+- guest.html
+- guest.css
+- guest.js
 - guest-room.js
-- guest-room.css
-- iso-guard.js (NEW)
+- shared-state.js
+- live-guest-config.js
 
-No Cloudflare Worker redeploy is required. Keep the existing 4.6 Worker and R2 bucket.
+Keep every other 5.0 file unchanged.
 
-## Why 5.0
+## New browser flow
 
-4.7 proved the core system works. 5.0 focuses on preventing a real interview from being lost.
+Host:
+Invite Guest → 6-digit code generated automatically → Copy Code / Copy Invite
 
-Major safeguards:
-- recording chunks checkpoint to IndexedDB every 5 seconds
-- protected local recovery state if upload fails
-- storage preflight
-- persistent-storage request
-- wake lock
-- camera/mic disconnect alerts
-- chunk watchdog
-- network-offline awareness
-- unload/close protection
-- 4-attempt exponential upload retry
-- audio uploads first
-- video uploads second
-- host sees partial upload progress
-- host can Retry Guest Upload
-- local recovery data is deleted ONLY after both cloud uploads succeed
+Guest:
+guest.html → Enter Code → Tech Check → Green Room → recording workflow
 
-Hard refresh after GitHub deploy. Bottom-left should read Guest Studio 5.0.
+## Security behavior
+
+- actual room token is no longer in the guest invitation URL
+- code resolves server-side into room credentials
+- credentials are kept in sessionStorage after entry, not shown in the address bar
+- codes expire after 48 hours by default
+- Regenerate revokes the old code
+- Revoke immediately disables the code
+- Clear Guest revokes the code before clearing the host session
+- code lookup is rate-limited per client
+- invalid code responses are intentionally generic
+- codes are tied to one private room/session
+- reconnects are still allowed while the code remains active

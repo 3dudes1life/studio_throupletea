@@ -154,3 +154,81 @@ dialog{width:min(700px,calc(100% - 24px));padding:0;border:1px solid var(--line)
   50%{border-color:rgba(43,228,151,.68);box-shadow:0 0 0 1px rgba(43,228,151,.08),0 0 32px rgba(43,228,151,.13)}
 }
 @keyframes guestBadgeBlink{50%{opacity:.45}}
+
+/* =========================================================
+   5.1 — Guest Codes
+   ========================================================= */
+.code-actions{
+  min-width:230px;
+  display:grid;
+  gap:9px;
+}
+.guest-code-card{
+  padding:12px 13px;
+  border:1px solid rgba(112,61,242,.28);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 75% 0,rgba(237,42,166,.10),transparent 40%),
+    rgba(112,61,242,.07);
+  text-align:center;
+}
+.guest-code-card small,.guest-code-card strong,.guest-code-card span{display:block}
+.guest-code-card small{
+  color:#a9afbd;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+.guest-code-card strong{
+  margin-top:5px;
+  font-variant-numeric:tabular-nums;
+  font-size:28px;
+  letter-spacing:.12em;
+}
+.guest-code-card span{
+  margin-top:4px;
+  color:#858c9b;
+  font-size:8px;
+}
+.guest-code-card.live{
+  border-color:rgba(43,228,151,.34);
+  box-shadow:0 0 0 1px rgba(43,228,151,.04);
+}
+.guest-code-card.live strong{color:#6af0b7}
+.guest-code-card.revoked strong{color:#ff8588}
+.code-button-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.code-button-grid button{
+  min-height:36px;
+  padding:0 9px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#171c26;
+  color:white;
+  font-size:9px;
+  font-weight:760;
+  cursor:pointer;
+}
+.code-button-grid button:disabled{opacity:.30;cursor:not-allowed}
+.code-button-grid .gradient{
+  border:0;
+  background:linear-gradient(100deg,#3d55ef,#ed2aa6);
+}
+.code-button-grid .revoke-code{
+  color:#ffd166;
+  border-color:rgba(255,209,102,.24);
+  background:rgba(255,209,102,.06);
+}
+.code-button-grid .clear-guest{
+  grid-column:1/-1;
+  color:#ff9a9d;
+  border-color:rgba(255,98,102,.28);
+  background:rgba(255,98,102,.08);
+}
+@media(max-width:900px){
+  .code-actions{min-width:0;width:100%}
+}
